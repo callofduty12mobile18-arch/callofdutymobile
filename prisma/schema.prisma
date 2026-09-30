@@ -1,0 +1,524 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum RoleType {
+  ADMIN
+  MODERATOR
+  PLAYER
+  USER
+}
+
+enum PlayerRole {
+  SLAYER
+  ANCHOR
+  OBJ
+  SUPPORT
+  IGL
+  FLEX
+  SNIPER
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  VERIFIED
+  REVOKED
+}
+
+enum TeamMemberRole {
+  ACTIVE_ROSTER
+  CAPTAIN
+  SUBSTITUTE
+  COACH
+  ANALYST
+  INACTIVE
+}
+
+enum TournamentTier {
+  S_TIER
+  A_TIER
+  B_TIER
+  COMMUNITY
+  COLLEGIATE
+}
+
+enum TournamentStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum AchievementCategory {
+  CHAMPIONSHIP
+  RUNNER_UP
+  MVP
+  ALL_STAR
+  REGIONAL
+  COMMUNITY
+}
+
+enum EntityType {
+  PLAYER
+  TEAM
+  ORGANIZATION
+  TOURNAMENT
+  ARTICLE
+}
+
+enum SocialPlatform {
+  TWITTER_X
+  INSTAGRAM
+  YOUTUBE
+  DISCORD
+  TWITCH
+  LIQUIPEDIA
+  FACEBOOK
+  OTHER
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO_CLIP
+  VIDEO_EMBED
+  PDF_DOCUMENT
+}
+
+enum SubmissionStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum SubmissionType {
+  COMMUNITY_JOIN_REQUEST
+  PLAYER_PORTFOLIO
+  TEAM_REGISTRATION
+  TOURNAMENT_REPORT
+}
+
+// --------------------------------------------------------
+// USER & AUTHENTICATION
+// --------------------------------------------------------
+model User {
+  id           String       @id @default(uuid()) @db.Uuid
+  supabaseUid  String?      @unique @map("supabase_uid")
+  email        String       @unique
+  passwordHash String?      @map("password_hash")
+  role         RoleType     @default(PLAYER)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  players      Player[]     @relation("UserClaimedPlayer")
+  articles     Article[]
+  reviewedSubs Submission[] @relation("AdminReviewedSubmissions")
+
+  @@map("users")
+}
+
+// --------------------------------------------------------
+// PLAYERS (Core Entity)
+// --------------------------------------------------------
+model Player {
+  id                 String             @id @default(uuid()) @db.Uuid
+  slug               String             @unique
+  ign                String             @db.VarChar(50) // In-Game Name
+  displayName        String?            @map("display_name") @db.VarChar(100)
+  realName           String?            @map("real_name") @db.VarChar(100)
+  avatarUrl          String?            @map("avatar_url")
+  coverImageUrl      String?            @map("cover_image_url")
+  country            String             @default("IN") @db.VarChar(10)
+  state              String?            @db.VarChar(100)
+  city               String?            @db.VarChar(100)
+  primaryRole        PlayerRole         @default(FLEX) @map("primary_role")
+  secondaryRole      PlayerRole?        @map("secondary_role")
+  bio                String?            @db.Text
+  competitiveHistory String?            @map("competitive_history") @db.Text
+  isLookingForTeam   Boolean            @default(false) @map("is_looking_for_team")
+  verificationStatus VerificationStatus @default(UNVERIFIED) @map("verification_status")
+  verifiedAt         DateTime?          @map("verified_at")
+  publishStatus      PublishStatus      @default(DRAFT) @map("publish_status")
+  publishedAt        DateTime?          @map("published_at")
+  deletedAt          DateTime?          @map("deleted_at") // Soft delete
+
+  // Future Claim Feature
+  userId             String?            @map("user_id") @db.Uuid
+  user               User?              @relation("UserClaimedPlayer", fields: [userId], references: [id], onDelete: SetNull)
+
+  // SEO Fields
+  seoTitle           String?            @map("seo_title") @db.VarChar(160)
+  seoDescription     String?            @map("seo_description") @db.VarChar(320)
+
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  // Relations
+  teamMemberships    TeamMember[]
+  teamHistory        PlayerTeamHistory[]
+  achievements       PlayerAchievement[]
+  socialLinks        SocialLink[]       @relation("PlayerSocials")
+  media              Media[]            @relation("PlayerMedia")
+  documents          Document[]         @relation("PlayerDocuments")
+  mvpTournaments     Tournament[]       @relation("TournamentMvp")
+  originSubmission   Submission?        @relation("SubmissionPlayer")
+
+  @@index([slug])
+  @@index([ign])
+  @@index([publishStatus])
+  @@index([verificationStatus])
+  @@index([primaryRole])
+  @@map("players")
+}
+
+// --------------------------------------------------------
+// ORGANIZATIONS & TEAMS
+// --------------------------------------------------------
+model Organization {
+  id            String        @id @default(uuid()) @db.Uuid
+  slug          String        @unique
+  name          String        @db.VarChar(120)
+  logoUrl       String?       @map("logo_url")
+  websiteUrl    String?       @map("website_url")
+  country       String        @default("IN") @db.VarChar(10)
+  bio           String?       @db.Text
+  publishStatus PublishStatus @default(DRAFT) @map("publish_status")
+  deletedAt     DateTime?     @map("deleted_at")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  teams         Team[]
+  socialLinks   SocialLink[]  @relation("OrgSocials")
+  media         Media[]       @relation("OrgMedia")
+
+  @@index([slug])
+  @@map("organizations")
+}
+
+model Team {
+  id                 String              @id @default(uuid()) @db.Uuid
+  slug               String              @unique
+  name               String              @db.VarChar(100)
+  tag                String              @db.VarChar(15) // Short abbreviation / clan tag
+  logoUrl            String?             @map("logo_url")
+  coverImageUrl      String?             @map("cover_image_url")
+  country            String              @default("IN") @db.VarChar(10)
+  organizationId     String?             @map("organization_id") @db.Uuid
+  bio                String?             @db.Text
+  isActive           Boolean             @default(true) @map("is_active")
+  publishStatus      PublishStatus       @default(DRAFT) @map("publish_status")
+  deletedAt          DateTime?           @map("deleted_at")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+
+  organization       Organization?       @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  members            TeamMember[]
+  historicalRoster   PlayerTeamHistory[]
+  achievements       TeamAchievement[]
+  socialLinks        SocialLink[]        @relation("TeamSocials")
+  media              Media[]             @relation("TeamMedia")
+  playerAchievements PlayerAchievement[]
+
+  @@index([slug])
+  @@index([tag])
+  @@index([publishStatus])
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String         @id @default(uuid()) @db.Uuid
+  teamId    String         @map("team_id") @db.Uuid
+  playerId  String         @map("player_id") @db.Uuid
+  role      TeamMemberRole @default(ACTIVE_ROSTER)
+  joinedAt  DateTime       @default(now()) @map("joined_at")
+  leftAt    DateTime?      @map("left_at")
+  isCurrent Boolean        @default(true) @map("is_current")
+
+  team      Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  player    Player         @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, playerId, isCurrent])
+  @@index([teamId, isCurrent])
+  @@index([playerId, isCurrent])
+  @@map("team_members")
+}
+
+model PlayerTeamHistory {
+  id            String         @id @default(uuid()) @db.Uuid
+  playerId      String         @map("player_id") @db.Uuid
+  teamId        String         @map("team_id") @db.Uuid
+  role          TeamMemberRole @default(ACTIVE_ROSTER)
+  startDate     DateTime       @map("start_date")
+  endDate       DateTime?      @map("end_date")
+  transferNotes String?        @map("transfer_notes") @db.VarChar(255)
+
+  player        Player         @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  team          Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([playerId])
+  @@index([teamId])
+  @@map("player_team_history")
+}
+
+// --------------------------------------------------------
+// TOURNAMENTS & ACHIEVEMENTS
+// --------------------------------------------------------
+model Tournament {
+  id                String              @id @default(uuid()) @db.Uuid
+  slug              String              @unique
+  name              String              @db.VarChar(150)
+  organizer         String              @db.VarChar(100)
+  tier              TournamentTier      @default(COMMUNITY)
+  status            TournamentStatus    @default(UPCOMING)
+  startDate         DateTime            @map("start_date")
+  endDate           DateTime?           @map("end_date")
+  prizePoolInr      Decimal?            @map("prize_pool_inr") @db.Decimal(12, 2)
+  location          String?             @db.VarChar(100)
+  formatDescription String?             @map("format_description") @db.Text
+  bannerUrl         String?             @map("banner_url")
+  publishStatus     PublishStatus       @default(DRAFT) @map("publish_status")
+  mvpPlayerId       String?             @map("mvp_player_id") @db.Uuid
+  deletedAt         DateTime?           @map("deleted_at")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
+
+  mvpPlayer          Player?             @relation("TournamentMvp", fields: [mvpPlayerId], references: [id], onDelete: SetNull)
+  playerAchievements PlayerAchievement[]
+  teamAchievements   TeamAchievement[]
+  socialLinks        SocialLink[]        @relation("TournamentSocials")
+  media              Media[]             @relation("TournamentMedia")
+
+  @@index([slug])
+  @@index([status])
+  @@index([tier])
+  @@map("tournaments")
+}
+
+model Achievement {
+  id                 String              @id @default(uuid()) @db.Uuid
+  title              String              @db.VarChar(120)
+  description        String?             @db.Text
+  category           AchievementCategory @default(CHAMPIONSHIP)
+  badgeIconUrl       String?             @map("badge_icon_url")
+  createdAt          DateTime            @default(now()) @map("created_at")
+
+  playerAchievements PlayerAchievement[]
+  teamAchievements   TeamAchievement[]
+
+  @@map("achievements")
+}
+
+model PlayerAchievement {
+  id            String       @id @default(uuid()) @db.Uuid
+  playerId      String       @map("player_id") @db.Uuid
+  achievementId String       @map("achievement_id") @db.Uuid
+  tournamentId  String?      @map("tournament_id") @db.Uuid
+  teamId        String?      @map("team_id") @db.Uuid
+  dateAwarded   DateTime     @map("date_awarded")
+  placement     String?      @db.VarChar(30)
+  notes         String?      @db.VarChar(255)
+
+  player        Player       @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  achievement   Achievement  @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  tournament    Tournament?  @relation(fields: [tournamentId], references: [id], onDelete: SetNull)
+  team          Team?        @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  @@index([playerId])
+  @@index([tournamentId])
+  @@map("player_achievements")
+}
+
+model TeamAchievement {
+  id            String       @id @default(uuid()) @db.Uuid
+  teamId        String       @map("team_id") @db.Uuid
+  achievementId String       @map("achievement_id") @db.Uuid
+  tournamentId  String?      @map("tournament_id") @db.Uuid
+  dateAwarded   DateTime     @map("date_awarded")
+  placement     String       @db.VarChar(30)
+  prizeWonInr   Decimal?     @map("prize_won_inr") @db.Decimal(12, 2)
+
+  team          Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  achievement   Achievement  @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  tournament    Tournament?  @relation(fields: [tournamentId], references: [id], onDelete: SetNull)
+
+  @@index([teamId])
+  @@index([tournamentId])
+  @@map("team_achievements")
+}
+
+// --------------------------------------------------------
+// SOCIAL LINKS & MEDIA & DOCUMENTS
+// --------------------------------------------------------
+model SocialLink {
+  id             String         @id @default(uuid()) @db.Uuid
+  entityType     EntityType     @map("entity_type")
+  playerId       String?        @map("player_id") @db.Uuid
+  teamId         String?        @map("team_id") @db.Uuid
+  organizationId String?        @map("organization_id") @db.Uuid
+  tournamentId   String?        @map("tournament_id") @db.Uuid
+  platform       SocialPlatform
+  url            String         @db.VarChar(255)
+  handle         String?        @db.VarChar(100)
+
+  player         Player?        @relation("PlayerSocials", fields: [playerId], references: [id], onDelete: Cascade)
+  team           Team?          @relation("TeamSocials", fields: [teamId], references: [id], onDelete: Cascade)
+  organization   Organization?  @relation("OrgSocials", fields: [organizationId], references: [id], onDelete: Cascade)
+  tournament     Tournament?    @relation("TournamentSocials", fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, playerId])
+  @@index([entityType, teamId])
+  @@map("social_links")
+}
+
+model Media {
+  id              String      @id @default(uuid()) @db.Uuid
+  entityType      EntityType  @map("entity_type")
+  playerId        String?     @map("player_id") @db.Uuid
+  teamId          String?     @map("team_id") @db.Uuid
+  organizationId  String?     @map("organization_id") @db.Uuid
+  tournamentId    String?     @map("tournament_id") @db.Uuid
+  articleId       String?     @map("article_id") @db.Uuid
+  mediaType       MediaType   @default(IMAGE) @map("media_type")
+  fileName        String      @map("file_name") @db.VarChar(255)
+  mimeType        String      @map("mime_type") @db.VarChar(100)
+  fileSizeBytes   Int         @map("file_size_bytes")
+  storagePath     String      @map("storage_path") @db.VarChar(500)
+  publicUrl       String      @map("public_url") @db.VarChar(500)
+  width           Int?
+  height          Int?
+  durationSeconds Int?        @map("duration_seconds")
+  altText         String?     @map("alt_text") @db.VarChar(255)
+  caption         String?     @db.VarChar(500)
+  isFeatured      Boolean     @default(false) @map("is_featured")
+  createdAt       DateTime    @default(now()) @map("created_at")
+
+  player          Player?       @relation("PlayerMedia", fields: [playerId], references: [id], onDelete: Cascade)
+  team            Team?         @relation("TeamMedia", fields: [teamId], references: [id], onDelete: Cascade)
+  organization    Organization? @relation("OrgMedia", fields: [organizationId], references: [id], onDelete: Cascade)
+  tournament      Tournament?   @relation("TournamentMedia", fields: [tournamentId], references: [id], onDelete: Cascade)
+  article         Article?      @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, playerId])
+  @@index([entityType, teamId])
+  @@map("media")
+}
+
+model Document {
+  id            String     @id @default(uuid()) @db.Uuid
+  entityType    EntityType @map("entity_type")
+  playerId      String?    @map("player_id") @db.Uuid
+  title         String     @db.VarChar(150)
+  documentType  String     @map("document_type") @db.VarChar(50)
+  fileName      String     @map("file_name") @db.VarChar(255)
+  mimeType      String     @map("mime_type") @db.VarChar(100)
+  fileSizeBytes Int        @map("file_size_bytes")
+  storagePath   String     @map("storage_path") @db.VarChar(500)
+  createdAt     DateTime   @default(now()) @map("created_at")
+
+  player        Player?    @relation("PlayerDocuments", fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, playerId])
+  @@map("documents")
+}
+
+// --------------------------------------------------------
+// SUBMISSIONS & WORKFLOW
+// --------------------------------------------------------
+model Submission {
+  id              String           @id @default(uuid()) @db.Uuid
+  type            SubmissionType   @default(PLAYER_PORTFOLIO)
+  status          SubmissionStatus @default(PENDING)
+  submitterName   String           @map("submitter_name") @db.VarChar(100)
+  submitterEmail  String           @map("submitter_email") @db.VarChar(150)
+  submitterPhone  String?          @map("submitter_phone") @db.VarChar(30)
+  rawData         Json             @map("raw_data")
+  adminNotes      String?          @map("admin_notes") @db.Text
+  reviewerId      String?          @map("reviewer_id") @db.Uuid
+  reviewedAt      DateTime?        @map("reviewed_at")
+  createdPlayerId String?          @unique @map("created_player_id") @db.Uuid
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  reviewer        User?            @relation("AdminReviewedSubmissions", fields: [reviewerId], references: [id], onDelete: SetNull)
+  createdPlayer   Player?          @relation("SubmissionPlayer", fields: [createdPlayerId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([type])
+  @@map("submissions")
+}
+
+// --------------------------------------------------------
+// ARTICLES & NEWS
+// --------------------------------------------------------
+model Article {
+  id               String        @id @default(uuid()) @db.Uuid
+  slug             String        @unique
+  title            String        @db.VarChar(200)
+  excerpt          String?       @db.VarChar(500)
+  contentMarkdown  String        @map("content_markdown") @db.Text
+  featuredImageUrl String?       @map("featured_image_url")
+  authorId         String        @map("author_id") @db.Uuid
+  publishStatus    PublishStatus @default(DRAFT) @map("publish_status")
+  publishedAt      DateTime?     @map("published_at")
+  seoTitle         String?       @map("seo_title") @db.VarChar(160)
+  seoDescription   String?       @map("seo_description") @db.VarChar(320)
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  author           User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  media            Media[]
+
+  @@index([slug])
+  @@index([publishStatus])
+  @@map("articles")
+}
+
+// --------------------------------------------------------
+// AUDIT LOGS & EVENT JOURNAL
+// --------------------------------------------------------
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  action    String   @db.VarChar(100)
+  severity  String   @default("INFO") @db.VarChar(20)
+  actor     String   @db.VarChar(150)
+  target    String?  @db.VarChar(255)
+  details   String   @db.Text
+  ipAddress String?  @map("ip_address") @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// --------------------------------------------------------
+// BROADCAST ANNOUNCEMENTS
+// --------------------------------------------------------
+model Broadcast {
+  id             String   @id @default(uuid()) @db.Uuid
+  subject        String   @db.VarChar(255)
+  headline       String   @db.VarChar(255)
+  badgeTitle     String   @map("badge_title") @db.VarChar(100)
+  bodyContent    String   @map("body_content") @db.Text
+  ctaText        String?  @map("cta_text") @db.VarChar(100)
+  ctaUrl         String?  @map("cta_url") @db.VarChar(255)
+  recipientCount Int      @default(0) @map("recipient_count")
+  status         String   @default("SENT") @db.VarChar(20)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("broadcasts")
+}
+

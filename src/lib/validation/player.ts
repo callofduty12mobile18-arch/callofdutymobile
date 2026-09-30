@@ -1,0 +1,37 @@
+import { z } from 'zod';
+
+export const PlayerRoleEnum = z.enum([
+  'SLAYER',
+  'ANCHOR',
+  'OBJ',
+  'SUPPORT',
+  'IGL',
+  'FLEX',
+  'SNIPER',
+]);
+
+export const PublishStatusEnum = z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']);
+export const VerificationStatusEnum = z.enum(['UNVERIFIED', 'VERIFIED', 'REVOKED']);
+
+export const playerSchema = z.object({
+  ign: z.string().min(2, 'IGN must be at least 2 characters').max(50, 'IGN cannot exceed 50 characters'),
+  displayName: z.string().max(100).optional().nullable(),
+  realName: z.string().max(100).optional().nullable(),
+  slug: z.string().min(2).max(60).regex(/^[a-z0-9-]+$/, 'Slug must only contain lowercase letters, numbers, and hyphens'),
+  avatarUrl: z.string().url('Must be a valid URL').optional().nullable(),
+  coverImageUrl: z.string().url('Must be a valid URL').optional().nullable(),
+  country: z.string().default('IN'),
+  state: z.string().max(100).optional().nullable(),
+  city: z.string().max(100).optional().nullable(),
+  primaryRole: PlayerRoleEnum.default('FLEX'),
+  secondaryRole: PlayerRoleEnum.optional().nullable(),
+  bio: z.string().max(5000).optional().nullable(),
+  competitiveHistory: z.string().max(10000).optional().nullable(),
+  isLookingForTeam: z.boolean().default(false),
+  verificationStatus: VerificationStatusEnum.default('UNVERIFIED'),
+  publishStatus: PublishStatusEnum.default('DRAFT'),
+  seoTitle: z.string().max(160).optional().nullable(),
+  seoDescription: z.string().max(320).optional().nullable(),
+});
+
+export type PlayerInput = z.infer<typeof playerSchema>;

@@ -1,0 +1,36 @@
+export const DESIGN_TOKENS = {
+  colors: {
+    primary: '#FFE93B',
+    primaryHover: '#E5D02C',
+    background: '#000000',
+    surface: '#141414',
+    surfaceElevated: '#1F1F1F',
+    surfaceBorder: '#837D72',
+    borderSubtle: '#2A2A2A',
+    textMain: '#FFFFFF',
+    textMuted: '#ADABAB',
+    accent: '#0000EE',
+  },
+  radii: {
+    input: '50px',
+    button: '5px',
+    card: '2px',
+    badge: '3px',
+  },
+  spacing: {
+    1: '4px',
+    2: '8px',
+    3: '12px',
+    4: '16px',
+    5: '20px',
+    6: '24px',
+    8: '32px',
+    10: '40px',
+    15: '60px',
+    25: '100px',
+  },
+  typography: {
+    display: 'var(--font-chakra)',
+    body: 'var(--font-inter)',
+  },
+} as const;
