@@ -1,26 +1,98 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #FFE93B;
+  --color-primary-hover: #E5D02C;
+  --color-canvas: #000000;
+  --color-surface: #141414;
+  --color-surface-elevated: #1F1F1F;
+  --color-surface-border: #837D72;
+  --color-border-subtle: #2A2A2A;
+  --color-text-main: #FFFFFF;
+  --color-text-muted: #ADABAB;
+  --color-accent: #0000EE;
+
+  --radius-input: 50px;
+  --radius-btn: 5px;
+  --radius-card: 2px;
+  --radius-badge: 3px;
+
+  --font-display: var(--font-chakra), sans-serif;
+  --font-body: var(--font-inter), sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #000000;
+  --foreground: #FFFFFF;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #000000;
+  color: #FFFFFF;
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Heading Styles */
+.font-display {
+  font-family: var(--font-display), sans-serif;
+}
+
+/* Tactical Angular Card Surface */
+.tactical-card {
+  background-color: #141414;
+  border: 1px solid #2A2A2A;
+  border-radius: 2px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.tactical-card:hover {
+  border-color: #837D72;
+}
+
+.tactical-card-elevated {
+  background-color: #1F1F1F;
+  border: 1px solid #837D72;
+  border-radius: 2px;
+}
+
+/* Tactical Input Standard (50px Pill) */
+.tactical-input {
+  border-radius: 50px;
+  background-color: #141414;
+  border: 1px solid #837D72;
+  color: #FFFFFF;
+  padding: 10px 20px;
+  transition: all 0.2s ease;
+}
+
+.tactical-input:focus {
+  outline: none;
+  border-color: #FFE93B;
+  box-shadow: 0 0 0 2px rgba(255, 233, 59, 0.2);
+}
+
+.tactical-input::placeholder {
+  color: #ADABAB;
+}
+
+/* Custom Scrollbar for dark aesthetic */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2A2A2A;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #837D72;
 }
