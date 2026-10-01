@@ -40,6 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# user uploads & local email exports
+# user uploads, photos & local email exports
+/photos/
 /public/uploads/
 *.eml

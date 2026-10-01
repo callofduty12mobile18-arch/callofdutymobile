@@ -62,7 +62,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Authentication required.' }, { status: 401 });
     }
 
-    if (!rateLimit(`upload:${identity}`, 30, 10 * 60 * 1000)) {
+    const isWithinRateLimit = await rateLimit(`upload:${identity}`, 30, 10 * 60 * 1000);
+    if (!isWithinRateLimit) {
       return NextResponse.json({ success: false, error: 'Too many uploads. Try again later.' }, { status: 429 });
     }
 

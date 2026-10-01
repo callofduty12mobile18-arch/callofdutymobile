@@ -349,3 +349,170 @@ export async function sendBroadcastEmail({
   }
 }
 
+/**
+ * Dispatch security alert email when an account is temporarily locked due to repeated failed logins.
+ */
+export async function sendAccountLockoutEmail({
+  to,
+  ip,
+  lockoutMinutes = 30,
+}: {
+  to: string;
+  ip: string;
+  lockoutMinutes?: number;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const transporter = getEmailTransporter();
+    if (!transporter) {
+      console.warn('[MAILER] SMTP credentials not configured. Skipping lockout alert dispatch.');
+      return { success: false, error: 'SMTP not configured' };
+    }
+
+    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Security" <${process.env.SMTP_USER}>`;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Security Alert: Account Locked</title></head>
+<body style="margin: 0; padding: 0; background-color: #0A0A0A; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #FFFFFF;">
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0A0A0A; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #141414; border: 1px solid #FF3D00; border-radius: 4px; overflow: hidden;">
+          <tr><td height="4" style="background-color: #FF3D00;"></td></tr>
+          <tr>
+            <td style="padding: 32px 32px 20px 32px; border-bottom: 1px solid #2A2A2A;">
+              <span style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #FF3D00; font-weight: bold;">SECURITY ALERT</span>
+              <h1 style="margin: 8px 0 0 0; font-size: 22px; font-weight: 900; text-transform: uppercase; color: #FFFFFF;">Account Temporarily Locked</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 32px;">
+              <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #D1D1D6;">
+                Your account (<strong style="color: #FFFFFF;">${escapeHtml(to)}</strong>) has been locked for <strong>${lockoutMinutes} minutes</strong> due to 5 consecutive failed login attempts.
+              </p>
+              <div style="background-color: #1F1F1F; border: 1px solid #333333; padding: 16px; border-radius: 4px; margin-bottom: 24px; font-size: 13px; color: #ADABAB;">
+                <div><strong>Originating IP:</strong> ${escapeHtml(ip)}</div>
+                <div style="margin-top: 6px;"><strong>Protection:</strong> Automated Brute Force Defense</div>
+              </div>
+              <p style="margin: 0; font-size: 13px; color: #8E8E93;">
+                If this wasn't you, someone may be attempting to access your account. Please change your credentials once access is restored or contact support.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px 32px; background-color: #0F0F0F; border-top: 1px solid #2A2A2A; font-size: 11px; color: #666666; text-align: center;">
+              CallOfDutyMobile Security Automated Monitor &middot; <a href="${siteUrl}" style="color: #FFE93B; text-decoration: none;">Platform Portal</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    await transporter.sendMail({
+      from: fromAddress,
+      to,
+      subject: `🚨 Security Alert: Account Locked (${to})`,
+      text: `Your CallOfDutyMobile account (${to}) has been temporarily locked for ${lockoutMinutes} minutes following 5 failed login attempts from IP: ${ip}.`,
+      html: htmlContent,
+    });
+
+    return { success: true };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error('[MAILER] Account lockout email failed:', errorMsg);
+    return { success: false, error: errorMsg };
+  }
+}
+
+/**
+ * Dispatch email verification link on player registration/signup.
+ */
+export async function sendEmailVerificationEmail({
+  to,
+  ign,
+  token,
+}: {
+  to: string;
+  ign: string;
+  token: string;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const transporter = getEmailTransporter();
+    if (!transporter) {
+      console.warn('[MAILER] SMTP credentials not configured. Skipping email verification dispatch.');
+      return { success: false, error: 'SMTP not configured' };
+    }
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const verificationUrl = `${siteUrl}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(to)}`;
+    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Verification" <${process.env.SMTP_USER}>`;
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Verify Your Player Email</title></head>
+<body style="margin: 0; padding: 0; background-color: #0A0A0A; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #FFFFFF;">
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0A0A0A; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #141414; border: 1px solid #2A2A2A; border-radius: 4px; overflow: hidden;">
+          <tr><td height="4" style="background-color: #FFE93B;"></td></tr>
+          <tr>
+            <td style="padding: 32px 32px 20px 32px; border-bottom: 1px solid #2A2A2A;">
+              <span style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #FFE93B; font-weight: bold;">IDENTITY VERIFICATION</span>
+              <h1 style="margin: 8px 0 0 0; font-size: 22px; font-weight: 900; text-transform: uppercase; color: #FFFFFF;">Verify Your Player Email</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 32px;">
+              <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #D1D1D6;">
+                Welcome <strong style="color: #FFE93B;">${escapeHtml(ign)}</strong>! Please verify your email address to activate your player profile.
+              </p>
+              <p style="margin: 0 0 24px 0; font-size: 13px; line-height: 1.6; color: #ADABAB;">
+                Your competitive profile will remain in <strong>DRAFT</strong> mode until your email address has been verified.
+              </p>
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="${verificationUrl}" style="display: inline-block; padding: 14px 28px; background-color: #FFE93B; color: #000000; font-weight: 900; text-decoration: none; border-radius: 2px; font-size: 13px; letter-spacing: 1px; text-transform: uppercase;">
+                  VERIFY EMAIL ADDRESS &rarr;
+                </a>
+              </div>
+              <p style="margin: 0; font-size: 12px; color: #666666;">
+                Or copy and paste this verification URL into your browser:<br>
+                <a href="${verificationUrl}" style="color: #FFE93B; word-break: break-all;">${verificationUrl}</a>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px 32px; background-color: #0F0F0F; border-top: 1px solid #2A2A2A; font-size: 11px; color: #666666; text-align: center;">
+              CallOfDutyMobile Player Verification &middot; Link expires in 24 hours.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    await transporter.sendMail({
+      from: fromAddress,
+      to,
+      subject: `Verify Your Email: Welcome to CallOfDutyMobile, ${ign}`,
+      text: `Welcome ${ign}! Please verify your email to activate your player profile by clicking: ${verificationUrl}`,
+      html: htmlContent,
+    });
+
+    return { success: true };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error('[MAILER] Verification email failed:', errorMsg);
+    return { success: false, error: errorMsg };
+  }
+}
+
+

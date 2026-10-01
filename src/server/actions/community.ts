@@ -8,7 +8,7 @@ import {
   rejectRequest,
 } from '../data/community-store';
 import { prisma } from '@/lib/db/prisma';
-import { sendPlayerCredentialsEmail } from '@/lib/email/mailer';
+import { sendPlayerCredentialsEmail, sendEmailVerificationEmail } from '@/lib/email/mailer';
 import { recordAuditLog } from '../data/audit-store';
 import { requireAdminSession } from './admin-auth';
 
@@ -88,14 +88,22 @@ export async function approveCommunityRequestAction(requestId: string) {
       return { success: false, error: 'Request not found in database.' };
     }
 
-    // Dispatch credentials email directly to the applicant
-    const emailResult = await sendPlayerCredentialsEmail({
-      to: result.credentials.email,
-      ign: result.request.gamerTag || result.credentials.email.split('@')[0],
-      password: result.credentials.password,
-      fullName: result.request.fullName,
-      isInvitation: false,
-    });
+    // Dispatch credentials and verification emails to applicant
+    const gamerTag = result.request.gamerTag || result.credentials.email.split('@')[0];
+    const [emailResult] = await Promise.all([
+      sendPlayerCredentialsEmail({
+        to: result.credentials.email,
+        ign: gamerTag,
+        password: result.credentials.password,
+        fullName: result.request.fullName,
+        isInvitation: false,
+      }),
+      sendEmailVerificationEmail({
+        to: result.credentials.email,
+        ign: gamerTag,
+        token: result.verificationToken,
+      }),
+    ]);
 
     // Record Audit Log in DB
     await recordAuditLog(
