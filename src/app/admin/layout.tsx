@@ -4,7 +4,6 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { LogOut } from 'lucide-react';
-import { Footer } from '@/components/common/Footer';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,12 +14,11 @@ export default async function AdminLayout({
 }) {
   const session = await getAdminSession();
 
-  // If unauthenticated (e.g. login page), render children with footer
+  // If unauthenticated (e.g. login page), render children without public footer
   if (!session) {
     return (
       <div className="min-h-screen flex flex-col bg-black text-white selection:bg-[#FFE93B] selection:text-black">
         <main className="flex-1 w-full flex flex-col">{children}</main>
-        <Footer />
       </div>
     );
   }
@@ -62,9 +60,6 @@ export default async function AdminLayout({
             {children}
           </div>
         </main>
-
-        {/* Admin Footer */}
-        <Footer />
       </div>
     </div>
   );
