@@ -46,15 +46,7 @@ export const Footer: React.FC = () => {
               The premier competitive registry, tournament archive, and tier-verified scrim matchmaking network for the Indian Call of Duty: Mobile esports community.
             </p>
 
-            {/* Operational Status Pill */}
-            <div className="pt-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-[2px] bg-[#141414] border border-[#262626] text-xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-                <span className="text-white font-medium">Platform Operational</span>
-                <span className="text-[#666666]">·</span>
-                <span className="text-[#ADABAB] font-mono text-[11px]">Season 2026 Circuit</span>
-              </div>
-            </div>
+
           </div>
 
           {/* Column 2: Registry & Roster Links (Span 2 cols on lg) */}
@@ -76,11 +68,6 @@ export const Footer: React.FC = () => {
               <li>
                 <Link href="/tournaments" className="hover:text-white hover:translate-x-0.5 transition-all inline-block">
                   Tournament Calendar
-                </Link>
-              </li>
-              <li>
-                <Link href="/lft" className="hover:text-white hover:translate-x-0.5 transition-all inline-block">
-                  LFT Free Agents
                 </Link>
               </li>
               <li>
@@ -182,10 +169,7 @@ export const Footer: React.FC = () => {
             <Link href="/support" className="hover:text-[#FFE93B] transition-colors">
               Support
             </Link>
-            <span className="text-[#333333]">·</span>
-            <Link href="/admin/login" className="text-[#666666] hover:text-[#ADABAB] transition-colors">
-              Admin
-            </Link>
+
           </div>
         </div>
       </div>
