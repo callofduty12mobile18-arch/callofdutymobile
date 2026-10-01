@@ -94,11 +94,14 @@ export async function loginAdminAction(
   prevState: AdminAuthResponse | null,
   formData: FormData
 ): Promise<AdminAuthResponse> {
-  const identifier = (formData.get('identifier') as string)?.trim().toLowerCase();
+  const rawIdentifier = (formData.get('identifier') as string)?.trim() || '';
+  const identifier = rawIdentifier.toLowerCase();
+  const cleanUsername = identifier.replace(/\s+/g, '');
+  const normalizedUsername = identifier.replace(/[\s._-]+/g, '');
   const password = (formData.get('password') as string)?.trim();
 
-  if (!identifier || !password) {
-    return { success: false, message: 'Please provide both admin username/email and password.' };
+  if (!rawIdentifier || !password) {
+    return { success: false, message: 'Please provide both admin username and password.' };
   }
 
   // Enforce password complexity check on admin login (min 12 chars, uppercase, digit, special char)
@@ -113,7 +116,7 @@ export async function loginAdminAction(
   const ip = await getClientIp();
   const [ipAllowed, idAllowed] = await Promise.all([
     rateLimit(`login:admin:ip:${ip}`, 20, 15 * 60 * 1000),
-    rateLimit(`login:admin:id:${identifier}`, 5, 15 * 60 * 1000),
+    rateLimit(`login:admin:id:${cleanUsername}`, 5, 15 * 60 * 1000),
   ]);
 
   if (!ipAllowed || !idAllowed) {
@@ -122,7 +125,7 @@ export async function loginAdminAction(
 
   let authenticated = false;
   let adminEmail = identifier;
-  let adminUsername = identifier;
+  let adminUsername = cleanUsername;
   let matchingDbUser: {
     id: string;
     email: string;
@@ -131,13 +134,21 @@ export async function loginAdminAction(
     lockedUntil: Date | null;
   } | null = null;
 
-  // Query administrator account from PostgreSQL database
+  // Query administrator account from PostgreSQL database by username or email
   try {
     const user = await prisma.user.findFirst({
       where: {
         OR: [
-          { email: { equals: identifier, mode: 'insensitive' } },
-          { email: { equals: `${identifier}@callofdutymobile.in`, mode: 'insensitive' } },
+          { email: { equals: identifier, mode: 'insensitive' as const } },
+          { email: { equals: cleanUsername, mode: 'insensitive' as const } },
+          { email: { equals: `${cleanUsername}@callofdutymobile.in`, mode: 'insensitive' as const } },
+          { email: { equals: `${cleanUsername}@gmail.com`, mode: 'insensitive' as const } },
+          ...(normalizedUsername === 'ashwin2019'
+            ? [
+                { email: { equals: 'ashwin2019@callofdutymobile.in', mode: 'insensitive' as const } },
+                { email: { equals: 'callofduty12mobile18@gmail.com', mode: 'insensitive' as const } },
+              ]
+            : []),
         ],
         role: RoleType.ADMIN,
       },
