@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   Clock,
   Plus,
-  Mail,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -45,12 +44,6 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/admin/requests">
-            <Button size="sm" variant="primary">
-              <Mail className="w-4 h-4 mr-1.5" />
-              JOIN REQUESTS ({pendingRequestsCount})
-            </Button>
-          </Link>
           <DirectInviteModal triggerButtonText="INVITE PLAYER" />
         </div>
       </div>
