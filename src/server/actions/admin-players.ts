@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db/prisma';
 import { recordAuditLog } from '../data/audit-store';
-import { playerAccounts } from '../data/community-store';
+import { requireAdminSession } from './admin-auth';
 
 export interface DeletePlayerResponse {
   success: boolean;
@@ -11,23 +11,20 @@ export interface DeletePlayerResponse {
 }
 
 export async function deletePlayerAction(playerId: string): Promise<DeletePlayerResponse> {
+  const admin = await requireAdminSession();
+
   if (!playerId) {
     return { success: false, message: 'Player ID is required.' };
   }
 
   try {
-    // 1. Fetch player details
-    let player = null;
-    try {
-      player = await prisma.player.findFirst({
-        where: {
-          OR: [{ id: playerId }, { slug: playerId }],
-        },
-        include: { user: true },
-      });
-    } catch (err) {
-      console.error('Error finding player in database:', err);
-    }
+    // 1. Fetch player details from database
+    let player = await prisma.player.findFirst({
+      where: {
+        OR: [{ id: playerId }, { slug: playerId }],
+      },
+      include: { user: true },
+    });
 
     const targetIgn = player?.ign || playerId;
     const targetSlug = player?.slug;
@@ -78,27 +75,16 @@ export async function deletePlayerAction(playerId: string): Promise<DeletePlayer
       }
     }
 
-    // 3. Clean up memory accounts store if present
-    const memoryIdx = playerAccounts.findIndex(
-      (acc) =>
-        acc.playerId === playerId ||
-        (player && acc.playerId === player.id) ||
-        acc.ign.toLowerCase() === targetIgn.toLowerCase()
-    );
-    if (memoryIdx !== -1) {
-      playerAccounts.splice(memoryIdx, 1);
-    }
-
-    // 4. Record audit log
+    // 3. Record audit log in database
     await recordAuditLog(
       'STATUS_MODIFIED',
-      'ADMIN',
+      admin.username,
       `Deleted player profile for "${targetIgn}".`,
       targetIgn,
       'WARNING'
     );
 
-    // 5. Invalidate Next.js caches
+    // 4. Invalidate Next.js caches
     revalidatePath('/admin/dashboard');
     revalidatePath('/admin/players');
     revalidatePath('/admin/teams');
@@ -111,7 +97,7 @@ export async function deletePlayerAction(playerId: string): Promise<DeletePlayer
 
     return {
       success: true,
-      message: `Player "${targetIgn}" has been deleted successfully.`,
+      message: `Player "${targetIgn}" has been deleted successfully from the database.`,
     };
   } catch (error) {
     console.error('Failed to delete player:', error);

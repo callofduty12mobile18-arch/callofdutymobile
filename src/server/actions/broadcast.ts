@@ -3,38 +3,40 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db/prisma';
 import { sendBroadcastEmail } from '@/lib/email/mailer';
-import { playerAccounts, communityRequests } from '../data/community-store';
 import { recordAuditLog } from '../data/audit-store';
 import { addBroadcastRecord, getDbBroadcastHistory, BroadcastHistoryItem } from '../data/broadcast-store';
-
+import { requireAdminSession } from './admin-auth';
 import { unstable_cache } from 'next/cache';
 
 async function fetchBroadcastRecipientEmails(): Promise<string[]> {
   const emailSet = new Set<string>();
 
-  // 1. From live Database
   try {
+    // 1. Fetch from User accounts table in PostgreSQL
     const users = await prisma.user.findMany({
       select: { email: true },
     });
     users.forEach((u) => {
-      if (u.email && u.email.includes('@')) emailSet.add(u.email.toLowerCase().trim());
+      if (u.email && u.email.includes('@')) {
+        emailSet.add(u.email.toLowerCase().trim());
+      }
     });
-  } catch {
-    // Database connection pending
+
+    // 2. Fetch from approved Submissions in PostgreSQL
+    const approvedSubs = await prisma.submission.findMany({
+      where: {
+        status: 'APPROVED',
+      },
+      select: { submitterEmail: true },
+    });
+    approvedSubs.forEach((s) => {
+      if (s.submitterEmail && s.submitterEmail.includes('@')) {
+        emailSet.add(s.submitterEmail.toLowerCase().trim());
+      }
+    });
+  } catch (err) {
+    console.error('Error fetching broadcast recipients from database:', err);
   }
-
-  // 2. From runtime player accounts
-  playerAccounts.forEach((acc) => {
-    if (acc.email && acc.email.includes('@')) emailSet.add(acc.email.toLowerCase().trim());
-  });
-
-  // 3. From approved community requests
-  communityRequests.forEach((req) => {
-    if (req.status === 'APPROVED' && req.email && req.email.includes('@')) {
-      emailSet.add(req.email.toLowerCase().trim());
-    }
-  });
 
   return Array.from(emailSet);
 }
@@ -54,6 +56,7 @@ export async function getBroadcastHistoryList(): Promise<BroadcastHistoryItem[]>
 
 export async function sendBroadcastAnnouncementAction(formData: FormData) {
   try {
+    const admin = await requireAdminSession();
     const subject = (formData.get('subject') as string)?.trim();
     const badgeTitle = (formData.get('badgeTitle') as string)?.trim() || 'OFFICIAL ANNOUNCEMENT';
     const headline = (formData.get('headline') as string)?.trim() || subject;
@@ -70,7 +73,7 @@ export async function sendBroadcastAnnouncementAction(formData: FormData) {
     if (recipients.length === 0) {
       return {
         success: false,
-        error: 'No registered player emails found in the system to broadcast to.',
+        error: 'No registered player emails found in the database to broadcast to.',
       };
     }
 
@@ -92,11 +95,11 @@ export async function sendBroadcastAnnouncementAction(formData: FormData) {
       status: result.success ? 'SENT' : 'FAILED',
     });
 
-    // Audit Log
-    recordAuditLog(
+    // Audit Log in DB
+    await recordAuditLog(
       'BROADCAST_SENT' as any,
-      'Admin Console',
-      `Sent email broadcast "${subject}" to ${recipients.length} player mailboxes.`,
+      admin.username,
+      `Dispatched email broadcast "${subject}" to ${recipients.length} player mailbox(es).`,
       `Broadcast: ${badgeTitle}`,
       result.success ? 'SUCCESS' : 'WARNING'
     );
@@ -110,7 +113,7 @@ export async function sendBroadcastAnnouncementAction(formData: FormData) {
       failedCount: result.failedCount,
       recipientCount: recipients.length,
       message: result.success
-        ? `Broadcast email successfully sent to ${recipients.length} player mailbox(es)!`
+        ? `Broadcast email successfully dispatched to ${recipients.length} player mailbox(es)!`
         : `Broadcast recorded (Dispatch note: ${result.error || 'Check SMTP config'}).`,
     };
   } catch (err: unknown) {

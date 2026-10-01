@@ -1,4 +1,5 @@
 import { PrismaClient, RoleType, AchievementCategory } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -22,12 +23,15 @@ async function main() {
   await prisma.organization.deleteMany();
   await prisma.user.deleteMany();
 
+  // Hash admin password
+  const adminPasswordHash = bcrypt.hashSync('CODMashwin@2019', 10);
+
   // Create default platform Admin account
   await prisma.user.create({
     data: {
-      email: 'admin@callofdutymobile.in',
+      email: 'ashwin2019@callofdutymobile.in',
       role: RoleType.ADMIN,
-      passwordHash: 'CODM-ADMIN-2024',
+      passwordHash: adminPasswordHash,
     },
   });
 

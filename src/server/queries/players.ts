@@ -185,3 +185,40 @@ async function fetchPlayerForStudio(slug: string) {
 export const getPlayerForStudio = cache(async (slug: string) => {
   return fetchPlayerForStudio(slug);
 });
+
+export async function getLookingForTeamPlayers(role?: PlayerRole) {
+  try {
+    const where: Record<string, unknown> = {
+      publishStatus: PublishStatus.PUBLISHED,
+      deletedAt: null,
+      isLookingForTeam: true,
+    };
+
+    if (role) {
+      where.primaryRole = role;
+    }
+
+    const players = await prisma.player.findMany({
+      where,
+      include: {
+        teamMemberships: {
+          where: { isCurrent: true },
+          include: { team: true },
+        },
+        achievements: {
+          include: { achievement: true },
+          take: 3,
+        },
+        socialLinks: true,
+      },
+      orderBy: [{ verificationStatus: 'asc' }, { updatedAt: 'desc' }],
+      take: 50,
+    });
+
+    return players;
+  } catch (err) {
+    console.error('Error fetching LFT players:', err);
+    return [];
+  }
+}
+

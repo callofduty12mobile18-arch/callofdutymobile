@@ -27,6 +27,25 @@ export const Footer: React.FC = () => {
           <p>© {new Date().getFullYear()} CallOfDutyMobile India. All Rights Reserved.</p>
         </div>
 
+        {/* Competitive Hub Links */}
+        <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-display font-bold uppercase tracking-wider text-[#ADABAB] pt-2">
+          <Link href="/scrims" className="hover:text-[#FFE93B] transition-colors">
+            Scrim Matchmaking
+          </Link>
+          <span className="text-[#333333]">·</span>
+          <Link href="/lft" className="hover:text-[#FFE93B] transition-colors">
+            LFT Free Agents
+          </Link>
+          <span className="text-[#333333]">·</span>
+          <Link href="/gunsmith" className="hover:text-[#FFE93B] transition-colors">
+            Gunsmith Meta
+          </Link>
+          <span className="text-[#333333]">·</span>
+          <Link href="/player" className="hover:text-[#FFE93B] transition-colors">
+            Player Studio
+          </Link>
+        </div>
+
         {/* Legal & Support Links */}
         <div className="flex items-center justify-center gap-4 text-[11px] font-display uppercase tracking-wider text-[#B4B4B8] pt-1">
           <Link href="/terms" className="hover:text-[#FFE93B] transition-colors">
