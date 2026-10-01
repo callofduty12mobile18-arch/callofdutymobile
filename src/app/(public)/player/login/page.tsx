@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useActionState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
@@ -13,6 +13,7 @@ import { loginPlayerAction } from '@/server/actions/player-auth';
 export default function PlayerLoginPage() {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(loginPlayerAction, null);
+  const [showPassword, setShowPassword] = React.useState(false);
 
   React.useEffect(() => {
     if (state?.success && state.redirectUrl) {
@@ -75,10 +76,21 @@ export default function PlayerLoginPage() {
             </label>
             <Input
               name="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               required
               placeholder="Enter your access key"
               leftIcon={<Lock className="w-4 h-4" />}
+              rightIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-[#ADABAB] hover:text-[#FFE93B] transition-colors focus:outline-none p-1 cursor-pointer flex items-center justify-center"
+                  title={showPassword ? 'Hide access key' : 'Show access key'}
+                  aria-label={showPassword ? 'Hide access key' : 'Show access key'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4 text-[#837D72] hover:text-[#FFE93B]" />}
+                </button>
+              }
             />
           </div>
 
