@@ -192,13 +192,8 @@ export const OrganizerPermissionsCard: React.FC<{
                   Request {modalType === 'TOURNAMENT' ? 'Tournament Organizer' : 'Scrim Host'} Permission
                 </h3>
               </div>
-              <button
-                type="button"
-                onClick={() => setModalType(null)}
-                className="text-[#837D72] hover:text-white transition-colors text-xs font-mono"
-              >
-                ✕ ESC
-              </button>
+
+
             </div>
 
             <p className="text-xs text-[#ADABAB] leading-relaxed">
