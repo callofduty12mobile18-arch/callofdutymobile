@@ -60,8 +60,13 @@ export const AdminOrganizerRequestRow: React.FC<{
           {request.details.plannedDate || 'Upcoming'}
         </td>
 
-        <td className="py-3.5 text-xs text-[#FFE93B] font-mono">
-          {request.details.prizePool || 'Free Entry'}
+        <td className="py-3.5 text-xs font-mono">
+          <div className="text-[#FFE93B] font-bold">
+            {request.details.prizePool || 'Just for Fun'}
+          </div>
+          <div className="text-[10px] text-[#ADABAB] font-sans">
+            Entry: {request.details.entryFee || (request.details.entryType === 'PAID' ? 'Payable' : 'Free Entry')}
+          </div>
         </td>
 
         <td className="py-3.5 text-xs text-[#837D72]">
@@ -125,7 +130,7 @@ export const AdminOrganizerRequestRow: React.FC<{
       {expanded && (
         <tr className="bg-[#121212] border-b border-[#2A2A2A]">
           <td colSpan={7} className="p-4 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
               <div className="bg-[#181818] p-3 rounded-[2px] border border-[#2A2A2A]">
                 <span className="text-[10px] uppercase font-display text-[#837D72] block mb-1">Host Organization / Clan</span>
                 <span className="text-white font-bold">{request.details.organizationOrClan || request.submitterName}</span>
@@ -133,6 +138,11 @@ export const AdminOrganizerRequestRow: React.FC<{
               <div className="bg-[#181818] p-3 rounded-[2px] border border-[#2A2A2A]">
                 <span className="text-[10px] uppercase font-display text-[#837D72] block mb-1">Match Format / Rules</span>
                 <span className="text-white">{request.details.format || 'Standard Competitive Rules'}</span>
+              </div>
+              <div className="bg-[#181818] p-3 rounded-[2px] border border-[#2A2A2A]">
+                <span className="text-[10px] uppercase font-display text-[#837D72] block mb-1">Prize & Entry Fee</span>
+                <div className="text-[#FFE93B] font-mono">{request.details.prizePool || 'Just for Fun'}</div>
+                <div className="text-[11px] text-[#ADABAB]">Entry: {request.details.entryFee || 'Free Entry'}</div>
               </div>
               <div className="bg-[#181818] p-3 rounded-[2px] border border-[#2A2A2A]">
                 <span className="text-[10px] uppercase font-display text-[#837D72] block mb-1">Discord / Contact Handle</span>
