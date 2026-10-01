@@ -215,6 +215,10 @@ export async function updatePlayerSelfProfile(
     return { success: false, message: 'IGN / Gamer Tag is required.' };
   }
 
+  if (!codmUid) {
+    return { success: false, message: 'CODM UID is required.' };
+  }
+
   const avatarRaw = field('avatarUrl', 500);
   const coverRaw = field('coverImageUrl', 500);
   const avatarUrl = avatarRaw ? safeMediaUrl(avatarRaw) : null;

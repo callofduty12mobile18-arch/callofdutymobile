@@ -28,6 +28,8 @@ export interface OrganizerRequestItem {
     organizationOrClan?: string;
     plannedDate?: string;
     prizePool?: string;
+    entryType?: string;
+    entryFee?: string;
     format?: string;
     discordOrContact?: string;
     description?: string;
@@ -106,9 +108,28 @@ export async function submitOrganizerRequestAction(
 
   const eventTitle = (formData.get('eventTitle') as string)?.trim();
   const organizationOrClan = (formData.get('organizationOrClan') as string)?.trim() || session.ign;
-  const plannedDate = (formData.get('plannedDate') as string)?.trim() || 'Upcoming';
-  const prizePool = (formData.get('prizePool') as string)?.trim() || 'Free Entry';
-  const format = (formData.get('format') as string)?.trim() || 'CDL Rules 5v5';
+  const eventDate = (formData.get('eventDate') as string)?.trim();
+  const eventTime = (formData.get('eventTime') as string)?.trim();
+  const plannedDate = eventDate
+    ? eventTime
+      ? `${eventDate} at ${eventTime}`
+      : eventDate
+    : (formData.get('plannedDate') as string)?.trim() || 'Upcoming';
+
+  const prizePoolType = (formData.get('prizePoolType') as string)?.trim();
+  const customPrizeAmount = (formData.get('customPrizeAmount') as string)?.trim();
+  const prizePool =
+    prizePoolType === 'CUSTOM' && customPrizeAmount
+      ? customPrizeAmount
+      : prizePoolType === 'FUN'
+      ? 'Just for Fun (No Cash Prize)'
+      : (formData.get('prizePool') as string)?.trim() || 'Just for Fun (No Cash Prize)';
+
+  const entryType = (formData.get('entryType') as string)?.trim() || 'FREE';
+  const entryFeeInput = (formData.get('entryFee') as string)?.trim();
+  const entryFee = entryType === 'PAID' ? (entryFeeInput || 'Payable') : 'Free Entry';
+
+  const format = (formData.get('format') as string)?.trim() || 'Standard Competitive Rules';
   const discordOrContact = (formData.get('discordOrContact') as string)?.trim() || session.email;
   const description = (formData.get('description') as string)?.trim() || '';
 
@@ -134,6 +155,8 @@ export async function submitOrganizerRequestAction(
           organizationOrClan,
           plannedDate,
           prizePool,
+          entryType,
+          entryFee,
           format,
           discordOrContact,
           description,
@@ -191,6 +214,8 @@ export async function getAdminOrganizerRequests(): Promise<OrganizerRequestItem[
           organizationOrClan: (raw.organizationOrClan as string) || undefined,
           plannedDate: (raw.plannedDate as string) || undefined,
           prizePool: (raw.prizePool as string) || undefined,
+          entryType: (raw.entryType as string) || undefined,
+          entryFee: (raw.entryFee as string) || undefined,
           format: (raw.format as string) || undefined,
           discordOrContact: (raw.discordOrContact as string) || undefined,
           description: (raw.description as string) || undefined,

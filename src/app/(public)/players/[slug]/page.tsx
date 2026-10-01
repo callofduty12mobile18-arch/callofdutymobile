@@ -448,28 +448,7 @@ export default async function PlayerProfilePage({
             </CardContent>
           </Card>
 
-          {/* Search Keywords & Discovery Tags */}
-          {parsedKeywords.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Hash className="w-4 h-4 text-[#FFE93B]" /> Search Keywords & Tags
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {parsedKeywords.map((tag, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-1 bg-[#1F1F1F] border border-[#2A2A2A] text-xs font-mono text-[#ADABAB] rounded-[2px] flex items-center gap-1 hover:border-[#FFE93B] hover:text-white transition-colors"
-                    >
-                      #{tag.replace(/\s+/g, '_')}
-                    </span>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+
 
           {/* Profile Link Box */}
           <Card>

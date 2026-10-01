@@ -85,13 +85,6 @@ export default async function PlayerDashboardPage() {
         </div>
       </div>
 
-      {/* Organizer Permissions & Hosting Hub */}
-      <OrganizerPermissionsCard
-        permissions={organizerPermissions}
-        userEmail={session.email}
-        userIgn={session.ign}
-      />
-
       {/* Editor Form */}
       <PlayerProfileEditorForm
         initialData={{
@@ -117,6 +110,13 @@ export default async function PlayerDashboardPage() {
           seoDescription: existingPlayer?.seoDescription || '',
           slug: existingPlayer?.slug || session.slug,
         }}
+      />
+
+      {/* Organizer Permissions & Hosting Hub */}
+      <OrganizerPermissionsCard
+        permissions={organizerPermissions}
+        userEmail={session.email}
+        userIgn={session.ign}
       />
     </div>
   );

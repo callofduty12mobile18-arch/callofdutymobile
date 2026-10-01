@@ -16,6 +16,17 @@ export const OrganizerPermissionsCard: React.FC<{
   const [modalType, setModalType] = React.useState<'TOURNAMENT' | 'SCRIM' | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
   const [feedback, setFeedback] = React.useState<{ success?: boolean; message?: string } | null>(null);
+  const [prizePoolType, setPrizePoolType] = React.useState<'FUN' | 'CUSTOM'>('FUN');
+  const [entryType, setEntryType] = React.useState<'FREE' | 'PAID'>('FREE');
+
+  const todayDateStr = React.useMemo(() => new Date().toISOString().split('T')[0], []);
+
+  const openModal = (type: 'TOURNAMENT' | 'SCRIM') => {
+    setModalType(type);
+    setPrizePoolType('FUN');
+    setEntryType('FREE');
+    setFeedback(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -100,7 +111,7 @@ export const OrganizerPermissionsCard: React.FC<{
                     size="sm"
                     variant="primary"
                     className="text-xs w-full font-bold"
-                    onClick={() => setModalType('TOURNAMENT')}
+                    onClick={() => openModal('TOURNAMENT')}
                   >
                     <Plus className="w-3.5 h-3.5 mr-1" />
                     SUBMIT ANOTHER TOURNAMENT
@@ -111,7 +122,7 @@ export const OrganizerPermissionsCard: React.FC<{
                   size="sm"
                   variant="outline"
                   className="text-xs w-full text-[#FFE93B] border-[#FFE93B]/40 hover:bg-[#FFE93B]/10 font-bold"
-                  onClick={() => setModalType('TOURNAMENT')}
+                  onClick={() => openModal('TOURNAMENT')}
                 >
                   <Send className="w-3.5 h-3.5 mr-1" />
                   {permissions.pendingTournamentRequests > 0 ? 'SUBMIT ADDITIONAL DETAILS' : 'REQUEST TOURNAMENT PERMISSION'}
@@ -155,7 +166,7 @@ export const OrganizerPermissionsCard: React.FC<{
                   size="sm"
                   variant="outline"
                   className="text-xs w-full text-cyan-400 border-cyan-800 hover:bg-cyan-950/20 font-bold"
-                  onClick={() => setModalType('SCRIM')}
+                  onClick={() => openModal('SCRIM')}
                 >
                   <Send className="w-3.5 h-3.5 mr-1" />
                   {permissions.pendingScrimRequests > 0 ? 'SUBMIT ADDITIONAL DETAILS' : 'REQUEST SCRIM HOST PERMISSION'}
@@ -169,7 +180,7 @@ export const OrganizerPermissionsCard: React.FC<{
       {/* Modal / Slide-in Dialog for Requesting Permission */}
       {modalType && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#181818] border border-[#2E2E2E] rounded-[2px] max-w-lg w-full p-6 shadow-2xl space-y-5 text-left">
+          <div className="bg-[#181818] border border-[#2E2E2E] rounded-[2px] max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl space-y-5 text-left">
             <div className="flex items-center justify-between border-b border-[#2A2A2A] pb-3">
               <div className="flex items-center gap-2">
                 {modalType === 'TOURNAMENT' ? (
@@ -210,7 +221,11 @@ export const OrganizerPermissionsCard: React.FC<{
                   type="text"
                   name="eventTitle"
                   required
-                  placeholder="e.g., GodLike Invitational Season 4 / T1 Night Scrims"
+                  placeholder={
+                    modalType === 'TOURNAMENT'
+                      ? 'e.g., GodLike Invitational Season 4 / COD Championship Qualifier'
+                      : 'e.g., Tier 1 Daily Night Scrims / Clan War Showdown'
+                  }
                   className="w-full bg-[#121212] border border-[#2E2E2E] rounded-[2px] px-3 py-2 text-white placeholder-[#555] focus:outline-none focus:border-[#FFE93B]"
                 />
               </div>
@@ -231,32 +246,6 @@ export const OrganizerPermissionsCard: React.FC<{
 
                 <div>
                   <label className="block text-[11px] font-display uppercase text-[#CCCCCC] mb-1">
-                    Planned Date & Time
-                  </label>
-                  <input
-                    type="text"
-                    name="plannedDate"
-                    placeholder="e.g. Oct 15-20, 2026 / Daily 9:00 PM"
-                    className="w-full bg-[#121212] border border-[#2E2E2E] rounded-[2px] px-3 py-2 text-white placeholder-[#555] focus:outline-none focus:border-[#FFE93B]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-display uppercase text-[#CCCCCC] mb-1">
-                    Prize Pool (if any)
-                  </label>
-                  <input
-                    type="text"
-                    name="prizePool"
-                    placeholder="e.g. ₹50,000 INR or Free Entry"
-                    className="w-full bg-[#121212] border border-[#2E2E2E] rounded-[2px] px-3 py-2 text-white placeholder-[#555] focus:outline-none focus:border-[#FFE93B]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-display uppercase text-[#CCCCCC] mb-1">
                     Discord / Phone Contact *
                   </label>
                   <input
@@ -270,16 +259,177 @@ export const OrganizerPermissionsCard: React.FC<{
                 </div>
               </div>
 
+              {/* Planned Date & Time Slot (Selectable, Not Typeable) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-display uppercase text-[#CCCCCC] mb-1">
+                    Planned Date (Select Date) *
+                  </label>
+                  <input
+                    type="date"
+                    name="eventDate"
+                    required
+                    min={todayDateStr}
+                    onKeyDown={(e) => e.preventDefault()}
+                    className="w-full bg-[#121212] border border-[#2E2E2E] rounded-[2px] px-3 py-2 text-white focus:outline-none focus:border-[#FFE93B] cursor-pointer"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-display uppercase text-[#CCCCCC] mb-1">
+                    Planned Time Slot *
+                  </label>
+                  <select
+                    name="eventTime"
+                    required
+                    defaultValue=""
+                    className="w-full bg-[#121212] border border-[#2E2E2E] rounded-[2px] px-3 py-2 text-white focus:outline-none focus:border-[#FFE93B] cursor-pointer"
+                  >
+                    <option value="" disabled>Select Time Slot</option>
+                    <option value="12:00 PM IST">12:00 PM IST (Afternoon)</option>
+                    <option value="02:00 PM IST">02:00 PM IST (Afternoon)</option>
+                    <option value="04:00 PM IST">04:00 PM IST (Evening)</option>
+                    <option value="06:00 PM IST">06:00 PM IST (Evening)</option>
+                    <option value="07:00 PM IST">07:00 PM IST (Prime Slot)</option>
+                    <option value="08:00 PM IST">08:00 PM IST (Prime Slot)</option>
+                    <option value="09:00 PM IST">09:00 PM IST (T1 Scrim / Tourney)</option>
+                    <option value="10:00 PM IST">10:00 PM IST (Night Scrim / Tourney)</option>
+                    <option value="11:00 PM IST">11:00 PM IST (Late Night)</option>
+                    <option value="Flexible / Full Day">Flexible / Full Day</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Format / Rules / Structure (Dropdown Selectable) */}
               <div>
                 <label className="block text-[11px] font-display uppercase text-[#CCCCCC] mb-1">
-                  Format / Rules / Structure
+                  Format / Rules / Structure *
                 </label>
-                <input
-                  type="text"
+                <select
                   name="format"
-                  placeholder="e.g. 5v5 Search & Destroy / Hardpoint, Single Elimination"
-                  className="w-full bg-[#121212] border border-[#2E2E2E] rounded-[2px] px-3 py-2 text-white placeholder-[#555] focus:outline-none focus:border-[#FFE93B]"
-                />
+                  required
+                  defaultValue=""
+                  className="w-full bg-[#121212] border border-[#2E2E2E] rounded-[2px] px-3 py-2 text-white focus:outline-none focus:border-[#FFE93B] cursor-pointer"
+                >
+                  <option value="" disabled>
+                    {modalType === 'TOURNAMENT' ? 'Select Tournament Format & Rules' : 'Select Scrim Rules & Structure'}
+                  </option>
+                  {modalType === 'TOURNAMENT' ? (
+                    <>
+                      <option value="5v5 CDL Competitive (Hardpoint, S&D, Control) - Single Elimination">
+                        5v5 CDL Competitive (Hardpoint, S&D, Control) — Single Elimination
+                      </option>
+                      <option value="5v5 CDL Competitive (Hardpoint, S&D, Control) - Double Elimination">
+                        5v5 CDL Competitive (Hardpoint, S&D, Control) — Double Elimination
+                      </option>
+                      <option value="5v5 Search & Destroy Only - Single Elimination">
+                        5v5 Search & Destroy Only — Single Elimination
+                      </option>
+                      <option value="5v5 Search & Destroy Only - Double Elimination">
+                        5v5 Search & Destroy Only — Double Elimination
+                      </option>
+                      <option value="5v5 Hardpoint Only - Round Robin / Group Stage">
+                        5v5 Hardpoint Only — Round Robin / Group Stage
+                      </option>
+                      <option value="Battle Royale Squads - Custom Room Points System">
+                        Battle Royale Squads — Custom Room Points System
+                      </option>
+                      <option value="Battle Royale Duos / Solos - Points System">
+                        Battle Royale Duos / Solos — Points System
+                      </option>
+                      <option value="1v1 Sniper Showdown - Single Elimination">
+                        1v1 Sniper Showdown — Single Elimination
+                      </option>
+                      <option value="Custom Community / Clan War Format">
+                        Custom Community / Clan War Format
+                      </option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="5v5 CDL Scrims (Hardpoint, S&D, Control - Best of 5)">
+                        5v5 CDL Scrims (Hardpoint, S&D, Control — Best of 5)
+                      </option>
+                      <option value="5v5 Search & Destroy Scrims (Best of 7 Rounds)">
+                        5v5 Search & Destroy Scrims (Best of 7 Rounds)
+                      </option>
+                      <option value="5v5 Search & Destroy Scrims (Best of 11 Rounds)">
+                        5v5 Search & Destroy Scrims (Best of 11 Rounds)
+                      </option>
+                      <option value="5v5 Hardpoint Practice Scrims (Map Rotation)">
+                        5v5 Hardpoint Practice Scrims (Map Rotation)
+                      </option>
+                      <option value="Tier 1 Pro Roster Scrims (Official CDL Rules)">
+                        Tier 1 Pro Roster Scrims (Official CDL Rules)
+                      </option>
+                      <option value="Tier 2 / Tier 3 Challenger Scrims">
+                        Tier 2 / Tier 3 Challenger Scrims
+                      </option>
+                      <option value="Battle Royale Squads Practice Scrims">
+                        Battle Royale Squads Practice Scrims
+                      </option>
+                      <option value="Clan War / Friendly Practice Scrims">
+                        Clan War / Friendly Practice Scrims
+                      </option>
+                    </>
+                  )}
+                </select>
+              </div>
+
+              {/* Prize Pool & Entry Type (Selectable) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Prize Pool */}
+                <div>
+                  <label className="block text-[11px] font-display uppercase text-[#CCCCCC] mb-1">
+                    Prize Pool (if any) *
+                  </label>
+                  <select
+                    name="prizePoolType"
+                    value={prizePoolType}
+                    onChange={(e) => setPrizePoolType(e.target.value as 'FUN' | 'CUSTOM')}
+                    className="w-full bg-[#121212] border border-[#2E2E2E] rounded-[2px] px-3 py-2 text-white focus:outline-none focus:border-[#FFE93B] cursor-pointer"
+                  >
+                    <option value="FUN">Just for Fun (No Cash Prize)</option>
+                    <option value="CUSTOM">Custom Prize Pool (Enter Amount)</option>
+                  </select>
+                  {prizePoolType === 'CUSTOM' && (
+                    <div className="mt-1.5">
+                      <input
+                        type="text"
+                        name="customPrizeAmount"
+                        required
+                        placeholder="e.g. ₹50,000 INR or Trophy"
+                        className="w-full bg-[#121212] border border-[#FFE93B]/50 rounded-[2px] px-3 py-1.5 text-xs text-white placeholder-[#666] focus:outline-none focus:border-[#FFE93B]"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Entry Type */}
+                <div>
+                  <label className="block text-[11px] font-display uppercase text-[#CCCCCC] mb-1">
+                    Entry Type *
+                  </label>
+                  <select
+                    name="entryType"
+                    value={entryType}
+                    onChange={(e) => setEntryType(e.target.value as 'FREE' | 'PAID')}
+                    className="w-full bg-[#121212] border border-[#2E2E2E] rounded-[2px] px-3 py-2 text-white focus:outline-none focus:border-[#FFE93B] cursor-pointer"
+                  >
+                    <option value="FREE">Free Entry (₹0)</option>
+                    <option value="PAID">Payable / Paid Entry</option>
+                  </select>
+                  {entryType === 'PAID' && (
+                    <div className="mt-1.5">
+                      <input
+                        type="text"
+                        name="entryFee"
+                        required
+                        placeholder="e.g. ₹100 / team or ₹50 / player"
+                        className="w-full bg-[#121212] border border-[#FFE93B]/50 rounded-[2px] px-3 py-1.5 text-xs text-white placeholder-[#666] focus:outline-none focus:border-[#FFE93B]"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>

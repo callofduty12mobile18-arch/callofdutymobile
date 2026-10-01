@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useActionState, useState, useRef } from 'react';
+import { useActionState, useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import {
   User,
@@ -89,6 +89,12 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
   const videoFeedInputRef = useRef<HTMLInputElement>(null);
 
   const activeSlug = state?.slug || initialData.slug;
+
+  useEffect(() => {
+    if (state) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }
+  }, [state]);
 
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -481,10 +487,11 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
             </div>
             <div>
               <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB] mb-1.5">
-                CODM UID
+                CODM UID *
               </label>
               <Input
                 name="codmUid"
+                required
                 defaultValue={initialData.codmUid}
                 placeholder="e.g. 6742819382109482910"
               />
@@ -855,15 +862,46 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
       </Card>
 
       {/* Floating Action Bar */}
-      <div className="flex items-center justify-between pt-4 border-t border-[#2A2A2A]">
-        <p className="text-xs text-[#837D72]">
-          All changes are published live to your official URL: <code className="text-[#FFE93B]">/players/{activeSlug}</code>
-        </p>
+      <div className="space-y-4 pt-4 border-t border-[#2A2A2A]">
+        {state && (
+          <div
+            className={`p-4 rounded-[2px] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm ${
+              state.success
+                ? 'bg-[#00E676]/10 border border-[#00E676]/30 text-[#00E676]'
+                : 'bg-[#FF3D00]/10 border border-[#FF3D00]/30 text-[#FF3D00]'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {state.success ? (
+                <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+              ) : (
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              )}
+              <span>{state.message}</span>
+            </div>
 
-        <Button size="lg" variant="primary" type="submit" isLoading={isPending}>
-          <Save className="w-4 h-4 mr-2" />
-          SAVE & PUBLISH PROFILE
-        </Button>
+            {state.success && activeSlug && (
+              <Link
+                href={`/players/${activeSlug}`}
+                target="_blank"
+                className="text-xs font-display font-bold uppercase tracking-wider underline hover:text-white flex items-center gap-1 shrink-0"
+              >
+                View Updated Profile <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+            )}
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <p className="text-xs text-[#837D72]">
+            All changes are published live to your official URL: <code className="text-[#FFE93B]">/players/{activeSlug}</code>
+          </p>
+
+          <Button size="lg" variant="primary" type="submit" isLoading={isPending}>
+            <Save className="w-4 h-4 mr-2" />
+            SAVE & PUBLISH PROFILE
+          </Button>
+        </div>
       </div>
     </form>
   );
