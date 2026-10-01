@@ -180,7 +180,7 @@ export const OrganizerPermissionsCard: React.FC<{
       {/* Modal / Slide-in Dialog for Requesting Permission */}
       {modalType && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#181818] border border-[#2E2E2E] rounded-[2px] max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl space-y-5 text-left">
+          <div className="bg-[#181818] border border-[#2E2E2E] rounded-[2px] max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-7 shadow-2xl space-y-5 text-left">
             <div className="flex items-center justify-between border-b border-[#2A2A2A] pb-3">
               <div className="flex items-center gap-2">
                 {modalType === 'TOURNAMENT' ? (
@@ -270,7 +270,9 @@ export const OrganizerPermissionsCard: React.FC<{
                     name="eventDate"
                     required
                     min={todayDateStr}
+                    onClick={(e) => e.currentTarget.showPicker?.()}
                     onKeyDown={(e) => e.preventDefault()}
+                    style={{ colorScheme: 'dark' }}
                     className="w-full bg-[#121212] border border-[#2E2E2E] rounded-[2px] px-3 py-2 text-white focus:outline-none focus:border-[#FFE93B] cursor-pointer"
                   />
                 </div>
@@ -375,12 +377,12 @@ export const OrganizerPermissionsCard: React.FC<{
                 </select>
               </div>
 
-              {/* Prize Pool & Entry Type (Selectable) */}
+              {/* Prize Pool & Entry Type Selection */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Prize Pool */}
                 <div>
                   <label className="block text-[11px] font-display uppercase text-[#CCCCCC] mb-1">
-                    Prize Pool (if any) *
+                    Prize Pool *
                   </label>
                   <select
                     name="prizePoolType"
@@ -389,19 +391,8 @@ export const OrganizerPermissionsCard: React.FC<{
                     className="w-full bg-[#121212] border border-[#2E2E2E] rounded-[2px] px-3 py-2 text-white focus:outline-none focus:border-[#FFE93B] cursor-pointer"
                   >
                     <option value="FUN">Just for Fun (No Cash Prize)</option>
-                    <option value="CUSTOM">Custom Prize Pool (Enter Amount)</option>
+                    <option value="CUSTOM">Custom Prize Pool</option>
                   </select>
-                  {prizePoolType === 'CUSTOM' && (
-                    <div className="mt-1.5">
-                      <input
-                        type="text"
-                        name="customPrizeAmount"
-                        required
-                        placeholder="e.g. ₹50,000 INR or Trophy"
-                        className="w-full bg-[#121212] border border-[#FFE93B]/50 rounded-[2px] px-3 py-1.5 text-xs text-white placeholder-[#666] focus:outline-none focus:border-[#FFE93B]"
-                      />
-                    </div>
-                  )}
                 </div>
 
                 {/* Entry Type */}
@@ -418,19 +409,55 @@ export const OrganizerPermissionsCard: React.FC<{
                     <option value="FREE">Free Entry (₹0)</option>
                     <option value="PAID">Payable / Paid Entry</option>
                   </select>
-                  {entryType === 'PAID' && (
-                    <div className="mt-1.5">
-                      <input
-                        type="text"
-                        name="entryFee"
-                        required
-                        placeholder="e.g. ₹100 / team or ₹50 / player"
-                        className="w-full bg-[#121212] border border-[#FFE93B]/50 rounded-[2px] px-3 py-1.5 text-xs text-white placeholder-[#666] focus:outline-none focus:border-[#FFE93B]"
-                      />
-                    </div>
-                  )}
                 </div>
               </div>
+
+              {/* Dynamic Amount Inputs (When Custom Prize or Paid Entry is selected) */}
+              {(prizePoolType === 'CUSTOM' || entryType === 'PAID') && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-[#141414] border border-[#2A2A2A] rounded-[2px]">
+                  {prizePoolType === 'CUSTOM' ? (
+                    <div>
+                      <label className="block text-[10px] font-display uppercase tracking-wider text-[#FFE93B] mb-1 font-semibold">
+                        Prize Pool Amount (₹ INR) *
+                      </label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3 text-[#FFE93B] font-bold text-xs pointer-events-none">₹</span>
+                        <input
+                          type="text"
+                          name="customPrizeAmount"
+                          required
+                          placeholder="e.g. 50,000 INR"
+                          className="w-full bg-[#1C1C1C] border border-[#FFE93B]/40 rounded-[2px] pl-7 pr-3 py-1.5 text-xs text-white placeholder-[#666] focus:outline-none focus:border-[#FFE93B]"
+                        />
+                      </div>
+                      <p className="text-[10px] text-[#837D72] mt-1">Specify total tournament prize pool</p>
+                    </div>
+                  ) : (
+                    <div className="hidden sm:block" />
+                  )}
+
+                  {entryType === 'PAID' ? (
+                    <div>
+                      <label className="block text-[10px] font-display uppercase tracking-wider text-[#FFE93B] mb-1 font-semibold">
+                        Entry Fee Amount (₹ INR) *
+                      </label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3 text-[#FFE93B] font-bold text-xs pointer-events-none">₹</span>
+                        <input
+                          type="text"
+                          name="entryFee"
+                          required
+                          placeholder="e.g. 100 per team / 50 per player"
+                          className="w-full bg-[#1C1C1C] border border-[#FFE93B]/40 rounded-[2px] pl-7 pr-3 py-1.5 text-xs text-white placeholder-[#666] focus:outline-none focus:border-[#FFE93B]"
+                        />
+                      </div>
+                      <p className="text-[10px] text-[#837D72] mt-1">Specify fee per team or player</p>
+                    </div>
+                  ) : (
+                    <div className="hidden sm:block" />
+                  )}
+                </div>
+              )}
 
               <div>
                 <label className="block text-[11px] font-display uppercase text-[#CCCCCC] mb-1">
