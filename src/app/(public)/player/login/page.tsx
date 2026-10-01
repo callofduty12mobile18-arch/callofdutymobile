@@ -35,7 +35,7 @@ export default function PlayerLoginPage() {
             PLAYER <span className="text-[#FFE93B]">LOGIN</span>
           </h1>
           <p className="text-[#ADABAB] text-xs leading-relaxed">
-            Sign in using the credentials dispatched to your email address by the platform administrators.
+            Sign in using the access key dispatched to your email address by the platform administrators.
           </p>
         </div>
 
@@ -58,29 +58,26 @@ export default function PlayerLoginPage() {
         <form action={formAction} className="space-y-5">
           <div className="space-y-1.5">
             <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB]">
-              Player Gmail / Email ID
+              Email Address
             </label>
             <Input
               name="email"
               type="email"
               required
-              placeholder="e.g. rohan.sharma.codm@gmail.com"
+              placeholder="Enter your email address"
               leftIcon={<Mail className="w-4 h-4" />}
             />
           </div>
 
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB]">
-                Player Password / Access Key
-              </label>
-              <span className="text-[10px] text-[#837D72]">Format: CODM-XXXXXXXXXXXX</span>
-            </div>
+            <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB]">
+              Access Key
+            </label>
             <Input
               name="password"
               type="password"
               required
-              placeholder="Paste your access key"
+              placeholder="Enter your access key"
               leftIcon={<Lock className="w-4 h-4" />}
             />
           </div>
