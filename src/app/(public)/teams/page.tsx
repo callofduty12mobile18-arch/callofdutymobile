@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/Button';
 import { TeamCard } from '@/components/teams/TeamCard';
 import { getPublishedTeams } from '@/server/queries/teams';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Indian CODM Competitive Teams & Rosters | CODM India',
   description:

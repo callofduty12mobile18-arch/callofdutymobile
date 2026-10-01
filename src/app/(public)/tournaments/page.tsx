@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/Button';
 import { TournamentCard } from '@/components/tournaments/TournamentCard';
 import { getPublishedTournaments } from '@/server/queries/tournaments';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Indian CODM Tournaments & Championships | CODM India',
   description:

@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/db/prisma';
 import { PlayerRole, VerificationStatus, PublishStatus } from '@prisma/client';
-import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 
 export interface PlayerFilterParams {
@@ -78,13 +77,7 @@ async function fetchPublishedPlayers(params: PlayerFilterParams = {}) {
 }
 
 export const getPublishedPlayers = cache(async (params: PlayerFilterParams = {}) => {
-  const cacheKey = `players-list-${JSON.stringify(params)}`;
-  const getCached = unstable_cache(
-    async () => fetchPublishedPlayers(params),
-    [cacheKey],
-    { revalidate: 30, tags: ['players'] }
-  );
-  return getCached();
+  return fetchPublishedPlayers(params);
 });
 
 async function fetchPlayerBySlug(slug: string) {
@@ -152,12 +145,7 @@ async function fetchPlayerBySlug(slug: string) {
 }
 
 export const getPlayerBySlug = cache(async (slug: string) => {
-  const getCached = unstable_cache(
-    async () => fetchPlayerBySlug(slug),
-    [`player-slug-${slug}`],
-    { revalidate: 30, tags: ['players', `player-${slug}`] }
-  );
-  return getCached();
+  return fetchPlayerBySlug(slug);
 });
 
 async function fetchPlayerForStudio(slug: string) {

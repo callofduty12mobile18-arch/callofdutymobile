@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/Badge';
 import { ScrimCard } from '@/components/scrims/ScrimCard';
 import { getScrimLobbies } from '@/server/actions/scrims';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'Competitive Scrim Finder & Matchmaking | CODM India',
   description: 'Find, schedule, and challenge tier-verified Call of Duty: Mobile scrims and matches across Indian esports rosters.',

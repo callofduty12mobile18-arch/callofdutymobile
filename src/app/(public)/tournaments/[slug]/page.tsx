@@ -8,6 +8,9 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { getTournamentBySlug } from '@/server/queries/tournaments';
 import { formatInr, formatDate } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface TournamentProfilePageProps {
   params: Promise<{ slug: string }>;
 }

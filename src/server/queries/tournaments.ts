@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/db/prisma';
 import { PublishStatus } from '@prisma/client';
-import { unstable_cache } from 'next/cache';
 import { cache } from 'react';
 
 async function fetchPublishedTournaments() {
@@ -27,12 +26,7 @@ async function fetchPublishedTournaments() {
 }
 
 export const getPublishedTournaments = cache(async () => {
-  const getCached = unstable_cache(
-    async () => fetchPublishedTournaments(),
-    ['published-tournaments-list'],
-    { revalidate: 30, tags: ['tournaments'] }
-  );
-  return getCached();
+  return fetchPublishedTournaments();
 });
 
 async function fetchTournamentBySlug(slug: string) {
@@ -63,10 +57,5 @@ async function fetchTournamentBySlug(slug: string) {
 }
 
 export const getTournamentBySlug = cache(async (slug: string) => {
-  const getCached = unstable_cache(
-    async () => fetchTournamentBySlug(slug),
-    [`tournament-${slug}`],
-    { revalidate: 60, tags: ['tournaments', `tournament-${slug}`] }
-  );
-  return getCached();
+  return fetchTournamentBySlug(slug);
 });
