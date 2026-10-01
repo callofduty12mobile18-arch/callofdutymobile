@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import { PlayerRole, VerificationStatus, PublishStatus } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { hashPassword } from '@/lib/auth/password';
@@ -129,8 +130,7 @@ export async function approveRequest(
   const gamerTag = raw.gamerTag || undefined;
 
   // Generate secure randomized access key
-  const randomPin = Math.floor(1000 + Math.random() * 9000);
-  const plainPassword = `CODM-PRO-${randomPin}`;
+  const plainPassword = `CODM-${randomBytes(9).toString('base64url')}`;
   const hashedPassword = await hashPassword(plainPassword);
 
   const defaultIgn = gamerTag || email.split('@')[0];
