@@ -134,6 +134,54 @@ export async function approveCommunityRequestAction(requestId: string) {
   }
 }
 
+export async function resendCommunityRequestEmailAction(requestId: string) {
+  try {
+    const admin = await requireAdminSession();
+    const result = await approveRequest(requestId);
+    if (!result) {
+      return { success: false, error: 'Request not found in database.' };
+    }
+
+    const gamerTag = result.request.gamerTag || result.credentials.email.split('@')[0];
+    const [emailResult] = await Promise.all([
+      sendPlayerCredentialsEmail({
+        to: result.credentials.email,
+        ign: gamerTag,
+        password: result.credentials.password,
+        fullName: result.request.fullName,
+        isInvitation: false,
+      }),
+      sendEmailVerificationEmail({
+        to: result.credentials.email,
+        ign: gamerTag,
+        token: result.verificationToken,
+      }),
+    ]);
+
+    await recordAuditLog(
+      'CREDENTIALS_ISSUED',
+      admin.username,
+      `Re-sent credentials email to ${result.credentials.email}.`,
+      `Player: ${gamerTag}`,
+      'SUCCESS'
+    );
+
+    revalidatePath('/admin/requests');
+    revalidatePath('/admin/dashboard');
+
+    return {
+      success: emailResult.success,
+      message: emailResult.success
+        ? `Credentials email successfully dispatched to ${result.credentials.email}!`
+        : `Email delivery issue: ${emailResult.error || 'Check SMTP configuration'}.`,
+      credentials: result.credentials,
+    };
+  } catch (err: unknown) {
+    console.error('Error re-sending credentials email:', err);
+    return { success: false, error: 'Failed to re-send credentials email.' };
+  }
+}
+
 export async function rejectCommunityRequestAction(requestId: string) {
   try {
     const admin = await requireAdminSession();

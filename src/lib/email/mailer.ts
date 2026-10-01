@@ -12,8 +12,9 @@ interface SendCredentialsOptions {
 export function getEmailTransporter() {
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
   const port = parseInt(process.env.SMTP_PORT || '465', 10);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS ? process.env.SMTP_PASS.replace(/\s+/g, '') : undefined;
+  const user = process.env.SMTP_USER || 'callofduty12mobile18@gmail.com';
+  const rawPass = process.env.SMTP_PASS || 'mfefrpbmvwgbwekm';
+  const pass = rawPass ? rawPass.replace(/\s+/g, '') : undefined;
 
   if (!user || !pass) {
     return null;
@@ -46,7 +47,7 @@ export async function sendPlayerCredentialsEmail({
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const loginUrl = `${siteUrl}/player/login`;
-    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile" <${process.env.SMTP_USER}>`;
+    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Esports" <${process.env.SMTP_USER || 'callofduty12mobile18@gmail.com'}>`;
 
     const badgeText = isInvitation ? 'OFFICIAL PLAYER INVITATION' : 'INDIAN CODM ARCHIVE';
     const mainHeading = isInvitation ? 'YOU HAVE BEEN INVITED' : 'YOUR ACCESS CREDENTIALS';
@@ -231,7 +232,7 @@ export async function sendBroadcastEmail({
       return { success: false, sentCount: 0, failedCount: toList.length, error: 'SMTP not configured in environment' };
     }
 
-    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile India" <${process.env.SMTP_USER}>`;
+    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile India" <${process.env.SMTP_USER || 'callofduty12mobile18@gmail.com'}>`;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const targetCtaUrl = ctaUrl
       ? safeHttpUrl(ctaUrl.startsWith('/') ? `${siteUrl}${ctaUrl}` : ctaUrl) ?? undefined
@@ -368,7 +369,7 @@ export async function sendAccountLockoutEmail({
       return { success: false, error: 'SMTP not configured' };
     }
 
-    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Security" <${process.env.SMTP_USER}>`;
+    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Security" <${process.env.SMTP_USER || 'callofduty12mobile18@gmail.com'}>`;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
     const htmlContent = `
@@ -450,7 +451,7 @@ export async function sendEmailVerificationEmail({
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const verificationUrl = `${siteUrl}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(to)}`;
-    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Verification" <${process.env.SMTP_USER}>`;
+    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Verification" <${process.env.SMTP_USER || 'callofduty12mobile18@gmail.com'}>`;
 
     const htmlContent = `
 <!DOCTYPE html>
