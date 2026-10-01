@@ -67,14 +67,6 @@ export default async function PlayersPage({
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <Link href="/join">
-              <Button size="lg" variant="primary" className="w-full sm:w-auto shadow-lg shadow-[#FFE93B]/10">
-                <User className="w-4 h-4 mr-2" />
-                JOIN COMMUNITY
-              </Button>
-            </Link>
-          </div>
         </div>
       </div>
 
