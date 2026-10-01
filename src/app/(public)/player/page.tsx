@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: 'Self-service competitive profile builder for verified Indian CODM competitors.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function PlayerDashboardPage() {
   const session = await getPlayerSession();
 

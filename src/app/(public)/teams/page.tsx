@@ -1,72 +1,123 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
-import { Shield } from 'lucide-react';
+import Link from 'next/link';
+import { Shield, Swords, Plus, Users, Trophy } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import { TeamCard } from '@/components/teams/TeamCard';
 import { getPublishedTeams } from '@/server/queries/teams';
 
 export const metadata: Metadata = {
-  title: 'Indian CODM Competitive Teams & Rosters',
+  title: 'Indian CODM Competitive Teams & Rosters | CODM India',
   description:
-    'Directory of active competitive Call of Duty: Mobile teams, clans, and organizations in India.',
+    'Directory of active competitive Call of Duty: Mobile teams, starting rosters, organizations, and championships in India.',
 };
 
-export default async function TeamsPage() {
+export default async function TeamsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ tier?: string }>;
+}) {
+  const resolvedParams = searchParams ? await searchParams : {};
   const teams = await getPublishedTeams();
 
-  return (
-    <div className="relative min-h-[calc(100vh-4rem)] pb-24">
-      {/* Teams Page Background Wallpaper - Contained with bottom dark fade */}
-      <div
-        className="absolute inset-0 bg-cover bg-top opacity-70 pointer-events-none scale-100 transition-opacity"
-        style={{
-          backgroundImage: `url('/photos/wallpapersden.com_call-of-duty-mobile-gaming-2022_1920x1080.jpg')`,
-        }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black pointer-events-none" />
+  const totalStartingPlayers = teams.reduce((acc, t) => {
+    const active = t.members?.filter((m) => m.isCurrent) || [];
+    return acc + active.length;
+  }, 0);
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-        {/* Header */}
-        <div className="border-b border-[#2A2A2A] pb-8 relative overflow-hidden bg-[#141414]/80 backdrop-blur-md p-6 sm:p-8 rounded-[2px] border border-[#837D72]/40 shadow-2xl">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#FFE93B]" />
-          <div className="flex items-center gap-2 text-xs font-display tracking-widest text-[#FFE93B] uppercase mb-2">
-            <Shield className="w-4 h-4" />
-            <span>COMPETITIVE ROSTERS</span>
+  const teamsWithAchievements = teams.filter((t) => t.achievements && t.achievements.length > 0).length;
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+      {/* Hero / Header Section matching Scrims Hub */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#141414] via-[#1A1A1A] to-[#141414] border border-[#2A2A2A] rounded-[2px] p-6 sm:p-10">
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-[#FFE93B]/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          <div className="space-y-3 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[2px] bg-[#FFE93B]/10 border border-[#FFE93B]/30 text-xs font-bold text-[#FFE93B]">
+              <Shield className="w-3.5 h-3.5" />
+              <span>OFFICIAL COMPETITIVE ROSTER REGISTRY</span>
+            </div>
+            <h1 className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-white uppercase tracking-tight leading-none">
+              COMPETITIVE <span className="text-[#FFE93B]">TEAMS</span> & CLANS
+            </h1>
+            <p className="text-sm sm:text-base text-[#ADABAB] leading-relaxed">
+              Official records of verified competitive organizations, active starting rosters, and championship-winning clans in India.
+            </p>
           </div>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div>
-              <h1 className="font-display font-black text-3xl sm:text-5xl text-white uppercase tracking-tight">
-                TEAMS & CLANS
-              </h1>
-              <p className="text-[#ADABAB] text-sm mt-2 max-w-xl">
-                Official records of active competitive teams, active starting rosters, and team championships in India.
-              </p>
-            </div>
-            <div className="text-right">
-              <span className="font-display font-black text-2xl sm:text-3xl text-[#FFE93B] block">
-                {teams.length}
-              </span>
-              <span className="text-[11px] text-[#837D72] font-display uppercase tracking-wider">
-                ACTIVE ROSTERS
-              </span>
-            </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <Link href="/scrims">
+              <Button size="lg" variant="primary" className="w-full sm:w-auto shadow-lg shadow-[#FFE93B]/10">
+                <Swords className="w-4 h-4 mr-2" />
+                CHALLENGE IN SCRIMS
+              </Button>
+            </Link>
           </div>
         </div>
 
-        {/* Grid */}
-        {teams.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {teams.map((team) => (
-              <TeamCard key={team.id} team={team} />
-            ))}
+        {/* Live Counters */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-[#2A2A2A]/80 text-xs">
+          <div>
+            <span className="text-[#ADABAB] block">Active Rosters</span>
+            <span className="font-display font-bold text-xl text-white">{teams.length} Verified</span>
           </div>
-        ) : (
-          <div className="text-center py-20 px-4 bg-[#141414]/70 backdrop-blur-md border border-[#837D72]/40 rounded-[2px] shadow-2xl">
-            <p className="text-[#ADABAB] font-display uppercase tracking-wider text-sm">
-              No competitive teams registered or published yet.
-            </p>
+          <div>
+            <span className="text-[#ADABAB] block">Starting Competitors</span>
+            <span className="font-display font-bold text-xl text-[#FFE93B]">{totalStartingPlayers} Players</span>
           </div>
-        )}
+          <div>
+            <span className="text-[#ADABAB] block">Championship Teams</span>
+            <span className="font-display font-bold text-xl text-emerald-400">{teamsWithAchievements} Decorated</span>
+          </div>
+          <div>
+            <span className="text-[#ADABAB] block">Matchmaking</span>
+            <span className="font-display font-bold text-xl text-white">CDL Certified</span>
+          </div>
+        </div>
       </div>
+
+      {/* Filter / Summary Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#2A2A2A] pb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-display text-xs font-bold px-3.5 py-1.5 rounded-[2px] bg-[#FFE93B] text-black border border-[#FFE93B]">
+            ALL TEAMS
+          </span>
+          <Link
+            href="/lft"
+            className="font-display text-xs font-bold px-3.5 py-1.5 rounded-[2px] bg-[#141414] text-[#ADABAB] border border-[#2A2A2A] hover:text-white hover:border-[#3A3A3A] transition-all"
+          >
+            SCOUT FREE AGENTS (LFT)
+          </Link>
+        </div>
+
+        <div className="text-xs text-[#ADABAB]">
+          Showing <strong className="text-white">{teams.length}</strong> competitive rosters
+        </div>
+      </div>
+
+      {/* Teams Grid */}
+      {teams.length === 0 ? (
+        <div className="bg-[#141414] border border-[#2A2A2A] p-12 text-center rounded-[2px] space-y-4">
+          <Shield className="w-10 h-10 text-neutral-600 mx-auto" />
+          <h3 className="font-display font-bold text-lg text-white">No Competitive Teams Found</h3>
+          <p className="text-xs text-[#ADABAB] max-w-sm mx-auto">
+            There are currently no competitive teams registered. Join the community to submit your clan roster.
+          </p>
+          <Link href="/join">
+            <Button size="sm" variant="primary">
+              <Plus className="w-4 h-4 mr-1.5" /> REGISTER A SQUAD
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {teams.map((team) => (
+            <TeamCard key={team.id} team={team} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

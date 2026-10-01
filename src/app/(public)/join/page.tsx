@@ -13,25 +13,19 @@ export default function JoinCommunityPage() {
   const showPopup = Boolean(state?.success && !isDismissed);
 
   return (
-    <div className="relative min-h-[85vh] flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
-      {/* Background Graphic Layer */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none mix-blend-luminosity scale-105"
-        style={{
-          backgroundImage: `url('/photos/hero-bg.jpg')`,
-        }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/90 pointer-events-none" />
+    <div className="relative min-h-[85vh] flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Subtle ambient glow effect matching Scrims */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#FFE93B]/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10 max-w-2xl w-full mx-auto space-y-10">
         {/* Title Header */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#141414]/90 border border-[#837D72] rounded-[3px] text-xs font-display tracking-widest uppercase text-[#FFE93B] backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[2px] bg-[#FFE93B]/10 border border-[#FFE93B]/30 text-xs font-bold text-[#FFE93B]">
             <ShieldCheck className="w-3.5 h-3.5" />
-            COMMUNITY ACCESS
+            <span>COMMUNITY ACCESS PORTAL</span>
           </div>
           <h1 className="font-display font-black text-3xl sm:text-5xl text-white uppercase tracking-tight">
-            JOIN THE COMMUNITY
+            JOIN THE <span className="text-[#FFE93B]">COMMUNITY</span>
           </h1>
           <p className="text-[#ADABAB] text-sm leading-relaxed max-w-lg mx-auto">
             Type your details below to request community access. Once verified, credentials will be sent to your inbox to log in and create your official competitive profile.
