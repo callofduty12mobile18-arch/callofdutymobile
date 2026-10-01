@@ -14,15 +14,15 @@ export default async function TeamsPage() {
   const teams = await getPublishedTeams();
 
   return (
-    <div className="relative min-h-screen">
-      {/* Teams Page Background Wallpaper - Top aligned to show full squad */}
+    <div className="relative min-h-[calc(100vh-4rem)] pb-24">
+      {/* Teams Page Background Wallpaper - Contained with bottom dark fade */}
       <div
-        className="fixed inset-0 bg-cover bg-top opacity-85 pointer-events-none scale-100 transition-opacity"
+        className="absolute inset-0 bg-cover bg-top opacity-70 pointer-events-none scale-100 transition-opacity"
         style={{
           backgroundImage: `url('/photos/wallpapersden.com_call-of-duty-mobile-gaming-2022_1920x1080.jpg')`,
         }}
       />
-      <div className="fixed inset-0 bg-gradient-to-b from-black/50 via-transparent to-[#080808] pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         {/* Header */}

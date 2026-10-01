@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Crosshair, UserCheck, Shield, MapPin, Sparkles, Trophy, ExternalLink, ArrowRight } from 'lucide-react';
+import { Crosshair, MapPin, ArrowRight } from 'lucide-react';
 import { PlayerRole } from '@prisma/client';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -131,7 +131,7 @@ export default async function LookingForTeamPage({
                       </div>
 
                       {player.displayName && (
-                        <p className="text-xs text-[#ADABAB] truncate">"{player.displayName}"</p>
+                        <p className="text-xs text-[#ADABAB] truncate">&ldquo;{player.displayName}&rdquo;</p>
                       )}
 
                       <div className="flex items-center gap-2 mt-1.5">

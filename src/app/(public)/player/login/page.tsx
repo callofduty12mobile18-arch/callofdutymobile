@@ -4,11 +4,11 @@ import * as React from 'react';
 import { useActionState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Key, Mail, Lock, ArrowRight, AlertCircle, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
-import { loginPlayerAction, PlayerAuthResponse } from '@/server/actions/player-auth';
+import { loginPlayerAction } from '@/server/actions/player-auth';
 
 export default function PlayerLoginPage() {
   const router = useRouter();
@@ -104,7 +104,7 @@ export default function PlayerLoginPage() {
         </form>
 
         <div className="text-center pt-2 border-t border-[#2A2A2A]">
-          <span className="text-xs text-[#837D72]">Haven't requested access yet? </span>
+          <span className="text-xs text-[#837D72]">Haven&apos;t requested access yet? </span>
           <Link
             href="/join"
             className="text-xs text-[#FFE93B] font-display uppercase font-semibold hover:underline block mt-1"

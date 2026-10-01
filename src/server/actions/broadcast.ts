@@ -99,7 +99,7 @@ export async function sendBroadcastAnnouncementAction(formData: FormData) {
 
     // Audit Log in DB
     await recordAuditLog(
-      'BROADCAST_SENT' as any,
+      'BROADCAST_SENT',
       admin.username,
       `Dispatched email broadcast "${subject}" to ${recipients.length} player mailbox(es).`,
       `Broadcast: ${badgeTitle}`,

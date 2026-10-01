@@ -108,6 +108,8 @@ enum SubmissionType {
   PLAYER_PORTFOLIO
   TEAM_REGISTRATION
   TOURNAMENT_REPORT
+  TOURNAMENT_ORGANIZER_REQUEST
+  SCRIM_ORGANIZER_REQUEST
 }
 
 // --------------------------------------------------------

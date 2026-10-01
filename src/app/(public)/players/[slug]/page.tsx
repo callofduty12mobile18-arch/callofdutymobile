@@ -12,10 +12,6 @@ import {
   Hash,
   Share2,
   ExternalLink,
-  Award,
-  History,
-  Video,
-  Camera,
   Globe,
   Film,
 } from 'lucide-react';
@@ -333,7 +329,7 @@ export default async function PlayerProfilePage({
               </CardHeader>
               <CardContent>
                 <PlayerMediaGallery
-                  media={player.media as any}
+                  media={player.media}
                   playerIgn={player.ign}
                 />
               </CardContent>

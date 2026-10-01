@@ -211,7 +211,7 @@ export async function getLookingForTeamPlayers(role?: PlayerRole) {
         },
         socialLinks: true,
       },
-      orderBy: [{ verificationStatus: 'asc' }, { updatedAt: 'desc' }],
+      orderBy: [{ verificationStatus: 'desc' }, { updatedAt: 'desc' }],
       take: 50,
     });
 
