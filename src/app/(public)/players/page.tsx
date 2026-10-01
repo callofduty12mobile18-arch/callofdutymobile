@@ -81,7 +81,7 @@ export default async function PlayersPage({
       {/* Filter and Search Bar with Scrims Aesthetic */}
       <div className="bg-[#141414] border border-[#2A2A2A] p-4 sm:p-5 rounded-[2px] space-y-4">
         <form method="GET" action="/players" className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
+          <div className="relative w-full sm:max-w-md">
             <input
               type="text"
               name="query"
@@ -92,8 +92,21 @@ export default async function PlayersPage({
             <Search className="w-4 h-4 text-[#ADABAB] absolute left-4 top-3.5" />
           </div>
 
+          <div className="w-full sm:max-w-[200px]">
+            <select
+              name="role"
+              defaultValue={selectedRole || ''}
+              className="w-full bg-[#1C1C1C] text-white border border-[#2A2A2A] text-sm rounded-[2px] px-4 py-2.5 focus:outline-none focus:border-[#FFE93B] transition-colors appearance-none cursor-pointer"
+            >
+              {ROLES.map((r) => (
+                <option key={r.label} value={r.value || ''}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex items-center gap-2">
-            {selectedRole && <input type="hidden" name="role" value={selectedRole} />}
             <Button size="md" variant="primary" type="submit">
               SEARCH
             </Button>
@@ -107,29 +120,6 @@ export default async function PlayersPage({
           </div>
         </form>
 
-        {/* Role Filter Tabs */}
-        <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-[#222222]">
-          {ROLES.map((r) => {
-            const isSelected = (!r.value && !selectedRole) || r.value === selectedRole;
-            const href = r.value
-              ? `/players?role=${r.value}${query ? `&query=${encodeURIComponent(query)}` : ''}`
-              : `/players${query ? `?query=${encodeURIComponent(query)}` : ''}`;
-
-            return (
-              <Link
-                key={r.label}
-                href={href}
-                className={`font-display text-xs font-bold px-3 py-1.5 rounded-[2px] border transition-all ${
-                  isSelected
-                    ? 'bg-[#FFE93B] text-black border-[#FFE93B]'
-                    : 'bg-[#1C1C1C] text-[#ADABAB] border-[#2A2A2A] hover:text-white hover:border-[#3A3A3A]'
-                }`}
-              >
-                {r.label}
-              </Link>
-            );
-          })}
-        </div>
       </div>
 
       {/* Player Grid */}
