@@ -4,7 +4,7 @@ import { verifySession } from '@/lib/auth/session-token';
 
 const ADMIN_COOKIE_NAME = 'codm_admin_session';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Intercept all /admin routes
@@ -35,6 +35,9 @@ export async function middleware(request: NextRequest) {
 
   return NextResponse.next();
 }
+
+// Backward compatibility for standard middleware runners
+export const middleware = proxy;
 
 export const config = {
   matcher: ['/admin/:path*'],

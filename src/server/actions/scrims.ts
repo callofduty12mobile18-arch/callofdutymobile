@@ -6,6 +6,9 @@ import { recordAuditLog } from '../data/audit-store';
 import { randomInt, randomUUID } from 'crypto';
 import { getPlayerSession } from './player-auth';
 
+import { requireAdminSession } from './admin-auth';
+import { getPlayerOrganizerPermissions } from './organizer';
+
 const NOT_LOGGED_IN = { success: false, message: 'Please log in to the Player Studio to use scrims.' };
 const MAX_TEXT = 100;
 
@@ -20,13 +23,24 @@ function toPublic(scrim: ScrimLobby, email?: string): ScrimLobby {
 
 export async function getScrimLobbies(): Promise<ScrimLobby[]> {
   const session = await getPlayerSession();
-  return scrimLobbiesStore.map((s) => toPublic(s, session?.email));
+  return scrimLobbiesStore
+    .filter((s) => s.isVisible !== false && s.publishStatus !== 'ARCHIVED')
+    .map((s) => toPublic(s, session?.email));
+}
+
+export async function getAllAdminScrimLobbies(): Promise<ScrimLobby[]> {
+  await requireAdminSession();
+  return [...scrimLobbiesStore];
 }
 
 export async function getScrimById(id: string): Promise<ScrimLobby | null> {
   const session = await getPlayerSession();
   const found = scrimLobbiesStore.find((s) => s.id === id);
-  return found ? toPublic(found, session?.email) : null;
+  if (!found) return null;
+  if (found.isVisible === false && found.ownerEmail !== session?.email) {
+    return null;
+  }
+  return toPublic(found, session?.email);
 }
 
 export interface CreateScrimInput {
@@ -66,6 +80,15 @@ export async function createScrimAction(
     return { success: false, message: 'Team Name and Tag are required.' };
   }
 
+  const permissions = await getPlayerOrganizerPermissions();
+  if (!permissions.canOrganizeScrims) {
+    return {
+      success: false,
+      message:
+        'Organizer approval required: You must submit a Scrim Organizer Request from your Player Studio and be verified by an Admin before creating public scrim lobbies.',
+    };
+  }
+
   const newScrim: ScrimLobby = {
     id: `scrim-${randomUUID()}`,
     ownerEmail: session.email,
@@ -81,6 +104,8 @@ export async function createScrimAction(
     pickedMaps: [],
     currentTurn: 'HOST',
     notes,
+    publishStatus: 'PUBLISHED',
+    isVisible: true,
   };
 
   scrimLobbiesStore.unshift(newScrim);
@@ -95,6 +120,82 @@ export async function createScrimAction(
 
   revalidatePath('/scrims');
   return { success: true, scrimId: newScrim.id };
+}
+
+export async function toggleScrimVisibilityAction(
+  scrimId: string,
+  isVisible: boolean
+): Promise<{ success: boolean; message: string }> {
+  const admin = await requireAdminSession();
+
+  const scrim = scrimLobbiesStore.find((s) => s.id === scrimId);
+  if (!scrim) {
+    return { success: false, message: 'Scrim not found.' };
+  }
+
+  scrim.isVisible = isVisible;
+
+  await recordAuditLog(
+    'SCRIM_UPDATED',
+    admin.username,
+    `Admin set scrim lobby visibility to ${isVisible ? 'VISIBLE' : 'HIDDEN'} for ${scrim.hostTeamName}.`,
+    scrim.id,
+    'INFO'
+  );
+
+  revalidatePath('/scrims');
+  revalidatePath('/admin/tournaments');
+  return { success: true, message: `Scrim lobby is now ${isVisible ? 'visible' : 'hidden'} to public players.` };
+}
+
+export async function updateScrimStatusAction(
+  scrimId: string,
+  newStatus: ScrimLobby['status']
+): Promise<{ success: boolean; message: string }> {
+  const admin = await requireAdminSession();
+
+  const scrim = scrimLobbiesStore.find((s) => s.id === scrimId);
+  if (!scrim) {
+    return { success: false, message: 'Scrim not found.' };
+  }
+
+  scrim.status = newStatus;
+
+  await recordAuditLog(
+    'SCRIM_UPDATED',
+    admin.username,
+    `Admin modified scrim lobby status to ${newStatus} for ${scrim.hostTeamName}.`,
+    scrim.id,
+    'INFO'
+  );
+
+  revalidatePath('/scrims');
+  revalidatePath(`/scrims/${scrimId}`);
+  revalidatePath('/admin/tournaments');
+  return { success: true, message: `Scrim status updated to ${newStatus}.` };
+}
+
+export async function deleteScrimAdminAction(scrimId: string): Promise<{ success: boolean; message: string }> {
+  const admin = await requireAdminSession();
+
+  const index = scrimLobbiesStore.findIndex((s) => s.id === scrimId);
+  if (index === -1) {
+    return { success: false, message: 'Scrim lobby not found.' };
+  }
+
+  const removed = scrimLobbiesStore.splice(index, 1)[0];
+
+  await recordAuditLog(
+    'SCRIM_UPDATED',
+    admin.username,
+    `Admin removed scrim lobby ${removed.hostTeamName} (${removed.id}).`,
+    scrimId,
+    'WARNING'
+  );
+
+  revalidatePath('/scrims');
+  revalidatePath('/admin/tournaments');
+  return { success: true, message: 'Scrim lobby deleted successfully.' };
 }
 
 export async function challengeScrimAction(scrimId: string, opponentName: string, opponentTag: string) {

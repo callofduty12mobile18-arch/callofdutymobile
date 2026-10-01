@@ -55,7 +55,14 @@ export async function requireAdminSession(): Promise<AdminSession> {
   }
   // Re-check the database so demoted or deleted admins lose access immediately.
   const dbUser = await prisma.user.findFirst({
-    where: { email: { equals: session.email, mode: 'insensitive' }, role: RoleType.ADMIN },
+    where: {
+      OR: [
+        { email: { equals: session.email, mode: 'insensitive' } },
+        { email: { equals: `${session.email}@callofdutymobile.in`, mode: 'insensitive' } },
+        { email: { equals: session.username, mode: 'insensitive' } },
+      ],
+      role: RoleType.ADMIN,
+    },
     select: { id: true },
   });
   if (!dbUser) {

@@ -3,8 +3,8 @@ import Link from 'next/link';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="w-full bg-[#080808] border-t border-[#181818] py-10 mt-auto text-center">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+    <footer className="relative z-20 w-full bg-[#080808]/95 backdrop-blur-md border-t border-[#222222] py-12 mt-auto text-center shadow-2xl">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
         {/* Centered Logo */}
         <div className="flex justify-center items-center">
           <Link href="/" className="inline-flex items-center justify-center group" aria-label="Home">
@@ -16,29 +16,33 @@ export const Footer: React.FC = () => {
 
         {/* Centered Attribution Text */}
         <div className="text-[11px] sm:text-xs leading-relaxed max-w-2xl mx-auto">
-          <p className="font-display uppercase tracking-wider text-[#CCCCCC] text-[10px] sm:text-[11px]">
-            CALL OF DUTY: MOBILE INDIA IS AN INDEPENDENT COMMUNITY REGISTRY & ESPORTS ARCHIVE DOCUMENTING PLAYERS AND TEAMS.
+          <p className="font-display uppercase tracking-wider text-[#A1A1AA] text-[11px] sm:text-[12px]">
+            CALL OF DUTY: MOBILE INDIA IS AN INDEPENDENT COMMUNITY PLAYER DIRECTORY & CLAN REGISTRY.
           </p>
         </div>
 
-        {/* Copyright */}
-        <div className="text-[11px] text-[#A1A1AA] pt-1">
-          <p>© {new Date().getFullYear()} CallOfDutyMobile India. All Rights Reserved.</p>
-        </div>
-
-        {/* Legal & Support Links */}
-        <div className="flex items-center justify-center gap-4 text-[11px] font-display uppercase tracking-wider text-[#B4B4B8] pt-1">
-          <Link href="/terms" className="hover:text-[#FFE93B] transition-colors">
+        {/* Navigation & Legal Links */}
+        <div className="flex flex-wrap items-center justify-center gap-5 text-xs font-display uppercase tracking-wider text-[#A1A1AA] pt-1">
+          <Link href="/about" className="hover:text-white transition-colors">
+            About Us & Vision
+          </Link>
+          <span className="text-[#444444]">·</span>
+          <Link href="/terms" className="hover:text-white transition-colors">
             Terms & Conditions
           </Link>
-          <span className="text-[#666666]">·</span>
-          <Link href="/privacy" className="hover:text-[#FFE93B] transition-colors">
+          <span className="text-[#444444]">·</span>
+          <Link href="/privacy" className="hover:text-white transition-colors">
             Privacy Policy
           </Link>
-          <span className="text-[#666666]">·</span>
-          <Link href="/support" className="hover:text-[#FFE93B] transition-colors">
+          <span className="text-[#444444]">·</span>
+          <Link href="/support" className="hover:text-white transition-colors">
             Support
           </Link>
+        </div>
+
+        {/* Copyright */}
+        <div className="text-[11px] text-[#71717A] pt-2">
+          <p>© {new Date().getFullYear()} CallOfDutyMobile India. All Rights Reserved.</p>
         </div>
       </div>
     </footer>

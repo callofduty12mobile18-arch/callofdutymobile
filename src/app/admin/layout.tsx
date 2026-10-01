@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { LogOut } from 'lucide-react';
 import { Footer } from '@/components/common/Footer';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminLayout({
   children,
 }: {

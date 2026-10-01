@@ -23,6 +23,8 @@ export interface ScrimLobby {
   notes?: string;
   ownerEmail?: string;
   opponentEmail?: string;
+  publishStatus?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  isVisible?: boolean;
 }
 
 export const CODM_COMPETITIVE_MAP_POOL = [

@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { Image as ImageIcon, Video, Film, Users, Sparkles } from 'lucide-react';
+import { Image as ImageIcon, Video, Film, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { getAllPlayerMedia } from '@/server/queries/media';
-import { MediaGalleryView } from '@/components/admin/MediaGalleryView';
+import { MediaGalleryView, MediaItem } from '@/components/admin/MediaGalleryView';
 
 export default async function AdminMediaPage() {
   const media = await getAllPlayerMedia();
@@ -104,7 +104,7 @@ export default async function AdminMediaPage() {
       </div>
 
       {/* Gallery & Feed View */}
-      <MediaGalleryView initialMedia={media as any} />
+      <MediaGalleryView initialMedia={media as unknown as MediaItem[]} />
     </div>
   );
 }

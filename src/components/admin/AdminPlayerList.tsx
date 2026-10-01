@@ -25,15 +25,11 @@ export interface AdminPlayerListProps {
 }
 
 export const AdminPlayerList: React.FC<AdminPlayerListProps> = ({ initialPlayers }) => {
-  const [players, setPlayers] = React.useState(initialPlayers);
-
-  // Sync state if server component passes new initialPlayers
-  React.useEffect(() => {
-    setPlayers(initialPlayers);
-  }, [initialPlayers]);
+  const [deletedIds, setDeletedIds] = React.useState<string[]>([]);
+  const players = initialPlayers.filter((p) => !deletedIds.includes(p.id));
 
   const handleDeleted = (deletedId: string) => {
-    setPlayers((prev) => prev.filter((p) => p.id !== deletedId));
+    setDeletedIds((prev) => [...prev, deletedId]);
   };
 
   return (

@@ -19,7 +19,7 @@ export async function deletePlayerAction(playerId: string): Promise<DeletePlayer
 
   try {
     // 1. Fetch player details from database
-    let player = await prisma.player.findFirst({
+    const player = await prisma.player.findFirst({
       where: {
         OR: [{ id: playerId }, { slug: playerId }],
       },

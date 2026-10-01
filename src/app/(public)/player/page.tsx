@@ -11,6 +11,8 @@ import { prisma } from '@/lib/db/prisma';
 import { PlayerProfileEditorForm } from '@/components/players/PlayerProfileEditorForm';
 
 import { getPlayerForStudio } from '@/server/queries/players';
+import { getPlayerOrganizerPermissions } from '@/server/actions/organizer';
+import { OrganizerPermissionsCard } from '@/components/players/OrganizerPermissionsCard';
 
 export const metadata: Metadata = {
   title: 'Player Profile Studio | Manage Your Profile',
@@ -25,8 +27,11 @@ export default async function PlayerDashboardPage() {
     redirect('/player/login');
   }
 
-  // Load current player record from live database (cached)
-  const existingPlayer = session.slug ? await getPlayerForStudio(session.slug) : null;
+  // Load current player record and organizer permissions from live database
+  const [existingPlayer, organizerPermissions] = await Promise.all([
+    session.slug ? getPlayerForStudio(session.slug) : null,
+    getPlayerOrganizerPermissions(),
+  ]);
 
   const currentTeam = existingPlayer?.teamMemberships?.[0]?.team;
   const youtubeLink = existingPlayer?.socialLinks?.find((s: { platform: string; url: string }) => s.platform === 'YOUTUBE')?.url || '';
@@ -77,6 +82,13 @@ export default async function PlayerDashboardPage() {
           </form>
         </div>
       </div>
+
+      {/* Organizer Permissions & Hosting Hub */}
+      <OrganizerPermissionsCard
+        permissions={organizerPermissions}
+        userEmail={session.email}
+        userIgn={session.ign}
+      />
 
       {/* Editor Form */}
       <PlayerProfileEditorForm

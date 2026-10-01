@@ -1,22 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import { useActionState, useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Mail, CheckCircle2, ShieldCheck, ArrowRight, AlertCircle, Key, X, Sparkles } from 'lucide-react';
+import { useActionState, useState } from 'react';
+import { Mail, ShieldCheck, ArrowRight, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { submitCommunityJoinRequest, JoinResponse } from '@/server/actions/community';
+import { submitCommunityJoinRequest } from '@/server/actions/community';
 
 export default function JoinCommunityPage() {
   const [state, formAction, isPending] = useActionState(submitCommunityJoinRequest, null);
-  const [showPopup, setShowPopup] = useState(false);
-
-  useEffect(() => {
-    if (state?.success) {
-      setShowPopup(true);
-    }
-  }, [state]);
+  const [isDismissed, setIsDismissed] = useState(false);
+  const showPopup = Boolean(state?.success && !isDismissed);
 
   return (
     <div className="relative min-h-[85vh] flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
@@ -119,7 +113,7 @@ export default function JoinCommunityPage() {
           <div className="relative w-full max-w-md bg-[#141414] border-2 border-[#FFE93B] rounded-[2px] p-6 sm:p-8 text-center space-y-5 shadow-[0_0_50px_rgba(255,233,59,0.25)]">
             {/* Close Button */}
             <button
-              onClick={() => setShowPopup(false)}
+              onClick={() => setIsDismissed(true)}
               className="absolute top-4 right-4 text-[#837D72] hover:text-white transition-colors"
               aria-label="Close"
             >
@@ -157,7 +151,7 @@ export default function JoinCommunityPage() {
                 size="lg"
                 variant="primary"
                 className="w-full"
-                onClick={() => setShowPopup(false)}
+                onClick={() => setIsDismissed(true)}
               >
                 GOT IT
               </Button>
