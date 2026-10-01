@@ -3,10 +3,17 @@
  * Compatible with Next.js Edge Runtime (Middleware) and Node.js Server Action runtime.
  */
 
-const SESSION_SECRET =
-  process.env.SESSION_SECRET ||
-  process.env.AUTH_SECRET ||
-  'codm-esports-india-secure-secret-key-391840192840129';
+const DEFAULT_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
+
+function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET || process.env.AUTH_SECRET;
+  if (secret && secret.length >= 32) return secret;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('SESSION_SECRET (min 32 chars) must be set in production.');
+  }
+  // Development-only fallback; never used in production builds.
+  return 'dev-only-insecure-session-secret-do-not-use-in-prod';
+}
 
 function base64UrlEncode(bytes: Uint8Array): string {
   let binary = '';
@@ -32,7 +39,7 @@ function base64UrlDecode(str: string): Uint8Array {
 
 async function getCryptoKey(): Promise<CryptoKey> {
   const encoder = new TextEncoder();
-  const keyData = encoder.encode(SESSION_SECRET);
+  const keyData = encoder.encode(getSessionSecret());
   return crypto.subtle.importKey(
     'raw',
     keyData,
@@ -46,9 +53,13 @@ async function getCryptoKey(): Promise<CryptoKey> {
  * Signs a JSON-serializable session payload and returns a tamper-proof string:
  * `base64url(payload).base64url(signature)`
  */
-export async function signSession<T>(payload: T): Promise<string> {
+export async function signSession<T extends object>(
+  payload: T,
+  ttlSeconds: number = DEFAULT_TTL_SECONDS
+): Promise<string> {
   const encoder = new TextEncoder();
-  const jsonString = JSON.stringify(payload);
+  const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
+  const jsonString = JSON.stringify({ ...payload, exp });
   const payloadBytes = encoder.encode(jsonString);
   const payloadB64 = base64UrlEncode(payloadBytes);
 
@@ -88,8 +99,12 @@ export async function verifySession<T>(token: string): Promise<T | null> {
     const payloadBytes = base64UrlDecode(payloadB64);
     const decoder = new TextDecoder();
     const jsonString = decoder.decode(payloadBytes);
-    return JSON.parse(jsonString) as T;
-  } catch (err) {
+    const parsed = JSON.parse(jsonString) as T & { exp?: number };
+    if (typeof parsed.exp !== 'number' || parsed.exp < Math.floor(Date.now() / 1000)) {
+      return null;
+    }
+    return parsed;
+  } catch {
     return null;
   }
 }

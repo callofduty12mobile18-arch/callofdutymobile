@@ -42,6 +42,7 @@ async function fetchBroadcastRecipientEmails(): Promise<string[]> {
 }
 
 export async function getBroadcastRecipientEmails(): Promise<string[]> {
+  await requireAdminSession();
   const getCached = unstable_cache(
     fetchBroadcastRecipientEmails,
     ['broadcast-recipient-emails'],
@@ -51,6 +52,7 @@ export async function getBroadcastRecipientEmails(): Promise<string[]> {
 }
 
 export async function getBroadcastHistoryList(): Promise<BroadcastHistoryItem[]> {
+  await requireAdminSession();
   return await getDbBroadcastHistory();
 }
 

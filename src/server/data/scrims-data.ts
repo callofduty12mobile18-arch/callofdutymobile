@@ -21,6 +21,8 @@ export interface ScrimLobby {
   pickedMaps: { mapName: string; mode: string; pickedBy: string }[];
   currentTurn: 'HOST' | 'OPPONENT' | 'COMPLETED';
   notes?: string;
+  ownerEmail?: string;
+  opponentEmail?: string;
 }
 
 export const CODM_COMPETITIVE_MAP_POOL = [
@@ -35,7 +37,7 @@ export const CODM_COMPETITIVE_MAP_POOL = [
 ];
 
 // Initial seeded scrims for Indian competitive scene
-export let scrimLobbiesStore: ScrimLobby[] = [
+export const scrimLobbiesStore: ScrimLobby[] = [
   {
     id: 'scrim-godl-01',
     hostTeamName: 'GodLike Esports',

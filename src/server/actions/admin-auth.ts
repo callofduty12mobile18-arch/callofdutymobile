@@ -6,7 +6,8 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db/prisma';
 import { recordAuditLog } from '../data/audit-store';
 import { RoleType } from '@prisma/client';
-import { hashPassword, verifyPassword } from '@/lib/auth/password';
+import { verifyPassword } from '@/lib/auth/password';
+import { getClientIp, rateLimit } from '@/lib/auth/rate-limit';
 import { signSession, verifySession } from '@/lib/auth/session-token';
 
 export interface AdminSession {
@@ -52,6 +53,14 @@ export async function requireAdminSession(): Promise<AdminSession> {
   if (!session || session.role !== 'ADMIN') {
     throw new Error('Unauthorized: Administrator privilege required to perform this action.');
   }
+  // Re-check the database so demoted or deleted admins lose access immediately.
+  const dbUser = await prisma.user.findFirst({
+    where: { email: { equals: session.email, mode: 'insensitive' }, role: RoleType.ADMIN },
+    select: { id: true },
+  });
+  if (!dbUser) {
+    throw new Error('Unauthorized: Administrator privilege required to perform this action.');
+  }
   return session;
 }
 
@@ -68,6 +77,14 @@ export async function loginAdminAction(
 
   if (!identifier || !password) {
     return { success: false, message: 'Please provide both admin username/email and password.' };
+  }
+
+  const ip = await getClientIp();
+  if (
+    !rateLimit(`login:admin:ip:${ip}`, 20, 15 * 60 * 1000) ||
+    !rateLimit(`login:admin:id:${identifier}`, 5, 15 * 60 * 1000)
+  ) {
+    return { success: false, message: 'Too many login attempts. Please try again in 15 minutes.' };
   }
 
   let authenticated = false;
@@ -109,19 +126,6 @@ export async function loginAdminAction(
       success: false,
       message: 'Access Denied: Invalid admin username or password.',
     };
-  }
-
-  // Automatically migrate legacy plaintext password to bcrypt hash in DB if needed
-  if (!matchingDbUser.passwordHash?.startsWith('$2')) {
-    try {
-      const newHash = await hashPassword(password);
-      await prisma.user.update({
-        where: { id: matchingDbUser.id },
-        data: { passwordHash: newHash },
-      });
-    } catch (migErr) {
-      console.error('Password hash upgrade failed:', migErr);
-    }
   }
 
   // Generate cryptographically signed session token

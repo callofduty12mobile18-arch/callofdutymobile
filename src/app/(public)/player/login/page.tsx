@@ -80,13 +80,13 @@ export default function PlayerLoginPage() {
               <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB]">
                 Credentials / Access Key
               </label>
-              <span className="text-[10px] text-[#837D72]">Format: CODM-PRO-XXXX</span>
+              <span className="text-[10px] text-[#837D72]">Format: CODM-XXXXXXXXXXXX</span>
             </div>
             <Input
               name="password"
               type="password"
               required
-              placeholder="e.g. REDACTED_KEY"
+              placeholder="Paste your access key"
               leftIcon={<Lock className="w-4 h-4" />}
             />
           </div>
