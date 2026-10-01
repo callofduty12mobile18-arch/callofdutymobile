@@ -20,6 +20,8 @@ import { getPublishedTournaments } from '@/server/queries/tournaments';
 import { getCommunityRequestsList } from '@/server/actions/community';
 import { DirectInviteModal } from '@/components/admin/DirectInviteModal';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboardPage() {
   const [playersData, teams, tournaments, requests] = await Promise.all([
     getPublishedPlayers({ limit: 10 }),
