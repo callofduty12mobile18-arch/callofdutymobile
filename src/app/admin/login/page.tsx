@@ -51,7 +51,7 @@ export default function AdminLoginPage() {
             ADMINISTRATOR <span className="text-[#FFE93B]">LOGIN</span>
           </h1>
           <p className="text-xs text-[#ADABAB] max-w-sm mx-auto">
-            Authorized administrative personnel only. Enter your credentials to manage community rosters, tournaments, and platform dispatches.
+            Authorized administrative personnel only. Enter your admin username and security password to access the platform control panel.
           </p>
         </div>
 
@@ -76,7 +76,7 @@ export default function AdminLoginPage() {
           <form action={formAction} className="space-y-4">
             <div className="space-y-1.5">
               <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB] font-semibold">
-                Admin Username / Email
+                Admin Username
               </label>
               <Input
                 name="identifier"

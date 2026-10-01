@@ -58,7 +58,7 @@ export default function PlayerLoginPage() {
         <form action={formAction} className="space-y-5">
           <div className="space-y-1.5">
             <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB]">
-              Email Address
+              Player Gmail / Email ID
             </label>
             <Input
               name="email"
@@ -72,7 +72,7 @@ export default function PlayerLoginPage() {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB]">
-                Credentials / Access Key
+                Player Password / Access Key
               </label>
               <span className="text-[10px] text-[#837D72]">Format: CODM-XXXXXXXXXXXX</span>
             </div>
