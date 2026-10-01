@@ -295,8 +295,14 @@ async function fetchCommunityRequestsList() {
     return dbSubs.map((s) => {
       const raw = (s.rawData as Record<string, string>) || {};
       let password = raw.password || undefined;
-      if (!password && s.status === 'APPROVED' && s.submitterEmail.toLowerCase().includes('polonium84r')) {
-        password = 'CODM#DAGEB24885D371619!';
+      if (!password && s.status === 'APPROVED') {
+        if (s.submitterEmail.toLowerCase().includes('polonium84r')) {
+          password = 'CODM#DAGEB24885D371619!';
+        } else if (s.submitterEmail.toLowerCase().includes('dhoniashwin18')) {
+          password = 'CODM#DA6EB24885D371619!';
+        } else {
+          password = `CODM#${s.id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 14).toUpperCase()}9!`;
+        }
       }
       return {
         id: s.id,
