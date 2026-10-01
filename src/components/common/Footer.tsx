@@ -1,10 +1,9 @@
 import * as React from 'react';
 import Link from 'next/link';
-import { Crosshair } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="w-full bg-[#080808] border-t border-[#181818] py-12 mt-24 text-center">
+    <footer className="w-full bg-[#080808] border-t border-[#181818] py-10 mt-auto text-center">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         {/* Centered Logo */}
         <div className="flex justify-center items-center">
@@ -25,25 +24,6 @@ export const Footer: React.FC = () => {
         {/* Copyright */}
         <div className="text-[11px] text-[#A1A1AA] pt-1">
           <p>© {new Date().getFullYear()} CallOfDutyMobile India. All Rights Reserved.</p>
-        </div>
-
-        {/* Competitive Hub Links */}
-        <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-display font-bold uppercase tracking-wider text-[#ADABAB] pt-2">
-          <Link href="/scrims" className="hover:text-[#FFE93B] transition-colors">
-            Scrim Matchmaking
-          </Link>
-          <span className="text-[#333333]">·</span>
-          <Link href="/lft" className="hover:text-[#FFE93B] transition-colors">
-            LFT Free Agents
-          </Link>
-          <span className="text-[#333333]">·</span>
-          <Link href="/gunsmith" className="hover:text-[#FFE93B] transition-colors">
-            Gunsmith Meta
-          </Link>
-          <span className="text-[#333333]">·</span>
-          <Link href="/player" className="hover:text-[#FFE93B] transition-colors">
-            Player Studio
-          </Link>
         </div>
 
         {/* Legal & Support Links */}

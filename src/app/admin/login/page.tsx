@@ -22,7 +22,7 @@ export default function AdminLoginPage() {
   }, [state, router]);
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-black text-white p-4 relative overflow-hidden selection:bg-[#FFE93B] selection:text-black">
+    <div className="flex-1 min-h-[80vh] w-full flex items-center justify-center bg-black text-white py-12 px-4 relative overflow-hidden selection:bg-[#FFE93B] selection:text-black">
       {/* Background Ambience */}
       <div
         className="absolute inset-0 bg-cover bg-center opacity-25 pointer-events-none mix-blend-luminosity scale-105"
