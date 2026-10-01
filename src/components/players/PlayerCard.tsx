@@ -1,9 +1,8 @@
 import * as React from 'react';
 import Link from 'next/link';
-import { User, Shield, Trophy, ChevronRight, CheckCircle2, MapPin } from 'lucide-react';
+import { CheckCircle2, MapPin } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
 
 interface PlayerCardProps {
   player: {
@@ -34,13 +33,12 @@ interface PlayerCardProps {
 }
 
 export const PlayerCard: React.FC<PlayerCardProps> = ({ player }) => {
-  const currentTeam = player.teamMemberships?.find((m) => m.isCurrent)?.team;
   const isVerified = player.verificationStatus === 'VERIFIED';
 
   return (
-    <Card className="bg-[#141414] border-[#2A2A2A] hover:border-[#FFE93B]/40 transition-all duration-200 rounded-[2px] flex flex-col justify-between h-full group">
-      <CardContent className="p-5 sm:p-6 space-y-4 flex-1 flex flex-col justify-between">
-        <div className="space-y-4">
+    <Link href={`/players/${player.slug}`} className="block h-full">
+      <Card className="bg-[#141414] border-[#2A2A2A] hover:border-[#FFE93B]/40 transition-all duration-200 rounded-[2px] flex flex-col justify-between h-full group cursor-pointer">
+        <CardContent className="p-5 sm:p-6 space-y-4 flex-1 flex flex-col">
           {/* Header Row: Role & Verification */}
           <div className="flex items-center justify-between gap-2">
             <Badge variant="role" className="text-[11px] font-bold tracking-wider">
@@ -89,48 +87,8 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player }) => {
               )}
             </div>
           </div>
-
-          {/* Current Roster Affiliation */}
-          <div className="pt-3 border-t border-[#222222] flex items-center justify-between text-xs">
-            <span className="text-[#8E8E93] font-display uppercase tracking-wider text-[11px]">
-              Affiliation
-            </span>
-            {currentTeam ? (
-              <span className="font-display font-bold text-white bg-[#1C1C1C] px-2.5 py-0.5 rounded-[2px] border border-[#2A2A2A] truncate max-w-[180px]">
-                <strong className="text-[#FFE93B] font-mono mr-1">[{currentTeam.tag}]</strong>
-                {currentTeam.name}
-              </span>
-            ) : (
-              <span className="text-emerald-400 bg-emerald-950/40 border border-emerald-900/40 px-2 py-0.5 rounded-[2px] text-[11px] font-medium">
-                Free Agent
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Footer Actions */}
-        <div className="pt-3 border-t border-[#222222] flex items-center justify-between gap-3 mt-auto">
-          {player.achievements && player.achievements.length > 0 ? (
-            <div className="flex items-center gap-1.5 text-xs text-[#ADABAB] min-w-0">
-              <Trophy className="w-3.5 h-3.5 text-[#FFE93B] flex-shrink-0" />
-              <span className="truncate text-[11px] text-white">
-                {player.achievements[0].placement || player.achievements[0].achievement?.title}
-              </span>
-            </div>
-          ) : (
-            <span className="text-[11px] text-[#8E8E93] font-mono uppercase tracking-wider">
-              PROFILE ACTIVE
-            </span>
-          )}
-
-          <Link href={`/players/${player.slug}`}>
-            <Button size="sm" variant="outline" className="text-xs group-hover:border-[#FFE93B]/60 group-hover:text-[#FFE93B]">
-              VIEW PROFILE
-              <ChevronRight className="w-3.5 h-3.5 ml-1" />
-            </Button>
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   );
 };
