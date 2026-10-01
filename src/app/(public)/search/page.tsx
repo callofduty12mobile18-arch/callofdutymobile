@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Search, User, Shield, Trophy } from 'lucide-react';
+import { Search, User, Shield, Trophy, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { PlayerCard } from '@/components/players/PlayerCard';
 import { TeamCard } from '@/components/teams/TeamCard';
@@ -11,16 +11,16 @@ import { getPublishedTeams } from '@/server/queries/teams';
 import { getPublishedTournaments } from '@/server/queries/tournaments';
 
 export const metadata: Metadata = {
-  title: 'Search Directory',
+  title: 'Global Directory Search | CODM India',
   description: 'Search Indian CODM competitive players, teams, and tournament championships.',
 };
 
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams?: Promise<{ q?: string }>;
 }) {
-  const resolved = await searchParams;
+  const resolved = searchParams ? await searchParams : {};
   const query = resolved.q?.trim() || '';
 
   const [playersData, teams, tournaments] = query
@@ -48,146 +48,147 @@ export default async function SearchPage({
   const totalResults = playersData.players.length + matchedTeams.length + matchedTournaments.length;
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] pb-24">
-      {/* Background Wallpaper - Contained with bottom dark fade */}
-      <div
-        className="absolute inset-0 bg-cover bg-top opacity-70 pointer-events-none scale-100 transition-opacity"
-        style={{
-          backgroundImage: `url('/photos/wallpapersden.com_call-of-duty-mobile-gaming-2022_1920x1080.jpg')`,
-        }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black pointer-events-none" />
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+      {/* Search Header Banner matching Scrims Hub */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#141414] via-[#1A1A1A] to-[#141414] border border-[#2A2A2A] rounded-[2px] p-6 sm:p-10">
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-[#FFE93B]/5 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-        {/* Search Header Banner */}
-        <div className="border-b border-[#2A2A2A] pb-8 relative overflow-hidden bg-[#141414]/85 backdrop-blur-md p-6 sm:p-8 rounded-[2px] border border-[#837D72]/40 shadow-2xl">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#FFE93B]" />
-          <div className="flex items-center gap-2 text-xs font-display tracking-widest text-[#FFE93B] uppercase mb-2">
-            <Search className="w-4 h-4" />
-            <span>DISCOVERY ENGINE</span>
+        <div className="space-y-4 max-w-3xl relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[2px] bg-[#FFE93B]/10 border border-[#FFE93B]/30 text-xs font-bold text-[#FFE93B]">
+            <Search className="w-3.5 h-3.5" />
+            <span>GLOBAL DISCOVERY ENGINE</span>
           </div>
 
-          <h1 className="font-display font-black text-3xl sm:text-5xl text-white uppercase tracking-tight">
-            GLOBAL DIRECTORY SEARCH
+          <h1 className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-white uppercase tracking-tight leading-none">
+            DIRECTORY <span className="text-[#FFE93B]">SEARCH</span>
           </h1>
-          <p className="text-[#ADABAB] text-sm mt-2 max-w-2xl">
-            Search across competitive players, verified teams, and national tournament championships.
+          <p className="text-sm sm:text-base text-[#ADABAB] leading-relaxed">
+            Search across competitive players, verified team rosters, clans, and national tournament championships.
           </p>
 
           {/* Search Input Bar */}
-          <form method="GET" action="/search" className="flex flex-col sm:flex-row gap-3 mt-6">
+          <form method="GET" action="/search" className="flex flex-col sm:flex-row gap-3 pt-2">
             <div className="relative flex-1">
               <input
                 type="text"
                 name="q"
                 defaultValue={query}
                 placeholder="Type player IGN, real name, team tag, or tournament name..."
-                className="w-full bg-[#1F1F1F]/90 text-white border border-[#837D72] text-sm rounded-[50px] pl-12 pr-6 py-3 placeholder:text-[#ADABAB] focus:outline-none focus:border-[#FFE93B]"
+                className="w-full bg-[#1C1C1C] text-white border border-[#2A2A2A] text-sm rounded-[2px] pl-11 pr-5 py-3 placeholder:text-[#ADABAB] focus:outline-none focus:border-[#FFE93B] transition-colors"
                 autoFocus
               />
-              <Search className="w-5 h-5 text-[#ADABAB] absolute left-4 top-3.5" />
+              <Search className="w-4 h-4 text-[#ADABAB] absolute left-4 top-4" />
             </div>
-            <Button size="lg" variant="primary" type="submit">
-              SEARCH DIRECTORY
+            <Button size="lg" variant="primary" type="submit" className="shadow-lg shadow-[#FFE93B]/10">
+              SEARCH DATABASE
             </Button>
           </form>
         </div>
-
-        {query && (
-          <div className="space-y-12">
-            {/* Quick Summary Pill */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-display uppercase tracking-wider text-[#ADABAB]">
-                Showing results for &ldquo;<span className="text-[#FFE93B] font-bold">{query}</span>&rdquo;
-              </span>
-              <span className="text-xs font-display uppercase tracking-wider text-[#FFE93B] font-bold">
-                {totalResults} TOTAL MATCHES
-              </span>
-            </div>
-
-            {/* Players Result Section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-[#2A2A2A] pb-2">
-                <div className="flex items-center gap-2 text-xs font-display tracking-widest text-[#FFE93B] uppercase font-bold">
-                  <User className="w-4 h-4" />
-                  <span>PLAYERS ({playersData.players.length})</span>
-                </div>
-                {playersData.players.length > 0 && (
-                  <Link href={`/players?query=${encodeURIComponent(query)}`} className="text-[11px] text-[#837D72] hover:text-[#FFE93B] font-display uppercase tracking-wider">
-                    View All in Directory &rarr;
-                  </Link>
-                )}
-              </div>
-
-              {playersData.players.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {playersData.players.map((p) => (
-                    <PlayerCard key={p.id} player={p} />
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 bg-[#141414]/70 backdrop-blur-md border border-[#2A2A2A] rounded-[2px] text-center text-xs text-[#837D72]">
-                  No competitive players matching &ldquo;{query}&rdquo;.
-                </div>
-              )}
-            </div>
-
-            {/* Teams Result Section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-[#2A2A2A] pb-2">
-                <div className="flex items-center gap-2 text-xs font-display tracking-widest text-[#FFE93B] uppercase font-bold">
-                  <Shield className="w-4 h-4" />
-                  <span>TEAMS ({matchedTeams.length})</span>
-                </div>
-                {matchedTeams.length > 0 && (
-                  <Link href="/teams" className="text-[11px] text-[#837D72] hover:text-[#FFE93B] font-display uppercase tracking-wider">
-                    View Teams Directory &rarr;
-                  </Link>
-                )}
-              </div>
-
-              {matchedTeams.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {matchedTeams.map((t) => (
-                    <TeamCard key={t.id} team={t} />
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 bg-[#141414]/70 backdrop-blur-md border border-[#2A2A2A] rounded-[2px] text-center text-xs text-[#837D72]">
-                  No teams matching &ldquo;{query}&rdquo;.
-                </div>
-              )}
-            </div>
-
-            {/* Tournaments Result Section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-[#2A2A2A] pb-2">
-                <div className="flex items-center gap-2 text-xs font-display tracking-widest text-[#FFE93B] uppercase font-bold">
-                  <Trophy className="w-4 h-4" />
-                  <span>TOURNAMENTS ({matchedTournaments.length})</span>
-                </div>
-                {matchedTournaments.length > 0 && (
-                  <Link href="/tournaments" className="text-[11px] text-[#837D72] hover:text-[#FFE93B] font-display uppercase tracking-wider">
-                    View Tournaments Directory &rarr;
-                  </Link>
-                )}
-              </div>
-
-              {matchedTournaments.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {matchedTournaments.map((tr) => (
-                    <TournamentCard key={tr.id} tournament={tr} />
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 bg-[#141414]/70 backdrop-blur-md border border-[#2A2A2A] rounded-[2px] text-center text-xs text-[#837D72]">
-                  No tournaments matching &ldquo;{query}&rdquo;.
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
+
+      {query ? (
+        <div className="space-y-12">
+          {/* Quick Summary Pill */}
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#2A2A2A] pb-4">
+            <span className="text-xs font-display uppercase tracking-wider text-[#ADABAB]">
+              Showing results for &ldquo;<span className="text-[#FFE93B] font-bold">{query}</span>&rdquo;
+            </span>
+            <span className="text-xs font-display uppercase tracking-wider text-[#FFE93B] font-bold bg-[#1C1C1C] border border-[#333333] px-3 py-1 rounded-[2px]">
+              {totalResults} TOTAL MATCHES
+            </span>
+          </div>
+
+          {/* Players Result Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b border-[#222222] pb-2">
+              <div className="flex items-center gap-2 text-xs font-display tracking-widest text-[#FFE93B] uppercase font-bold">
+                <User className="w-4 h-4" />
+                <span>PLAYERS ({playersData.players.length})</span>
+              </div>
+              {playersData.players.length > 0 && (
+                <Link href={`/players?query=${encodeURIComponent(query)}`} className="text-[11px] text-[#ADABAB] hover:text-[#FFE93B] font-display uppercase tracking-wider transition-colors">
+                  View All in Directory &rarr;
+                </Link>
+              )}
+            </div>
+
+            {playersData.players.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {playersData.players.map((p) => (
+                  <PlayerCard key={p.id} player={p} />
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 bg-[#141414] border border-[#2A2A2A] rounded-[2px] text-center text-xs text-[#ADABAB]">
+                No competitive players found matching &ldquo;{query}&rdquo;.
+              </div>
+            )}
+          </div>
+
+          {/* Teams Result Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b border-[#222222] pb-2">
+              <div className="flex items-center gap-2 text-xs font-display tracking-widest text-[#FFE93B] uppercase font-bold">
+                <Shield className="w-4 h-4" />
+                <span>TEAMS ({matchedTeams.length})</span>
+              </div>
+              {matchedTeams.length > 0 && (
+                <Link href="/teams" className="text-[11px] text-[#ADABAB] hover:text-[#FFE93B] font-display uppercase tracking-wider transition-colors">
+                  View Teams Directory &rarr;
+                </Link>
+              )}
+            </div>
+
+            {matchedTeams.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {matchedTeams.map((t) => (
+                  <TeamCard key={t.id} team={t} />
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 bg-[#141414] border border-[#2A2A2A] rounded-[2px] text-center text-xs text-[#ADABAB]">
+                No competitive teams found matching &ldquo;{query}&rdquo;.
+              </div>
+            )}
+          </div>
+
+          {/* Tournaments Result Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b border-[#222222] pb-2">
+              <div className="flex items-center gap-2 text-xs font-display tracking-widest text-[#FFE93B] uppercase font-bold">
+                <Trophy className="w-4 h-4" />
+                <span>TOURNAMENTS ({matchedTournaments.length})</span>
+              </div>
+              {matchedTournaments.length > 0 && (
+                <Link href="/tournaments" className="text-[11px] text-[#ADABAB] hover:text-[#FFE93B] font-display uppercase tracking-wider transition-colors">
+                  View Tournaments Directory &rarr;
+                </Link>
+              )}
+            </div>
+
+            {matchedTournaments.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {matchedTournaments.map((tr) => (
+                  <TournamentCard key={tr.id} tournament={tr} />
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 bg-[#141414] border border-[#2A2A2A] rounded-[2px] text-center text-xs text-[#ADABAB]">
+                No tournaments found matching &ldquo;{query}&rdquo;.
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* Empty / Initial Search Suggestion Box */
+        <div className="bg-[#141414] border border-[#2A2A2A] p-12 text-center rounded-[2px] space-y-4">
+          <Search className="w-10 h-10 text-neutral-600 mx-auto" />
+          <h3 className="font-display font-bold text-lg text-white">Search the National Archive</h3>
+          <p className="text-xs text-[#ADABAB] max-w-md mx-auto">
+            Type an in-game name (e.g. &ldquo;Learn&rdquo;, &ldquo;Sammy&rdquo;), team clan tag (e.g. &ldquo;GODL&rdquo;, &ldquo;VIT&rdquo;), or tournament name to search the directory.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

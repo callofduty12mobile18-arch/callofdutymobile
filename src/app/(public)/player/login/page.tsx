@@ -21,24 +21,18 @@ export default function PlayerLoginPage() {
   }, [state, router]);
 
   return (
-    <div className="relative min-h-[80vh] flex items-center justify-center py-16 px-4 sm:px-6">
-      {/* Ambient background photo */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none mix-blend-luminosity scale-105"
-        style={{
-          backgroundImage: `url('/photos/codm-operator.jpg')`,
-        }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/90 pointer-events-none" />
+    <div className="relative min-h-[80vh] flex items-center justify-center py-16 px-4 sm:px-6 overflow-hidden">
+      {/* Subtle ambient glow effect matching Scrims */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#FFE93B]/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10 max-w-md w-full mx-auto space-y-8">
         {/* Title */}
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 rounded-[2px] overflow-hidden flex items-center justify-center mx-auto mb-4">
-            <img src="/photos/logo1.png" alt="CODM India Logo" className="w-full h-full object-contain" />
+          <div className="w-16 h-16 rounded-[2px] overflow-hidden flex items-center justify-center mx-auto mb-4 bg-[#141414] border border-[#2A2A2A]">
+            <img src="/photos/logo1.png" alt="CODM India Logo" className="w-12 h-12 object-contain" />
           </div>
           <h1 className="font-display font-black text-2xl sm:text-4xl text-white uppercase tracking-tight">
-            PLAYER LOGIN
+            PLAYER <span className="text-[#FFE93B]">LOGIN</span>
           </h1>
           <p className="text-[#ADABAB] text-xs leading-relaxed">
             Sign in using the credentials dispatched to your email address by the platform administrators.
