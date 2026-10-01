@@ -5,7 +5,6 @@ import {
   Shield,
   Trophy,
   Inbox,
-  ArrowUpRight,
   CheckCircle2,
   Clock,
   Plus,
@@ -121,16 +120,10 @@ export default async function AdminDashboardPage() {
 
       {/* Recent Community Requests Queue */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Clock className="w-4 h-4 text-[#FFE93B]" /> Community Access Requests Queue
           </CardTitle>
-          <Link
-            href="/admin/requests"
-            className="text-xs text-[#FFE93B] font-display uppercase font-semibold hover:underline flex items-center gap-1"
-          >
-            VIEW ALL <ArrowUpRight className="w-3.5 h-3.5" />
-          </Link>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
