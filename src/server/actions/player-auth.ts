@@ -6,7 +6,8 @@ import { revalidatePath } from 'next/cache';
 import { recordAuditLog } from '../data/audit-store';
 import { prisma } from '@/lib/db/prisma';
 import { PlayerRole, VerificationStatus, PublishStatus, EntityType, MediaType, SocialPlatform } from '@prisma/client';
-import { hashPassword, verifyPassword } from '@/lib/auth/password';
+import { verifyPassword } from '@/lib/auth/password';
+import { getClientIp, rateLimit } from '@/lib/auth/rate-limit';
 import { signSession, verifySession } from '@/lib/auth/session-token';
 
 export interface PlayerSession {
@@ -33,6 +34,14 @@ export async function loginPlayerAction(
 
   if (!email || !password) {
     return { success: false, message: 'Please provide both email and password credentials.' };
+  }
+
+  const ip = await getClientIp();
+  if (
+    !rateLimit(`login:player:ip:${ip}`, 20, 15 * 60 * 1000) ||
+    !rateLimit(`login:player:id:${email}`, 5, 15 * 60 * 1000)
+  ) {
+    return { success: false, message: 'Too many login attempts. Please try again in 15 minutes.' };
   }
 
   let authenticatedUser: { id: string; email: string; ign?: string; slug?: string } | null = null;
@@ -71,19 +80,6 @@ export async function loginPlayerAction(
       success: false,
       message: 'Invalid credentials. Please verify the email and access key sent to your inbox.',
     };
-  }
-
-  // Automatically migrate legacy plaintext password to bcrypt hash in DB if needed
-  if (!matchingDbUser.passwordHash?.startsWith('$2')) {
-    try {
-      const newHash = await hashPassword(password);
-      await prisma.user.update({
-        where: { id: matchingDbUser.id },
-        data: { passwordHash: newHash },
-      });
-    } catch {
-      // Non-blocking
-    }
   }
 
   const sessionData: PlayerSession = {

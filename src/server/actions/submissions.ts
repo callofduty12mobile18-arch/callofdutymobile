@@ -39,7 +39,7 @@ export async function submitPlayerPortfolio(
 
     const data = parseResult.data;
 
-    let submissionId = `sub-${Date.now()}`;
+    let submissionId: string;
 
     try {
       const created = await prisma.submission.create({
@@ -54,7 +54,11 @@ export async function submitPlayerPortfolio(
       });
       submissionId = created.id;
     } catch (dbErr) {
-      console.warn('Database insert failed, recorded in memory buffer:', dbErr);
+      console.error('Submission database insert failed:', dbErr);
+      return {
+        success: false,
+        message: 'We could not save your submission right now. Please try again shortly.',
+      };
     }
 
     return {
