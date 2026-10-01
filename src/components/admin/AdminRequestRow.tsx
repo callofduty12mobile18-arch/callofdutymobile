@@ -1,12 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { CheckCircle2, XCircle, Key, Copy, Check } from 'lucide-react';
+import { CheckCircle2, XCircle, Key, Copy, Check, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import {
   approveCommunityRequestAction,
   rejectCommunityRequestAction,
+  resendCommunityRequestEmailAction,
 } from '@/server/actions/community';
 import { CommunityRequestItem } from '@/server/data/community-store';
 import { formatDate } from '@/lib/utils';
@@ -14,6 +15,7 @@ import { formatDate } from '@/lib/utils';
 export const AdminRequestRow: React.FC<{ request: CommunityRequestItem }> = ({ request }) => {
   const [loading, setLoading] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
+  const [resendStatus, setResendStatus] = React.useState<string | null>(null);
   const [issuedCreds, setIssuedCreds] = React.useState<{ email: string; password: string } | null>(
     request.generatedPassword
       ? { email: request.email, password: request.generatedPassword }
@@ -33,6 +35,23 @@ export const AdminRequestRow: React.FC<{ request: CommunityRequestItem }> = ({ r
     setLoading(true);
     await rejectCommunityRequestAction(request.id);
     setLoading(false);
+  };
+
+  const handleResend = async () => {
+    setLoading(true);
+    setResendStatus('Sending...');
+    const res = await resendCommunityRequestEmailAction(request.id);
+    setLoading(false);
+    if (res.success) {
+      setResendStatus('Sent!');
+      if (res.credentials) {
+        setIssuedCreds(res.credentials);
+      }
+      setTimeout(() => setResendStatus(null), 3000);
+    } else {
+      setResendStatus('Failed');
+      setTimeout(() => setResendStatus(null), 3000);
+    }
   };
 
   const copyCreds = () => {
@@ -125,10 +144,23 @@ export const AdminRequestRow: React.FC<{ request: CommunityRequestItem }> = ({ r
             </Button>
           </div>
         ) : (
-          <span className="text-xs text-[#00E676] font-display uppercase font-semibold inline-flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            Email Sent & Approved
-          </span>
+          <div className="flex items-center justify-end gap-2.5">
+            <span className="text-xs text-[#00E676] font-display uppercase font-semibold inline-flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Approved
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-[11px] h-7 px-2.5 border-[#2A2A2A] hover:border-[#FFE93B] text-[#ADABAB] hover:text-[#FFE93B]"
+              onClick={handleResend}
+              disabled={loading}
+              title="Re-dispatch credentials email to player"
+            >
+              <Mail className="w-3 h-3 mr-1" />
+              {resendStatus ? resendStatus : 'Resend Email'}
+            </Button>
+          </div>
         )}
       </td>
     </tr>
