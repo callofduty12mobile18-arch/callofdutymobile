@@ -42,6 +42,9 @@ const TwitterIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
 );
 
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface PlayerProfilePageProps {
   params: Promise<{ slug: string }>;
 }

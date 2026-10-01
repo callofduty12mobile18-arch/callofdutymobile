@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db/prisma';
 import { EntityType } from '@prisma/client';
-import { unstable_cache } from 'next/cache';
+import { cache } from 'react';
 
 async function fetchAllPlayerMedia() {
   try {
@@ -32,11 +32,6 @@ async function fetchAllPlayerMedia() {
   }
 }
 
-export async function getAllPlayerMedia() {
-  const getCached = unstable_cache(
-    async () => fetchAllPlayerMedia(),
-    ['all-player-media-list'],
-    { revalidate: 30, tags: ['media'] }
-  );
-  return getCached();
-}
+export const getAllPlayerMedia = cache(async () => {
+  return fetchAllPlayerMedia();
+});

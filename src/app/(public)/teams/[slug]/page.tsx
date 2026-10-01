@@ -9,6 +9,9 @@ import { Button } from '@/components/ui/Button';
 import { getTeamBySlug } from '@/server/queries/teams';
 import { formatInr } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface TeamProfilePageProps {
   params: Promise<{ slug: string }>;
 }

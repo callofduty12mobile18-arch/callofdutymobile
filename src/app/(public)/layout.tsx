@@ -2,6 +2,9 @@ import * as React from 'react';
 import { Navbar } from '@/components/common/Navbar';
 import { Footer } from '@/components/common/Footer';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function PublicLayout({
   children,
 }: {

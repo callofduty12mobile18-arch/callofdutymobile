@@ -10,6 +10,9 @@ import { getPublishedPlayers } from '@/server/queries/players';
 import { getPublishedTeams } from '@/server/queries/teams';
 import { getPublishedTournaments } from '@/server/queries/tournaments';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function HomePage() {
   const [playersData, teams, tournaments] = await Promise.all([
     getPublishedPlayers({ limit: 4 }),
