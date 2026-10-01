@@ -435,20 +435,22 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
             </div>
             <div>
               <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB] mb-1.5">
-                Display Name
+                Display Name *
               </label>
               <Input
                 name="displayName"
+                required
                 defaultValue={initialData.displayName}
                 placeholder="e.g. Jash Shah"
               />
             </div>
             <div>
               <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB] mb-1.5">
-                Real Name
+                Real Name *
               </label>
               <Input
                 name="realName"
+                required
                 defaultValue={initialData.realName}
                 placeholder="e.g. Jash Shah"
               />
@@ -474,14 +476,15 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
             </div>
             <div>
               <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB] mb-1.5">
-                State (India)
+                State (India) *
               </label>
               <select
                 name="state"
+                required
                 defaultValue={initialData.state || ''}
                 className="w-full bg-[#1F1F1F] text-white border border-[#837D72] text-sm rounded-[50px] px-5 py-2.5 focus:outline-none focus:border-[#FFE93B]"
               >
-                <option value="">Select State / UT</option>
+                <option value="" disabled>Select State / UT</option>
                 {INDIAN_STATES.map((s) => (
                   <option key={s} value={s}>
                     {s}
@@ -502,11 +505,12 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
             </div>
             <div>
               <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB] mb-1.5">
-                Player Joined
+                Player Joined *
               </label>
               <select
                 name="joinedYear"
-                defaultValue={initialData.joinedYear || '2020'}
+                required
+                defaultValue={initialData.joinedYear || ''}
                 className="w-full bg-[#1F1F1F] text-white border border-[#837D72] text-sm rounded-[50px] px-5 py-2.5 focus:outline-none focus:border-[#FFE93B]"
               >
                 {JOINED_YEARS.map((y) => (
