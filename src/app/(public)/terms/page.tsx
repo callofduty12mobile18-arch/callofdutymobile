@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/Badge';
 
 export const metadata: Metadata = {
   title: 'Terms & Conditions',
-  description: 'Terms of service, community safety rules, and user agreement for CallOfDutyMobile India platform.',
+  description: 'Terms of service, community safety rules, and user agreement for MobileRoster India platform.',
 };
 
 export default function TermsPage() {
@@ -29,7 +29,7 @@ export default function TermsPage() {
           TERMS & CONDITIONS
         </h1>
         <p className="text-sm sm:text-base text-[#ADABAB] leading-relaxed max-w-2xl">
-          Please read these terms and conditions carefully before using the CallOfDutyMobile India registry and platform services.
+          Please read these terms and conditions carefully before using the MobileRoster India registry and platform services.
         </p>
       </div>
 
@@ -43,7 +43,7 @@ export default function TermsPage() {
           </CardHeader>
           <CardContent className="space-y-3 leading-relaxed text-sm text-[#ADABAB]">
             <p>
-              By accessing and using CallOfDutyMobile India (the &quot;Platform&quot;), including exploring directory listings, submitting player profiles, or logging into the Player Studio, you agree to comply with and be bound by these Terms and Conditions.
+              By accessing and using MobileRoster India (the &quot;Platform&quot;), including exploring directory listings, submitting player profiles, or logging into the Player Studio, you agree to comply with and be bound by these Terms and Conditions.
             </p>
             <p>
               If you do not agree with any part of these terms, you must refrain from using the platform and submitting competitive data.
@@ -96,10 +96,13 @@ export default function TermsPage() {
           </CardHeader>
           <CardContent className="space-y-3 leading-relaxed text-sm text-[#ADABAB]">
             <p>
-              CallOfDutyMobile India is an independent, non-commercial community documentation archive and esports registry for Indian players.
+              MobileRoster India is an independent, non-commercial community documentation archive and esports registry for Indian players. <strong>This platform is purely informational and community-driven.</strong>
             </p>
             <p>
-              This platform is not affiliated with, endorsed by, sponsored by, or operated by Activision Publishing, Inc., TiMi Studio Group, Tencent Games, or their subsidiaries. MobileRoster and MobileRoster are registered trademarks of their respective owners.
+              <strong>Trademark Disclaimer:</strong> This platform is NOT affiliated with, endorsed by, sponsored by, or operated by Activision Publishing, Inc., TiMi Studio Group, Tencent Games, or any of their subsidiaries. 
+            </p>
+            <p>
+              "Call of Duty", "Call of Duty: Mobile", and "CODM" are registered trademarks of Activision Publishing, Inc. All other trademarks, logos, and copyrights are the property of their respective owners. Any reference to these games is made under nominative fair use for identification purposes only, to indicate the specific game the community plays.
             </p>
           </CardContent>
         </Card>
@@ -133,7 +136,7 @@ export default function TermsPage() {
           </CardHeader>
           <CardContent className="space-y-3 leading-relaxed text-sm text-[#ADABAB]">
             <p>
-              By uploading avatars, banner covers, and gaming highlight media to the platform, you grant CallOfDutyMobile India a non-exclusive license to display this content on public directory pages, search results, and tournament leaderboards.
+              By uploading avatars, banner covers, and gaming highlight media to the platform, you grant MobileRoster India a non-exclusive license to display this content on public directory pages, search results, and tournament leaderboards.
             </p>
             <p>
               You retain all ownership of your personal media and gamer brand assets.

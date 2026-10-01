@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/Badge';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Privacy policy and data protection practices of CallOfDutyMobile India platform.',
+  description: 'Privacy policy and data protection practices of MobileRoster India platform.',
 };
 
 export default function PrivacyPage() {
@@ -29,7 +29,7 @@ export default function PrivacyPage() {
           PRIVACY POLICY
         </h1>
         <p className="text-sm sm:text-base text-[#ADABAB] leading-relaxed max-w-2xl">
-          We respect your privacy and are committed to safeguarding your personal data across the CallOfDutyMobile India platform.
+          We respect your privacy and are committed to safeguarding your personal data across the MobileRoster India platform.
         </p>
       </div>
 
