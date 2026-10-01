@@ -43,7 +43,7 @@ export const Footer: React.FC = () => {
             </Link>
 
             <p className="text-xs sm:text-sm text-[#8E8E93] leading-relaxed max-w-md">
-              The premier competitive registry, tournament archive, and tier-verified scrim matchmaking network for the Indian Call of Duty: Mobile esports community.
+              The premier competitive registry, tournament archive, and tier-verified scrim matchmaking network for the Indian MobileRoster esports community.
             </p>
 
 

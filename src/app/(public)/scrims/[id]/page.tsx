@@ -13,10 +13,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const scrim = await getScrimById(id);
-  if (!scrim) return { title: 'Scrim Not Found | CODM India' };
+  if (!scrim) return { title: 'Scrim Not Found | MOBILEROSTER' };
 
   return {
-    title: `${scrim.hostTeamName} vs ${scrim.opponentTeamName || 'Open Slot'} Scrim Lobby | CODM India`,
+    title: `${scrim.hostTeamName} vs ${scrim.opponentTeamName || 'Open Slot'} Scrim Lobby | MOBILEROSTER`,
     description: `Competitive scrimmage lobby for ${scrim.hostTeamName} scheduled at ${scrim.scheduledTime}.`,
   };
 }

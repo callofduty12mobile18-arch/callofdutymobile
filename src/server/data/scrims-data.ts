@@ -27,7 +27,7 @@ export interface ScrimLobby {
   isVisible?: boolean;
 }
 
-export const CODM_COMPETITIVE_MAP_POOL = [
+export const MobileRoster_COMPETITIVE_MAP_POOL = [
   { name: 'Summit', modes: ['Hardpoint', 'Search & Destroy', 'Control'], image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80' },
   { name: 'Raid', modes: ['Hardpoint', 'Search & Destroy', 'Control'], image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=600&q=80' },
   { name: 'Standoff', modes: ['Hardpoint', 'Search & Destroy', 'Control'], image: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?auto=format&fit=crop&w=600&q=80' },

@@ -19,11 +19,11 @@ export default function SupportPage() {
     },
     {
       q: 'I did not receive my login credentials. What should I do?',
-      a: 'Check your spam or promotions folder for an email from support@callofdutymobile.in. If you still cannot find it, send us an email with your registered IGN and email address.',
+      a: 'Check your spam or promotions folder for an email from support@MobileRoster.in. If you still cannot find it, send us an email with your registered IGN and email address.',
     },
     {
       q: 'How do I update my IGN, UID, or competitive team?',
-      a: 'Log into your Player Studio at /player/login. You can edit your IGN, CODM UID, competitive role, team tag, bio, and social media channels anytime.',
+      a: 'Log into your Player Studio at /player/login. You can edit your IGN, MobileRoster UID, competitive role, team tag, bio, and social media channels anytime.',
     },
     {
       q: 'How do I report an incorrect profile or tournament record?',
@@ -66,10 +66,10 @@ export default function SupportPage() {
             </p>
           </div>
           <a
-            href="mailto:support@callofdutymobile.in"
+            href="mailto:support@MobileRoster.in"
             className="inline-flex items-center text-xs font-display uppercase tracking-wider text-[#FFE93B] hover:underline pt-2 font-bold"
           >
-            support@callofdutymobile.in
+            support@MobileRoster.in
           </a>
         </Card>
 
@@ -80,7 +80,7 @@ export default function SupportPage() {
           <div>
             <h3 className="font-display font-bold text-white text-base">Discord Community</h3>
             <p className="text-xs text-[#ADABAB] mt-1 leading-relaxed">
-              Connect with Indian CODM scrim organizers, players, and platform mods.
+              Connect with Indian MobileRoster scrim organizers, players, and platform mods.
             </p>
           </div>
           <Link

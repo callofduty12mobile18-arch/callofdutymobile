@@ -83,7 +83,7 @@ export const TournamentCard: React.FC<TournamentCardProps> = ({ tournament }) =>
           <div className="flex items-start gap-3.5 py-1">
             <div className="w-12 h-12 rounded-[2px] overflow-hidden border border-[#2A2A2A] group-hover:border-[#FFE93B]/60 flex-shrink-0 bg-black">
               <img
-                src="/photos/codm-championship.jpg"
+                src="/photos/MobileRoster-championship.jpg"
                 alt={tournament.name}
                 className="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity"
               />

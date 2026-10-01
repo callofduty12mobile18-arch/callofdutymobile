@@ -26,7 +26,7 @@ export interface PlayerAuthResponse {
   redirectUrl?: string;
 }
 
-const COOKIE_NAME = 'codm_player_session';
+const COOKIE_NAME = 'MobileRoster_player_session';
 
 export async function loginPlayerAction(
   prevState: PlayerAuthResponse | null,
@@ -203,7 +203,7 @@ export async function updatePlayerSelfProfile(
     ? (primaryRoleInput as PlayerRole)
     : PlayerRole.FLEX;
   const state = field('state', 100);
-  const codmUid = field('codmUid', 100);
+  const MobileRosterUid = field('MobileRosterUid', 100);
   const joinedYear = field('joinedYear', 10000);
   const teamName = field('teamName', 100);
   const teamTag = field('teamTag', 10);
@@ -215,8 +215,8 @@ export async function updatePlayerSelfProfile(
     return { success: false, message: 'IGN / Gamer Tag is required.' };
   }
 
-  if (!codmUid) {
-    return { success: false, message: 'CODM UID is required.' };
+  if (!MobileRosterUid) {
+    return { success: false, message: 'MobileRoster UID is required.' };
   }
 
   const avatarRaw = field('avatarUrl', 500);
@@ -297,7 +297,7 @@ export async function updatePlayerSelfProfile(
               realName: realName || null,
               primaryRole,
               state: state || null,
-              city: codmUid || null,
+              city: MobileRosterUid || null,
               avatarUrl,
               coverImageUrl,
               bio: bio || null,
@@ -316,7 +316,7 @@ export async function updatePlayerSelfProfile(
               realName: realName || null,
               primaryRole,
               state: state || null,
-              city: codmUid || null,
+              city: MobileRosterUid || null,
               avatarUrl,
               coverImageUrl,
               bio: bio || null,

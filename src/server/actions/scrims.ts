@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { scrimLobbiesStore, ScrimLobby, CODM_COMPETITIVE_MAP_POOL } from '../data/scrims-data';
+import { scrimLobbiesStore, ScrimLobby, MobileRoster_COMPETITIVE_MAP_POOL } from '../data/scrims-data';
 import { recordAuditLog } from '../data/audit-store';
 import { randomInt, randomUUID } from 'crypto';
 import { getPlayerSession } from './player-auth';
@@ -254,7 +254,7 @@ export async function acceptScrimAction(scrimId: string) {
   scrim.status = 'CONFIRMED';
   scrim.roomCredentials = {
     roomId: `${randomInt(1000, 10000)}-${randomInt(1000, 10000)}`,
-    roomPassword: `codm${randomInt(100000, 1000000)}`,
+    roomPassword: `MobileRoster${randomInt(100000, 1000000)}`,
     spectatorPassword: `spec${randomInt(100000, 1000000)}`,
   };
 
@@ -278,7 +278,7 @@ export async function submitVetoAction(scrimId: string, actionType: 'BAN' | 'PIC
   if (session.email !== turnOwner) {
     return { success: false, message: 'It is not your turn.' };
   }
-  const map = CODM_COMPETITIVE_MAP_POOL.find((m) => m.name === mapName);
+  const map = MobileRoster_COMPETITIVE_MAP_POOL.find((m) => m.name === mapName);
   if (!map || (actionType !== 'BAN' && actionType !== 'PICK')) {
     return { success: false, message: 'Invalid map or action.' };
   }

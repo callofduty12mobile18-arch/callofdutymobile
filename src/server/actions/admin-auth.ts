@@ -26,7 +26,7 @@ export interface AdminAuthResponse {
   redirectUrl?: string;
 }
 
-const ADMIN_COOKIE_NAME = 'codm_admin_session';
+const ADMIN_COOKIE_NAME = 'MobileRoster_admin_session';
 
 /**
  * Retrieve and cryptographically verify the current admin session from cookie.
@@ -63,7 +63,7 @@ export async function requireAdminSession(): Promise<AdminSession> {
       where: {
         OR: [
           { email: { equals: session.email, mode: 'insensitive' } },
-          { email: { equals: `${session.email}@callofdutymobile.in`, mode: 'insensitive' } },
+          { email: { equals: `${session.email}@MobileRoster.in`, mode: 'insensitive' } },
           { email: { equals: session.username, mode: 'insensitive' } },
         ],
         role: RoleType.ADMIN,
@@ -141,11 +141,11 @@ export async function loginAdminAction(
         OR: [
           { email: { equals: identifier, mode: 'insensitive' as const } },
           { email: { equals: cleanUsername, mode: 'insensitive' as const } },
-          { email: { equals: `${cleanUsername}@callofdutymobile.in`, mode: 'insensitive' as const } },
+          { email: { equals: `${cleanUsername}@MobileRoster.in`, mode: 'insensitive' as const } },
           { email: { equals: `${cleanUsername}@gmail.com`, mode: 'insensitive' as const } },
           ...(normalizedUsername === 'ashwin2019'
             ? [
-                { email: { equals: 'ashwin2019@callofdutymobile.in', mode: 'insensitive' as const } },
+                { email: { equals: 'ashwin2019@MobileRoster.in', mode: 'insensitive' as const } },
                 { email: { equals: 'callofduty12mobile18@gmail.com', mode: 'insensitive' as const } },
               ]
             : []),

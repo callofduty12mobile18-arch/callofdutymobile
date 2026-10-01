@@ -23,8 +23,8 @@ import { prisma } from '@/lib/db/prisma';
 import { PublishStatus } from '@prisma/client';
 
 export const metadata: Metadata = {
-  title: 'About Us & Vision | Indian CODM Player Directory',
-  description: 'The official open directory and competitive profile archive for Indian Call of Duty: Mobile players, clans, and teams.',
+  title: 'About Us & Vision | Indian MobileRoster Player Directory',
+  description: 'The official open directory and competitive profile archive for Indian MobileRoster players, clans, and teams.',
 };
 
 export default async function AboutPage() {
@@ -39,7 +39,7 @@ export default async function AboutPage() {
       title: 'Verified Player Directory',
       tag: 'DIRECTORY',
       color: 'text-[#FFE93B]',
-      description: 'The definitive database documenting Indian Call of Duty: Mobile players — tracking competitive roles (Slayer, Anchor, OBJ, IGL, Sniper), in-game IDs, social handles, and verified gamer tags.',
+      description: 'The definitive database documenting Indian MobileRoster players — tracking competitive roles (Slayer, Anchor, OBJ, IGL, Sniper), in-game IDs, social handles, and verified gamer tags.',
     },
     {
       icon: Users,
@@ -104,18 +104,18 @@ export default async function AboutPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[3px] bg-[#1F1F1F] border border-[#FFE93B]/40 text-[#FFE93B] text-xs font-display tracking-widest uppercase font-bold">
             <BookOpen className="w-3.5 h-3.5" />
-            <span>INDIAN CODM PLAYER & CLAN DIRECTORY</span>
+            <span>INDIAN MobileRoster PLAYER & CLAN DIRECTORY</span>
           </div>
 
           <h1 className="font-display font-black text-4xl sm:text-6xl lg:text-7xl text-white uppercase tracking-tight leading-[1.05]">
             THE OFFICIAL INDIAN <br />
             <span className="text-[#FFE93B] drop-shadow-[0_0_25px_rgba(255,233,59,0.25)]">
-              CODM PLAYER DIRECTORY
+              MobileRoster PLAYER DIRECTORY
             </span>
           </h1>
 
           <p className="max-w-3xl mx-auto text-[#ADABAB] text-sm sm:text-base md:text-lg leading-relaxed font-sans">
-            <strong className="text-white">Call of Duty: Mobile India</strong> is the centralized registry and player directory connecting gamers, clans, and tournament organizers across India into one verified ecosystem.
+            <strong className="text-white">MobileRoster</strong> is the centralized registry and player directory connecting gamers, clans, and tournament organizers across India into one verified ecosystem.
           </p>
 
           <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
@@ -171,7 +171,7 @@ export default async function AboutPage() {
               </h2>
 
               <p className="text-sm text-[#CCCCCC] leading-relaxed">
-                Finding genuine player stats, team rosters, and active clan members in Call of Duty: Mobile used to be difficult with fragmented social posts. 
+                Finding genuine player stats, team rosters, and active clan members in MobileRoster used to be difficult with fragmented social posts. 
               </p>
 
               <p className="text-sm text-[#CCCCCC] leading-relaxed">
@@ -212,10 +212,10 @@ export default async function AboutPage() {
                 <div className="flex items-center justify-between border-b border-[#2A2A2A] pb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-[2px] bg-[#FFE93B]/10 border border-[#FFE93B]/30 flex items-center justify-center">
-                      <img src="/photos/logo1.png" alt="CODM India" className="w-7 h-7 object-contain" />
+                      <img src="/photos/logo1.png" alt="MOBILEROSTER" className="w-7 h-7 object-contain" />
                     </div>
                     <div>
-                      <span className="font-display font-black text-sm text-white block">CODM INDIA DIRECTORY</span>
+                      <span className="font-display font-black text-sm text-white block">MOBILEROSTER DIRECTORY</span>
                       <span className="text-[10px] text-[#FFE93B] font-mono uppercase">Community Database</span>
                     </div>
                   </div>
@@ -242,7 +242,7 @@ export default async function AboutPage() {
 
                 <div className="pt-2 border-t border-[#2A2A2A] flex items-center justify-between text-xs text-[#837D72]">
                   <span>Independent Community Portal</span>
-                  <span className="font-mono text-[#FFE93B]">CallOfDutyMobile.in</span>
+                  <span className="font-mono text-[#FFE93B]">MobileRoster.in</span>
                 </div>
               </div>
             </div>
@@ -339,7 +339,7 @@ export default async function AboutPage() {
             CLAIM YOUR PLAYER PROFILE TODAY
           </h2>
           <p className="text-xs sm:text-sm text-[#ADABAB] max-w-xl mx-auto leading-relaxed">
-            Join hundreds of verified Call of Duty: Mobile players and clans across India. Create your profile to be discoverable in the directory.
+            Join hundreds of verified MobileRoster players and clans across India. Create your profile to be discoverable in the directory.
           </p>
 
           <div className="pt-4 flex flex-wrap items-center justify-center gap-4">

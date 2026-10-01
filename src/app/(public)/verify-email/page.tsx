@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 
 export const metadata: Metadata = {
-  title: 'Verify Player Email | CODM India',
-  description: 'Verify your player email address to activate your Call of Duty Mobile competitive profile.',
+  title: 'Verify Player Email | MOBILEROSTER',
+  description: 'Verify your player email address to activate your MobileRoster Mobile competitive profile.',
 };
 
 export default async function VerifyEmailPage({
@@ -78,7 +78,7 @@ export default async function VerifyEmailPage({
       <div className="relative z-10 max-w-md w-full mx-auto space-y-8">
         <div className="text-center space-y-2">
           <div className="w-16 h-16 rounded-[2px] overflow-hidden flex items-center justify-center mx-auto mb-4 bg-[#141414] border border-[#2A2A2A]">
-            <img src="/photos/logo1.png" alt="CODM India Logo" className="w-12 h-12 object-contain" />
+            <img src="/photos/logo1.png" alt="MOBILEROSTER Logo" className="w-12 h-12 object-contain" />
           </div>
           <h1 className="font-display font-black text-2xl sm:text-3xl text-white uppercase tracking-tight">
             EMAIL <span className="text-[#FFE93B]">VERIFICATION</span>

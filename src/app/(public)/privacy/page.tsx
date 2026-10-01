@@ -47,7 +47,7 @@ export default function PrivacyPage() {
             </p>
             <ul className="list-disc list-inside space-y-2 text-xs sm:text-sm">
               <li>
-                <strong>Public Gaming Data:</strong> In-game name (IGN), CODM numeric UID, competitive role, team affiliation, state of residence, and social media handles.
+                <strong>Public Gaming Data:</strong> In-game name (IGN), MobileRoster numeric UID, competitive role, team affiliation, state of residence, and social media handles.
               </li>
               <li>
                 <strong>Contact Information:</strong> Email address for dispatching access credentials, verification updates, and security alerts.

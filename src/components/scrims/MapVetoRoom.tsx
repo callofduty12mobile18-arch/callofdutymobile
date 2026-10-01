@@ -5,7 +5,7 @@ import { Shield, Swords, Ban, Check, Copy, CheckCircle2, Lock, Flame } from 'luc
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { ScrimLobby, CODM_COMPETITIVE_MAP_POOL } from '@/server/data/scrims-data';
+import { ScrimLobby, MobileRoster_COMPETITIVE_MAP_POOL } from '@/server/data/scrims-data';
 import { challengeScrimAction, acceptScrimAction, submitVetoAction } from '@/server/actions/scrims';
 
 interface MapVetoRoomProps {
@@ -21,7 +21,7 @@ export const MapVetoRoom: React.FC<MapVetoRoomProps> = ({ scrim }) => {
 
   const copyCredentials = () => {
     if (!scrim.roomCredentials) return;
-    const text = `CODM Scrim Lobby\nRoom ID: ${scrim.roomCredentials.roomId}\nPassword: ${scrim.roomCredentials.roomPassword}\nSpectator: ${scrim.roomCredentials.spectatorPassword || 'N/A'}`;
+    const text = `MobileRoster Scrim Lobby\nRoom ID: ${scrim.roomCredentials.roomId}\nPassword: ${scrim.roomCredentials.roomPassword}\nSpectator: ${scrim.roomCredentials.spectatorPassword || 'N/A'}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -163,7 +163,7 @@ export const MapVetoRoom: React.FC<MapVetoRoomProps> = ({ scrim }) => {
               <Flame className="w-5 h-5 text-[#FFE93B]" /> Competitive Map Veto Pool
             </h2>
             <p className="text-xs text-[#ADABAB] mt-0.5">
-              Turn-based Pick & Ban rotation according to official CODM Stage Rules.
+              Turn-based Pick & Ban rotation according to official MobileRoster Stage Rules.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -213,7 +213,7 @@ export const MapVetoRoom: React.FC<MapVetoRoomProps> = ({ scrim }) => {
 
         {/* Maps Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
-          {CODM_COMPETITIVE_MAP_POOL.map((map) => {
+          {MobileRoster_COMPETITIVE_MAP_POOL.map((map) => {
             const banned = isBanned(map.name);
             const picked = isPicked(map.name);
 

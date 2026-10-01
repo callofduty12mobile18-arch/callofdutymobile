@@ -65,13 +65,13 @@ export async function generateMetadata({
     ? player.seoTitle.split(',').map((k: string) => k.trim()).filter(Boolean)
     : [];
 
-  const title = `${player.ign}${player.displayName ? ` (${player.displayName})` : ''} — Indian Call of Duty Mobile Player`;
+  const title = `${player.ign}${player.displayName ? ` (${player.displayName})` : ''} — Indian MobileRoster Mobile Player`;
   const description =
     player.seoDescription ||
     player.bio ||
-    `Official Call of Duty Mobile competitive profile, championships, and team history for Indian CODM competitor ${player.ign}.`;
+    `Official MobileRoster Mobile competitive profile, championships, and team history for Indian MobileRoster competitor ${player.ign}.`;
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://callofdutymobile.in';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://MobileRoster.in';
 
   return {
     title,
@@ -79,9 +79,9 @@ export async function generateMetadata({
     keywords: [
       player.ign,
       player.displayName || '',
-      'Call of Duty Mobile',
-      'CODM India',
-      'Indian CODM Player',
+      'MobileRoster Mobile',
+      'MOBILEROSTER',
+      'Indian MobileRoster Player',
       player.primaryRole,
       ...parsedKeywords,
     ].filter(Boolean),
@@ -138,11 +138,11 @@ export default async function PlayerProfilePage({
     '@type': 'Person',
     name: player.displayName || player.ign,
     alternateName: alternateNames,
-    jobTitle: `Call of Duty Mobile Competitive Player (${player.primaryRole})`,
+    jobTitle: `MobileRoster Mobile Competitive Player (${player.primaryRole})`,
     nationality: 'Indian',
-    description: player.seoDescription || player.bio || `Official Call of Duty Mobile player profile for ${player.ign}.`,
+    description: player.seoDescription || player.bio || `Official MobileRoster Mobile player profile for ${player.ign}.`,
     image: player.avatarUrl || undefined,
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://callofdutymobile.in'}/players/${player.slug}`,
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://MobileRoster.in'}/players/${player.slug}`,
     sameAs: sameAsLinks.length > 0 ? sameAsLinks : undefined,
     ...(currentTeam && {
       memberOf: {

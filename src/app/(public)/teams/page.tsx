@@ -10,9 +10,9 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: 'Indian CODM Competitive Teams & Rosters | CODM India',
+  title: 'Indian MobileRoster Competitive Teams & Rosters | MOBILEROSTER',
   description:
-    'Directory of active competitive Call of Duty: Mobile teams, starting rosters, organizations, and championships in India.',
+    'Directory of active competitive MobileRoster teams, starting rosters, organizations, and championships in India.',
 };
 
 export default async function TeamsPage() {

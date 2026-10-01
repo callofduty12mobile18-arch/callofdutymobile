@@ -91,7 +91,7 @@ export async function createTournamentAction(
   const admin = await requireAdminSession();
 
   const name = (formData.get('name') as string)?.trim();
-  const organizer = (formData.get('organizer') as string)?.trim() || 'CODM India Editorial';
+  const organizer = (formData.get('organizer') as string)?.trim() || 'MOBILEROSTER Editorial';
   const tier = (formData.get('tier') as TournamentTier) || TournamentTier.COMMUNITY;
   const status = (formData.get('status') as TournamentStatus) || TournamentStatus.UPCOMING;
   const publishStatus = (formData.get('publishStatus') as PublishStatus) || PublishStatus.PUBLISHED;
