@@ -423,11 +423,14 @@ export const OrganizerPermissionsCard: React.FC<{
                       <div className="relative flex items-center">
                         <span className="absolute left-3 text-[#FFE93B] font-bold text-xs pointer-events-none">₹</span>
                         <input
-                          type="text"
+                          type="number"
+                          inputMode="numeric"
                           name="customPrizeAmount"
                           required
-                          placeholder="e.g. 50,000 INR"
-                          className="w-full bg-[#1C1C1C] border border-[#FFE93B]/40 rounded-[2px] pl-7 pr-3 py-1.5 text-xs text-white placeholder-[#666] focus:outline-none focus:border-[#FFE93B]"
+                          min={0}
+                          placeholder="e.g. 50000"
+                          onKeyDown={(e) => { if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault(); }}
+                          className="w-full bg-[#1C1C1C] border border-[#FFE93B]/40 rounded-[2px] pl-7 pr-3 py-1.5 text-xs text-white placeholder-[#666] focus:outline-none focus:border-[#FFE93B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                       </div>
                       <p className="text-[10px] text-[#837D72] mt-1">Specify total tournament prize pool</p>
@@ -444,11 +447,14 @@ export const OrganizerPermissionsCard: React.FC<{
                       <div className="relative flex items-center">
                         <span className="absolute left-3 text-[#FFE93B] font-bold text-xs pointer-events-none">₹</span>
                         <input
-                          type="text"
+                          type="number"
+                          inputMode="numeric"
                           name="entryFee"
                           required
-                          placeholder="e.g. 100 per team / 50 per player"
-                          className="w-full bg-[#1C1C1C] border border-[#FFE93B]/40 rounded-[2px] pl-7 pr-3 py-1.5 text-xs text-white placeholder-[#666] focus:outline-none focus:border-[#FFE93B]"
+                          min={0}
+                          placeholder="e.g. 100"
+                          onKeyDown={(e) => { if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault(); }}
+                          className="w-full bg-[#1C1C1C] border border-[#FFE93B]/40 rounded-[2px] pl-7 pr-3 py-1.5 text-xs text-white placeholder-[#666] focus:outline-none focus:border-[#FFE93B] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                       </div>
                       <p className="text-[10px] text-[#837D72] mt-1">Specify fee per team or player</p>
