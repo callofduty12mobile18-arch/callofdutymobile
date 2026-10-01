@@ -91,7 +91,7 @@ export default async function PlayerDashboardPage() {
           ign: existingPlayer?.ign || session.ign,
           displayName: existingPlayer?.displayName || '',
           realName: existingPlayer?.realName || '',
-          primaryRole: existingPlayer?.primaryRole || 'SLAYER',
+          primaryRole: existingPlayer?.primaryRole || 'ENTRY_FRAGGER',
           state: existingPlayer?.state || '',
           codmUid: existingPlayer?.city || '',
           joinedYear: existingPlayer?.competitiveHistory || '',

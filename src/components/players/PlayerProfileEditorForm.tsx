@@ -58,13 +58,17 @@ interface InitialData {
 }
 
 const ROLES = [
-  { value: 'SLAYER', label: 'Slayer (Entry Fragger / High Fragging)' },
-  { value: 'ANCHOR', label: 'Anchor (Spawn Control / Hardpoint Anchor)' },
-  { value: 'OBJ', label: 'Objective (OBJ / Hill Time / Bomb Carrier)' },
-  { value: 'IGL', label: 'In-Game Leader (IGL / Strategist)' },
-  { value: 'SNIPER', label: 'Sniper (Precision / Search & Destroy)' },
-  { value: 'FLEX', label: 'Flex (Versatile SMG & AR)' },
-  { value: 'SUPPORT', label: 'Support (Trade Fragger)' },
+  { value: 'ENTRY_FRAGGER', label: 'Entry Fragger' },
+  { value: 'FRAGGER_SLAYER', label: 'Fragger / Slayer' },
+  { value: 'ANCHOR', label: 'Anchor' },
+  { value: 'SCOUT_RECON', label: 'Scout / Recon' },
+  { value: 'SUPPORT', label: 'Support' },
+  { value: 'IGL', label: 'IGL (In-Game Leader)' },
+  { value: 'OVERWATCH', label: 'Overwatch' },
+  { value: 'RUSHER', label: 'Rusher' },
+  { value: 'FLANKER', label: 'Flanker' },
+  { value: 'MEDIC_REVIVER', label: 'Medic / Reviver' },
+  { value: 'OBJECTIVE_PLAYER', label: 'Objective Player' },
 ];
 
 export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = ({
