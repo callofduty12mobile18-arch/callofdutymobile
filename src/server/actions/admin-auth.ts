@@ -45,35 +45,47 @@ export async function getAdminSession(): Promise<AdminSession | null> {
 }
 
 /**
- * Guard function to be called inside every admin server action.
- * Throws an Unauthorized error if the caller is not an authenticated Admin.
+ * Guard function to be called inside admin server actions.
+ * If the user is unauthenticated or session has expired, redirect cleanly to /admin/login.
  */
 export async function requireAdminSession(): Promise<AdminSession> {
   const session = await getAdminSession();
   if (!session || session.role !== 'ADMIN') {
-    throw new Error('Unauthorized: Administrator privilege required to perform this action.');
+    redirect('/admin/login');
   }
-  // Re-check the database so demoted or deleted admins lose access immediately.
-  const dbUser = await prisma.user.findFirst({
-    where: {
-      OR: [
-        { email: { equals: session.email, mode: 'insensitive' } },
-        { email: { equals: `${session.email}@callofdutymobile.in`, mode: 'insensitive' } },
-        { email: { equals: session.username, mode: 'insensitive' } },
-      ],
-      role: RoleType.ADMIN,
-    },
-    select: { id: true },
-  });
-  if (!dbUser) {
-    throw new Error('Unauthorized: Administrator privilege required to perform this action.');
+
+  // Verify against database to ensure admin has not been deleted or demoted
+  try {
+    const dbUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: { equals: session.email, mode: 'insensitive' } },
+          { email: { equals: `${session.email}@callofdutymobile.in`, mode: 'insensitive' } },
+          { email: { equals: session.username, mode: 'insensitive' } },
+        ],
+        role: RoleType.ADMIN,
+      },
+      select: { id: true },
+    });
+
+    if (!dbUser) {
+      redirect('/admin/login');
+    }
+  } catch (err) {
+    // If it's a Next.js redirect exception, rethrow it so Next.js handles the redirection
+    if (err && typeof err === 'object' && 'digest' in err && typeof (err as { digest?: string }).digest === 'string' && (err as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) {
+      throw err;
+    }
+    console.error('Database check error in requireAdminSession:', err);
+    redirect('/admin/login');
   }
+
   return session;
 }
 
 /**
  * Admin login server action.
- * Authenticates exclusively against the database without any hardcoded credentials.
+ * Authenticates exclusively against the database without hardcoded credentials.
  */
 export async function loginAdminAction(
   prevState: AdminAuthResponse | null,
