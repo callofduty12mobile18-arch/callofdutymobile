@@ -268,15 +268,8 @@ export async function updatePlayerSelfProfile(
   }
 
   // Live PostgreSQL database update
-  let isEmailVerified = false;
   try {
-    const userAccount = await prisma.user.findUnique({
-      where: { id: session.playerId },
-      select: { emailVerified: true },
-    });
-
-    isEmailVerified = !!userAccount?.emailVerified;
-    const targetPublishStatus = isEmailVerified ? PublishStatus.PUBLISHED : PublishStatus.DRAFT;
+    const targetPublishStatus = PublishStatus.PUBLISHED;
 
     const teamSlug = teamName ? teamName.toLowerCase().replace(/[^a-z0-9]/g, '-') : null;
 
@@ -495,9 +488,7 @@ export async function updatePlayerSelfProfile(
 
   return {
     success: true,
-    message: isEmailVerified
-      ? 'Profile saved and published to the public directory!'
-      : 'Profile saved in Draft mode! Please verify your email via the verification link sent to your inbox to publish your profile publicly.',
+    message: 'Profile saved and published to the Player Directory!',
     slug: newSlug,
   };
 }
