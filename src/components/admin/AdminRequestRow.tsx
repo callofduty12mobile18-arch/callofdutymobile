@@ -56,7 +56,7 @@ export const AdminRequestRow: React.FC<{ request: CommunityRequestItem }> = ({ r
 
   const copyCreds = () => {
     if (!issuedCreds) return;
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://callofdutymobile-one.vercel.app';
     navigator.clipboard.writeText(
       `CallOfDutyMobile Access\nEmail: ${issuedCreds.email}\nKey: ${issuedCreds.password}\nLogin URL: ${origin}/player/login`
     );

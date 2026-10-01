@@ -9,6 +9,16 @@ interface SendCredentialsOptions {
   isInvitation?: boolean;
 }
 
+function getSiteUrl(): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')) {
+    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return 'https://callofdutymobile-one.vercel.app';
+}
+
 export function getEmailTransporter() {
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
   const port = parseInt(process.env.SMTP_PORT || '465', 10);
@@ -45,7 +55,7 @@ export async function sendPlayerCredentialsEmail({
       return { success: false, error: 'SMTP not configured' };
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const siteUrl = getSiteUrl();
     const loginUrl = `${siteUrl}/player/login`;
     const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Esports" <${process.env.SMTP_USER || 'callofduty12mobile18@gmail.com'}>`;
 
@@ -233,7 +243,7 @@ export async function sendBroadcastEmail({
     }
 
     const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile India" <${process.env.SMTP_USER || 'callofduty12mobile18@gmail.com'}>`;
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const siteUrl = getSiteUrl();
     const targetCtaUrl = ctaUrl
       ? safeHttpUrl(ctaUrl.startsWith('/') ? `${siteUrl}${ctaUrl}` : ctaUrl) ?? undefined
       : undefined;
@@ -370,7 +380,7 @@ export async function sendAccountLockoutEmail({
     }
 
     const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Security" <${process.env.SMTP_USER || 'callofduty12mobile18@gmail.com'}>`;
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const siteUrl = getSiteUrl();
 
     const htmlContent = `
 <!DOCTYPE html>
@@ -449,7 +459,7 @@ export async function sendEmailVerificationEmail({
       return { success: false, error: 'SMTP not configured' };
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const siteUrl = getSiteUrl();
     const verificationUrl = `${siteUrl}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(to)}`;
     const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Verification" <${process.env.SMTP_USER || 'callofduty12mobile18@gmail.com'}>`;
 
