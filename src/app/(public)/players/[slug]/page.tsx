@@ -1,3 +1,4 @@
+import { jsonForScript } from '@/lib/security';
 import * as React from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -157,7 +158,7 @@ export default async function PlayerProfilePage({
       {/* JSON-LD Script */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonForScript(jsonLd) }}
       />
 
       {/* 1. HERO / PROFILE HEADER WITH COVER BANNER */}

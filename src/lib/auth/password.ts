@@ -10,24 +10,24 @@ export async function hashPassword(plainText: string): Promise<string> {
 }
 
 /**
- * Verify a plain text password against a hashed (or legacy plain text) password.
+ * Verify a plain text password against a hashed password.
  */
-export async function verifyPassword(plainText: string, storedHashOrPlain: string): Promise<boolean> {
-  if (!plainText || !storedHashOrPlain) return false;
+export async function verifyPassword(plainText: string, storedHash: string): Promise<boolean> {
+  if (!plainText || !storedHash) return false;
 
   // If stored value is a bcrypt hash ($2a$, $2b$, $2y$)
   if (
-    storedHashOrPlain.startsWith('$2a$') ||
-    storedHashOrPlain.startsWith('$2b$') ||
-    storedHashOrPlain.startsWith('$2y$')
+    storedHash.startsWith('$2a$') ||
+    storedHash.startsWith('$2b$') ||
+    storedHash.startsWith('$2y$')
   ) {
     try {
-      return await bcrypt.compare(plainText, storedHashOrPlain);
+      return await bcrypt.compare(plainText, storedHash);
     } catch {
       return false;
     }
   }
 
-  // Fallback for legacy plain text passwords
-  return plainText === storedHashOrPlain;
+  // Non-bcrypt stored values (legacy plaintext) are rejected.
+  return false;
 }

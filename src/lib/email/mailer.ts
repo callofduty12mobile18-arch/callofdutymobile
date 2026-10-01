@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { escapeHtml, safeHttpUrl } from '@/lib/security';
 
 interface SendCredentialsOptions {
   to: string;
@@ -98,7 +99,7 @@ export async function sendPlayerCredentialsEmail({
           <tr>
             <td style="padding: 32px;">
               <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 24px; color: #ADABAB;">
-                Hello <strong style="color: #FFFFFF;">${fullName || ign}</strong>,
+                Hello <strong style="color: #FFFFFF;">${escapeHtml(fullName || ign)}</strong>,
               </p>
               <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 22px; color: #ADABAB;">
                 ${leadMessage}
@@ -118,7 +119,7 @@ export async function sendPlayerCredentialsEmail({
                           LOGIN EMAIL:
                         </td>
                         <td style="padding-bottom: 12px; font-size: 14px; font-family: monospace; color: #FFFFFF; font-weight: bold;">
-                          ${to}
+                          ${escapeHtml(to)}
                         </td>
                       </tr>
                       <tr>
@@ -126,7 +127,7 @@ export async function sendPlayerCredentialsEmail({
                           PLAYER IGN:
                         </td>
                         <td style="padding-bottom: 12px; font-size: 14px; font-family: monospace; color: #FFFFFF; font-weight: bold;">
-                          ${ign}
+                          ${escapeHtml(ign)}
                         </td>
                       </tr>
                       <tr>
@@ -134,7 +135,7 @@ export async function sendPlayerCredentialsEmail({
                           ACCESS KEY:
                         </td>
                         <td style="font-size: 16px; font-family: monospace; color: #FFE93B; font-weight: 900; letter-spacing: 1px;">
-                          ${password}
+                          ${escapeHtml(password)}
                         </td>
                       </tr>
                     </table>
@@ -232,9 +233,11 @@ export async function sendBroadcastEmail({
 
     const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile India" <${process.env.SMTP_USER}>`;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-    const targetCtaUrl = ctaUrl ? (ctaUrl.startsWith('http') ? ctaUrl : `${siteUrl}${ctaUrl}`) : undefined;
+    const targetCtaUrl = ctaUrl
+      ? safeHttpUrl(ctaUrl.startsWith('/') ? `${siteUrl}${ctaUrl}` : ctaUrl) ?? undefined
+      : undefined;
 
-    const formattedBody = bodyContent
+    const formattedBody = escapeHtml(bodyContent)
       .replace(/\n\n/g, '</p><p style="margin: 0 0 16px 0; font-size: 14px; line-height: 24px; color: #D1D1D1;">')
       .replace(/\n/g, '<br>');
 
@@ -243,7 +246,7 @@ export async function sendBroadcastEmail({
 <html>
 <head>
   <meta charset="utf-8">
-  <title>${subject}</title>
+  <title>${escapeHtml(subject)}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #0A0A0A; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF;">
   <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0A0A0A; padding: 40px 20px;">
@@ -263,10 +266,10 @@ export async function sendBroadcastEmail({
                 <tr>
                   <td>
                     <span style="display: inline-block; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #FFE93B; font-weight: bold; margin-bottom: 8px;">
-                      ${badgeTitle}
+                      ${escapeHtml(badgeTitle)}
                     </span>
                     <h1 style="margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase; color: #FFFFFF; line-height: 28px;">
-                      ${headline || subject}
+                      ${escapeHtml(headline || subject)}
                     </h1>
                   </td>
                 </tr>
@@ -290,8 +293,8 @@ export async function sendBroadcastEmail({
               <table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin-top: 24px; margin-bottom: 16px;">
                 <tr>
                   <td align="center" style="background-color: #FFE93B; border-radius: 2px;">
-                    <a href="${targetCtaUrl}" target="_blank" style="display: inline-block; padding: 14px 28px; font-size: 13px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; color: #000000; text-decoration: none;">
-                      ${ctaText} &rarr;
+                    <a href="${escapeHtml(targetCtaUrl)}" target="_blank" style="display: inline-block; padding: 14px 28px; font-size: 13px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; color: #000000; text-decoration: none;">
+                      ${escapeHtml(ctaText)} &rarr;
                     </a>
                   </td>
                 </tr>

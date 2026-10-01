@@ -231,5 +231,6 @@ async function fetchCommunityRequestsList() {
 }
 
 export async function getCommunityRequestsList() {
+  await requireAdminSession();
   return fetchCommunityRequestsList();
 }

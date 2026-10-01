@@ -13,3 +13,8 @@ Official competitive community directory, player profiles, tournament registry, 
 - **Database**: PostgreSQL with Prisma ORM
 - **Styling**: Tailwind CSS & Modern Dark/Esports Aesthetics
 - **Email Service**: Nodemailer SMTP with customized responsive templates
+
+## Required environment
+- `SESSION_SECRET` — at least 32 random characters (e.g. `openssl rand -base64 48`). The app refuses to sign sessions in production without it.
+- `DATABASE_URL`, `DIRECT_URL`, and `SMTP_*` for mail.
+- `SUPABASE_SERVICE_ROLE_KEY` only if you use `src/lib/storage`.
