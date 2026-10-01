@@ -28,7 +28,7 @@ export default function JoinCommunityPage() {
             JOIN THE <span className="text-[#FFE93B]">COMMUNITY</span>
           </h1>
           <p className="text-[#ADABAB] text-sm leading-relaxed max-w-lg mx-auto">
-            Type your details below to request community access. Once verified, credentials will be sent to your inbox to log in and create your official competitive profile.
+            Type your details below to join the community. Your access credentials and login instructions will be sent automatically to your inbox.
           </p>
         </div>
 

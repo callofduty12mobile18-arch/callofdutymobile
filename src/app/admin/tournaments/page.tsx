@@ -6,14 +6,17 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { getAllAdminTournaments } from '@/server/actions/admin-tournaments';
 import { getAllAdminScrimLobbies } from '@/server/actions/scrims';
+import { getAdminOrganizerRequests } from '@/server/actions/organizer';
 import { AdminTournamentRow, AdminScrimRow } from '@/components/admin/AdminTournamentControlRow';
+import { AdminOrganizerRequestRow } from '@/components/admin/AdminOrganizerRequestRow';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminTournamentsPage() {
-  const [tournaments, scrims] = await Promise.all([
+  const [tournaments, scrims, organizerRequests] = await Promise.all([
     getAllAdminTournaments(),
     getAllAdminScrimLobbies(),
+    getAdminOrganizerRequests(),
   ]);
 
   const visibleTournaments = tournaments.filter((t) => t.publishStatus === 'PUBLISHED').length;
@@ -21,6 +24,8 @@ export default async function AdminTournamentsPage() {
 
   const visibleScrims = scrims.filter((s) => s.publishStatus === 'PUBLISHED').length;
   const hiddenScrims = scrims.length - visibleScrims;
+
+  const pendingOrganizerCount = organizerRequests.filter((r) => r.status === 'PENDING').length;
 
   return (
     <div className="space-y-10 max-w-7xl">
@@ -35,7 +40,7 @@ export default async function AdminTournamentsPage() {
             TOURNAMENTS & SCRIMS GOVERNANCE
           </h1>
           <p className="text-xs text-[#ADABAB] mt-1 max-w-3xl">
-            Complete administrative control over all published tournament and scrim pages. Instantly toggle visibility (show / hide pages from public site), moderate organizer submissions, or adjust competitive tiers.
+            Complete administrative control over tournament and scrim pages, organizer verification requests, and visibility settings.
           </p>
         </div>
 
@@ -43,16 +48,72 @@ export default async function AdminTournamentsPage() {
           <Badge variant="primary" className="text-xs px-3 py-1 font-mono">
             {visibleTournaments + visibleScrims} LIVE EVENTS
           </Badge>
-          <Link href="/admin/requests">
+          <a href="#organizer-requests">
             <Button size="sm" variant="outline" className="text-xs">
               <Shield className="w-3.5 h-3.5 mr-1.5 text-[#FFE93B]" />
-              REVIEW PERMISSIONS
+              ORGANIZER REQUESTS {pendingOrganizerCount > 0 && `(${pendingOrganizerCount})`}
             </Button>
-          </Link>
+          </a>
         </div>
       </div>
 
-      {/* SECTION 1: Tournaments Control */}
+      {/* SECTION 1: Tournament & Scrim Organizer Permissions Queue */}
+      <div id="organizer-requests" className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-[#FFE93B]" />
+            <h2 className="font-display font-bold text-lg text-white uppercase tracking-wide">
+              Tournament & Scrim Organizer Requests
+            </h2>
+          </div>
+          <Badge variant={pendingOrganizerCount > 0 ? 'warning' : 'secondary'} className="text-xs">
+            {pendingOrganizerCount} PENDING APPROVAL
+          </Badge>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm flex items-center justify-between text-[#CCCCCC]">
+              <span>Organizer Verification & Permissions Queue</span>
+              <span className="text-xs text-[#837D72] font-normal">
+                Approving grants permission to create and manage tournaments and scrims on the platform.
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="border-b border-[#2A2A2A] text-[#837D72] font-display uppercase tracking-wider">
+                  <tr>
+                    <th className="pb-3 font-semibold">Event / Scrim</th>
+                    <th className="pb-3 font-semibold">Organizer / Email</th>
+                    <th className="pb-3 font-semibold">Planned Date</th>
+                    <th className="pb-3 font-semibold">Prize Pool / Rules</th>
+                    <th className="pb-3 font-semibold">Requested On</th>
+                    <th className="pb-3 font-semibold">Status</th>
+                    <th className="pb-3 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#2A2A2A]">
+                  {organizerRequests.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-8 text-center text-[#837D72]">
+                        No organizer permission requests submitted yet. When players submit requests via Player Studio, they will appear here.
+                      </td>
+                    </tr>
+                  ) : (
+                    organizerRequests.map((req) => (
+                      <AdminOrganizerRequestRow key={req.id} request={req} />
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* SECTION 2: Tournaments Control */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -115,7 +176,7 @@ export default async function AdminTournamentsPage() {
         </Card>
       </div>
 
-      {/* SECTION 2: Scrims Moderation & Control */}
+      {/* SECTION 3: Scrims Moderation & Control */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">

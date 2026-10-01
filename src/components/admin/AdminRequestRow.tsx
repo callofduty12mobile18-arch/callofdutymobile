@@ -147,7 +147,7 @@ export const AdminRequestRow: React.FC<{ request: CommunityRequestItem }> = ({ r
           <div className="flex items-center justify-end gap-2.5">
             <span className="text-xs text-[#00E676] font-display uppercase font-semibold inline-flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              Approved
+              Email Sent & Approved
             </span>
             <Button
               size="sm"
