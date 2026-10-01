@@ -3,10 +3,11 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { playerAccounts } from '../data/community-store';
 import { recordAuditLog } from '../data/audit-store';
 import { prisma } from '@/lib/db/prisma';
 import { PlayerRole, VerificationStatus, PublishStatus, EntityType, MediaType, SocialPlatform } from '@prisma/client';
+import { hashPassword, verifyPassword } from '@/lib/auth/password';
+import { signSession, verifySession } from '@/lib/auth/session-token';
 
 export interface PlayerSession {
   email: string;
@@ -35,48 +36,54 @@ export async function loginPlayerAction(
   }
 
   let authenticatedUser: { id: string; email: string; ign?: string; slug?: string } | null = null;
+  let matchingDbUser: { id: string; email: string; passwordHash: string | null } | null = null;
 
-  // 1. Check live database first
+  // Query live PostgreSQL database
   try {
     const dbUser = await prisma.user.findUnique({
       where: { email },
       include: { players: true },
     });
 
-    if (dbUser && dbUser.passwordHash === password) {
-      const primaryPlayer = dbUser.players?.[0];
-      authenticatedUser = {
-        id: dbUser.id,
-        email: dbUser.email,
-        ign: primaryPlayer?.ign || email.split('@')[0],
-        slug: primaryPlayer?.slug || email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-'),
-      };
+    if (dbUser && dbUser.passwordHash) {
+      const isMatch = await verifyPassword(password, dbUser.passwordHash);
+      if (isMatch) {
+        const primaryPlayer = dbUser.players?.[0];
+        authenticatedUser = {
+          id: dbUser.id,
+          email: dbUser.email,
+          ign: primaryPlayer?.ign || email.split('@')[0],
+          slug: primaryPlayer?.slug || email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-'),
+        };
+        matchingDbUser = dbUser;
+      }
     }
-  } catch {
-    // Database connection pending, check memory accounts
-  }
-
-  // 2. Check memory accounts
-  if (!authenticatedUser) {
-    const memoryAccount = playerAccounts.find(
-      (acc) => acc.email.toLowerCase() === email && acc.password === password
-    );
-
-    if (memoryAccount) {
-      authenticatedUser = {
-        id: memoryAccount.playerId,
-        email: memoryAccount.email,
-        ign: memoryAccount.ign,
-        slug: memoryAccount.ign.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-      };
-    }
-  }
-
-  if (!authenticatedUser) {
+  } catch (err) {
+    console.error('Database query error during player login:', err);
     return {
       success: false,
-      message: 'Invalid credentials. Please verify the email and password sent by the admin.',
+      message: 'Database authentication error. Please try again.',
     };
+  }
+
+  if (!authenticatedUser || !matchingDbUser) {
+    return {
+      success: false,
+      message: 'Invalid credentials. Please verify the email and access key sent to your inbox.',
+    };
+  }
+
+  // Automatically migrate legacy plaintext password to bcrypt hash in DB if needed
+  if (!matchingDbUser.passwordHash?.startsWith('$2')) {
+    try {
+      const newHash = await hashPassword(password);
+      await prisma.user.update({
+        where: { id: matchingDbUser.id },
+        data: { passwordHash: newHash },
+      });
+    } catch {
+      // Non-blocking
+    }
   }
 
   const sessionData: PlayerSession = {
@@ -86,8 +93,10 @@ export async function loginPlayerAction(
     slug: authenticatedUser.slug || 'player',
   };
 
+  const signedToken = await signSession(sessionData);
+
   const cookieStore = await cookies();
-  cookieStore.set(COOKIE_NAME, JSON.stringify(sessionData), {
+  cookieStore.set(COOKIE_NAME, signedToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -95,11 +104,11 @@ export async function loginPlayerAction(
     path: '/',
   });
 
-  // Audit Log
-  recordAuditLog(
+  // Audit Log in DB
+  await recordAuditLog(
     'PLAYER_LOGGED_IN',
     sessionData.ign || email,
-    `Player logged into studio with validated key.`,
+    `Player logged into studio with validated database credentials.`,
     `Player: ${sessionData.ign}`,
     'SUCCESS'
   );
@@ -114,9 +123,10 @@ export async function loginPlayerAction(
 export async function getPlayerSession(): Promise<PlayerSession | null> {
   try {
     const cookieStore = await cookies();
-    const raw = cookieStore.get(COOKIE_NAME)?.value;
-    if (!raw) return null;
-    return JSON.parse(raw) as PlayerSession;
+    const token = cookieStore.get(COOKIE_NAME)?.value;
+    if (!token) return null;
+
+    return await verifySession<PlayerSession>(token);
   } catch {
     return null;
   }
@@ -182,7 +192,7 @@ export async function updatePlayerSelfProfile(
   photoUrls = photoUrls.filter(Boolean).slice(0, 5);
   videoUrls = videoUrls.filter(Boolean).slice(0, 2);
 
-  // Live database update
+  // Live PostgreSQL database update
   try {
     const teamSlug = teamName ? teamName.toLowerCase().replace(/[^a-z0-9]/g, '-') : null;
 
@@ -358,13 +368,18 @@ export async function updatePlayerSelfProfile(
     await prisma.$transaction(operations);
   } catch (err) {
     console.error('Database profile update error:', err);
+    return {
+      success: false,
+      message: 'Failed to update profile in database. Please try again.',
+    };
   }
 
-  // Update session
+  // Update session with signed token
   session.ign = ign;
   session.slug = newSlug;
+  const updatedToken = await signSession(session);
   const cookieStore = await cookies();
-  cookieStore.set(COOKIE_NAME, JSON.stringify(session), {
+  cookieStore.set(COOKIE_NAME, updatedToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -372,9 +387,9 @@ export async function updatePlayerSelfProfile(
     path: '/',
   });
 
-  // Audit Log
+  // Audit Log in DB
   const mediaCount = photoUrls.length + videoUrls.length;
-  recordAuditLog(
+  await recordAuditLog(
     'PROFILE_UPDATED',
     ign,
     `Updated profile info (Role: ${primaryRole}, Team: ${teamTag || 'Free Agent'})${
@@ -396,4 +411,3 @@ export async function updatePlayerSelfProfile(
     slug: newSlug,
   };
 }
-

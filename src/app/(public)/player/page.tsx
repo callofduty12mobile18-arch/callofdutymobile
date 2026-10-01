@@ -87,7 +87,7 @@ export default async function PlayerDashboardPage() {
           primaryRole: existingPlayer?.primaryRole || 'SLAYER',
           state: existingPlayer?.state || '',
           codmUid: existingPlayer?.city || '',
-          joinedYear: existingPlayer?.competitiveHistory || '2020',
+          joinedYear: existingPlayer?.competitiveHistory || '',
           avatarUrl: existingPlayer?.avatarUrl || '',
           coverImageUrl: existingPlayer?.coverImageUrl || '',
           teamName: currentTeam?.name || '',

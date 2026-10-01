@@ -28,41 +28,8 @@ interface BroadcastCenterFormProps {
 
 const TEMPLATES = [
   {
-    id: 'tourney',
-    name: 'Tournament Registration',
-    icon: Trophy,
-    badgeTitle: 'TOURNAMENT ANNOUNCEMENT',
-    subject: '🏆 Official Tournament Registrations Are Now Live!',
-    headline: 'NATIONAL ESPORTS CHAMPIONSHIP REGISTRATION',
-    bodyContent: `The registration phase for the upcoming National CODM Championship is officially open.\n\nAll verified Indian teams and free agent rosters are eligible to apply. Check bracket schedules, prize pools (INR 2,50,000+), and match timing in the tournaments hub.\n\nSlots are strictly limited and seeded on a first-come, first-served bracket basis.`,
-    ctaText: 'VIEW TOURNAMENT HUB',
-    ctaUrl: '/tournaments',
-  },
-  {
-    id: 'rules',
-    name: 'Rulebook & Fair Play',
-    icon: ShieldAlert,
-    badgeTitle: 'RULEBOOK UPDATE',
-    subject: '📜 Important Update: Competitive Fair Play & Weapon Guidelines',
-    headline: 'OFFICIAL ESPORTS RULES & WEAPON BALANCING',
-    bodyContent: `Please review the updated competitive rulebook for all sanctioned Indian CODM events.\n\nKey Highlights:\n• Updated weapon attachment and tactical restriction list for Hardpoint & SnD.\n• Strict zero-tolerance policy against device tampering and emulator usage.\n• Mandatory recording and submission guidelines for playoff brackets.`,
-    ctaText: 'READ PLATFORM RULES',
-    ctaUrl: '/terms',
-  },
-  {
-    id: 'scrims',
-    name: 'Competitive Scrims',
-    icon: Swords,
-    badgeTitle: 'SCRIMS & MATCHMAKING',
-    subject: '⚔️ Tier-1 & Community Scrims Matchmaking Schedule',
-    headline: 'DAILY COMPETITIVE SCRIMS SCHEDULE',
-    bodyContent: `Official clan scrims are scheduled every evening from 8:00 PM IST to 11:30 PM IST.\n\nTeam captains can coordinate server lobbies and map vetos directly through the verified community network.`,
-    ctaText: 'EXPLORE TEAMS DIRECTORY',
-    ctaUrl: '/teams',
-  },
-  {
     id: 'custom',
-    name: 'Custom Announcement',
+    name: 'Blank Announcement',
     icon: Megaphone,
     badgeTitle: 'OFFICIAL ANNOUNCEMENT',
     subject: '',
@@ -71,19 +38,52 @@ const TEMPLATES = [
     ctaText: '',
     ctaUrl: '',
   },
+  {
+    id: 'tourney',
+    name: 'Tournament Update',
+    icon: Trophy,
+    badgeTitle: 'TOURNAMENT ANNOUNCEMENT',
+    subject: '',
+    headline: '',
+    bodyContent: '',
+    ctaText: 'VIEW TOURNAMENTS',
+    ctaUrl: '/tournaments',
+  },
+  {
+    id: 'rules',
+    name: 'Rulebook & Guidelines',
+    icon: ShieldAlert,
+    badgeTitle: 'RULEBOOK UPDATE',
+    subject: '',
+    headline: '',
+    bodyContent: '',
+    ctaText: 'READ PLATFORM RULES',
+    ctaUrl: '/terms',
+  },
+  {
+    id: 'scrims',
+    name: 'Competitive Scrims',
+    icon: Swords,
+    badgeTitle: 'SCRIMS & MATCHMAKING',
+    subject: '',
+    headline: '',
+    bodyContent: '',
+    ctaText: 'EXPLORE TEAMS',
+    ctaUrl: '/teams',
+  },
 ];
 
 export const BroadcastCenterForm: React.FC<BroadcastCenterFormProps> = ({
   recipientCount,
   initialHistory,
 }) => {
-  const [selectedTemplate, setSelectedTemplate] = React.useState('tourney');
-  const [badgeTitle, setBadgeTitle] = React.useState(TEMPLATES[0].badgeTitle);
-  const [subject, setSubject] = React.useState(TEMPLATES[0].subject);
-  const [headline, setHeadline] = React.useState(TEMPLATES[0].headline);
-  const [bodyContent, setBodyContent] = React.useState(TEMPLATES[0].bodyContent);
-  const [ctaText, setCtaText] = React.useState(TEMPLATES[0].ctaText);
-  const [ctaUrl, setCtaUrl] = React.useState(TEMPLATES[0].ctaUrl);
+  const [selectedTemplate, setSelectedTemplate] = React.useState('custom');
+  const [badgeTitle, setBadgeTitle] = React.useState('');
+  const [subject, setSubject] = React.useState('');
+  const [headline, setHeadline] = React.useState('');
+  const [bodyContent, setBodyContent] = React.useState('');
+  const [ctaText, setCtaText] = React.useState('');
+  const [ctaUrl, setCtaUrl] = React.useState('');
 
   const [isPending, setIsPending] = React.useState(false);
   const [showConfirmModal, setShowConfirmModal] = React.useState(false);

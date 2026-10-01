@@ -6,11 +6,11 @@ import {
   addCommunityRequest,
   approveRequest,
   rejectRequest,
-  communityRequests,
 } from '../data/community-store';
 import { prisma } from '@/lib/db/prisma';
 import { sendPlayerCredentialsEmail } from '@/lib/email/mailer';
 import { recordAuditLog } from '../data/audit-store';
+import { requireAdminSession } from './admin-auth';
 
 const joinSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -53,8 +53,8 @@ export async function submitCommunityJoinRequest(
     const { email, fullName, gamerTag } = validated.data;
     const req = await addCommunityRequest(email, fullName, gamerTag);
 
-    // Audit Log
-    recordAuditLog(
+    // Record Audit Log in DB
+    await recordAuditLog(
       'COMMUNITY_JOIN_REQUESTED',
       email,
       `Submitted public access request for gamer tag "${gamerTag || email.split('@')[0]}".`,
@@ -82,9 +82,10 @@ export async function submitCommunityJoinRequest(
 
 export async function approveCommunityRequestAction(requestId: string) {
   try {
+    const admin = await requireAdminSession();
     const result = await approveRequest(requestId);
     if (!result) {
-      return { success: false, error: 'Request not found' };
+      return { success: false, error: 'Request not found in database.' };
     }
 
     // Dispatch credentials email directly to the applicant
@@ -96,10 +97,10 @@ export async function approveCommunityRequestAction(requestId: string) {
       isInvitation: false,
     });
 
-    // Audit Log (non-blocking)
-    void recordAuditLog(
+    // Record Audit Log in DB
+    await recordAuditLog(
       'CREDENTIALS_ISSUED',
-      'Admin Console',
+      admin.username,
       `Approved access and dispatched login key to ${result.credentials.email}.`,
       `Player: ${result.request.gamerTag || result.credentials.email}`,
       'SUCCESS'
@@ -112,7 +113,7 @@ export async function approveCommunityRequestAction(requestId: string) {
 
     const emailStatusMsg = emailResult.success
       ? `Email dispatched directly to ${result.credentials.email}!`
-      : `Credentials created (Email dispatch note: ${emailResult.error || 'Check SMTP config'}).`;
+      : `Credentials created in database (Email dispatch note: ${emailResult.error || 'Check SMTP config'}).`;
 
     return {
       success: true,
@@ -127,10 +128,11 @@ export async function approveCommunityRequestAction(requestId: string) {
 
 export async function rejectCommunityRequestAction(requestId: string) {
   try {
+    const admin = await requireAdminSession();
     const success = await rejectRequest(requestId);
-    recordAuditLog(
+    await recordAuditLog(
       'STATUS_MODIFIED',
-      'Admin Console',
+      admin.username,
       `Rejected community request ${requestId}.`,
       `Request: ${requestId}`,
       'WARNING'
@@ -146,6 +148,7 @@ export async function rejectCommunityRequestAction(requestId: string) {
 
 export async function directInvitePlayerAction(formData: FormData) {
   try {
+    const admin = await requireAdminSession();
     const email = (formData.get('email') as string)?.trim().toLowerCase();
     const fullName = (formData.get('fullName') as string)?.trim() || undefined;
     const gamerTag = (formData.get('gamerTag') as string)?.trim() || undefined;
@@ -158,7 +161,7 @@ export async function directInvitePlayerAction(formData: FormData) {
     const result = await approveRequest(req.id);
 
     if (!result) {
-      return { success: false, error: 'Could not generate credentials' };
+      return { success: false, error: 'Could not generate credentials in database.' };
     }
 
     // Dispatch credentials email directly to the applicant
@@ -170,10 +173,10 @@ export async function directInvitePlayerAction(formData: FormData) {
       isInvitation: true,
     });
 
-    // Audit Log
-    recordAuditLog(
+    // Record Audit Log in DB
+    await recordAuditLog(
       'DIRECT_INVITE_SENT',
-      'Admin Console',
+      admin.username,
       `Admin initiated direct invitation to ${result.credentials.email} (IGN: ${gamerTag || 'None'}).`,
       `Invited: ${result.credentials.email}`,
       'SUCCESS'
@@ -187,7 +190,7 @@ export async function directInvitePlayerAction(formData: FormData) {
 
     const emailStatusMsg = emailResult.success
       ? `Invitation email dispatched directly to ${result.credentials.email}!`
-      : `Credentials created (Email dispatch note: ${emailResult.error || 'Check SMTP config'}).`;
+      : `Credentials created in database (Email dispatch note: ${emailResult.error || 'Check SMTP config'}).`;
 
     return {
       success: true,
@@ -208,34 +211,25 @@ async function fetchCommunityRequestsList() {
       orderBy: { createdAt: 'desc' },
     });
 
-    if (dbSubs && dbSubs.length > 0) {
-      return dbSubs.map((s) => {
-        const raw = (s.rawData as Record<string, string>) || {};
-        const inMem = communityRequests.find(
-          (r) => r.id === s.id || r.email.toLowerCase() === s.submitterEmail.toLowerCase()
-        );
-        const password = raw.password || inMem?.generatedPassword || undefined;
-        return {
-          id: s.id,
-          email: s.submitterEmail,
-          fullName: raw.fullName || s.submitterName,
-          gamerTag: raw.gamerTag || '',
-          status: s.status as 'PENDING' | 'APPROVED' | 'REJECTED',
-          createdAt: s.createdAt.toISOString(),
-          approvedAt: s.reviewedAt ? s.reviewedAt.toISOString() : undefined,
-          generatedPassword: password,
-        };
-      });
-    }
+    return dbSubs.map((s) => {
+      const raw = (s.rawData as Record<string, string>) || {};
+      return {
+        id: s.id,
+        email: s.submitterEmail,
+        fullName: raw.fullName || s.submitterName,
+        gamerTag: raw.gamerTag || '',
+        status: s.status as 'PENDING' | 'APPROVED' | 'REJECTED',
+        createdAt: s.createdAt.toISOString(),
+        approvedAt: s.reviewedAt ? s.reviewedAt.toISOString() : undefined,
+        generatedPassword: raw.password || undefined,
+      };
+    });
   } catch (err) {
     console.error('Error fetching community requests from DB:', err);
+    return [];
   }
-
-  return [...communityRequests];
 }
 
 export async function getCommunityRequestsList() {
   return fetchCommunityRequestsList();
 }
-
-

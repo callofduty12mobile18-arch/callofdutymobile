@@ -18,10 +18,16 @@ import {
   Mail,
   Menu,
   X,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logoutAdminAction } from '@/server/actions/admin-auth';
 
-export const AdminSidebar: React.FC = () => {
+interface AdminSidebarProps {
+  adminUsername?: string;
+}
+
+export const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminUsername }) => {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
@@ -124,8 +130,8 @@ export const AdminSidebar: React.FC = () => {
           </nav>
         </div>
 
-        {/* Footer Quick Return */}
-        <div className="pt-4 mt-6 md:mt-0 border-t border-[#2A2A2A]">
+        {/* Footer Quick Return & Logout */}
+        <div className="pt-4 mt-6 md:mt-0 border-t border-[#2A2A2A] space-y-2">
           <Link
             href="/"
             target="_blank"
@@ -134,6 +140,15 @@ export const AdminSidebar: React.FC = () => {
             <span className="font-display uppercase tracking-wider">Public Site</span>
             <ExternalLink className="w-3.5 h-3.5 text-[#FFE93B]" />
           </Link>
+          <form action={logoutAdminAction}>
+            <button
+              type="submit"
+              className="w-full flex items-center justify-between px-3 py-2 bg-[#141414] hover:bg-red-950/40 border border-[#2A2A2A] hover:border-red-800 rounded-[2px] text-xs text-[#ADABAB] hover:text-red-300 transition-colors"
+            >
+              <span className="font-display uppercase tracking-wider">Sign Out Admin</span>
+              <LogOut className="w-3.5 h-3.5 text-[#FF3D00]" />
+            </button>
+          </form>
         </div>
       </aside>
     </>

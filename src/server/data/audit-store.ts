@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db/prisma';
+import { unstable_cache } from 'next/cache';
 
 export type AuditAction =
   | 'CREDENTIALS_ISSUED'
@@ -23,17 +24,9 @@ export interface AuditLogItem {
   timestamp: string;
 }
 
-// Clean in-memory runtime cache (0 fake data)
-const globalStore = globalThis as unknown as {
-  auditLogs?: AuditLogItem[];
-};
-
-if (!globalStore.auditLogs) {
-  globalStore.auditLogs = [];
-}
-
-export const auditLogs = globalStore.auditLogs;
-
+/**
+ * Record an audit log event directly into the PostgreSQL database.
+ */
 export async function recordAuditLog(
   action: AuditAction,
   actor: string,
@@ -41,28 +34,11 @@ export async function recordAuditLog(
   target?: string,
   severity: AuditSeverity = 'INFO',
   ipAddress: string = '127.0.0.1'
-) {
-  const newLog: AuditLogItem = {
-    id: `log-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-    action,
-    severity,
-    actor,
-    target,
-    details,
-    ipAddress,
-    timestamp: new Date().toISOString(),
-  };
+): Promise<AuditLogItem> {
+  const timestamp = new Date();
 
-  auditLogs.unshift(newLog);
-
-  // Keep last 200 items in runtime memory cache
-  if (auditLogs.length > 200) {
-    auditLogs.pop();
-  }
-
-  // Persist directly to PostgreSQL database
   try {
-    await prisma.auditLog.create({
+    const created = await prisma.auditLog.create({
       data: {
         action,
         severity,
@@ -72,15 +48,35 @@ export async function recordAuditLog(
         ipAddress: ipAddress || null,
       },
     });
-  } catch (err) {
-    // Database connection fallback
-  }
 
-  return newLog;
+    return {
+      id: created.id,
+      action: created.action as AuditAction,
+      severity: (created.severity || 'INFO') as AuditSeverity,
+      actor: created.actor,
+      target: created.target || undefined,
+      details: created.details,
+      ipAddress: created.ipAddress || undefined,
+      timestamp: created.createdAt.toISOString(),
+    };
+  } catch (err) {
+    console.error('[AUDIT LOG] Database persistence error:', err);
+    return {
+      id: `log-${Date.now()}`,
+      action,
+      severity,
+      actor,
+      target,
+      details,
+      ipAddress,
+      timestamp: timestamp.toISOString(),
+    };
+  }
 }
 
-import { unstable_cache } from 'next/cache';
-
+/**
+ * Fetch latest audit logs from PostgreSQL database.
+ */
 async function fetchAuditLogsFromDb(): Promise<AuditLogItem[]> {
   try {
     const dbLogs = await prisma.auditLog.findMany({
@@ -88,23 +84,20 @@ async function fetchAuditLogsFromDb(): Promise<AuditLogItem[]> {
       take: 100,
     });
 
-    if (dbLogs && dbLogs.length > 0) {
-      return dbLogs.map((l) => ({
-        id: l.id,
-        action: l.action as AuditAction,
-        severity: (l.severity || 'INFO') as AuditSeverity,
-        actor: l.actor,
-        target: l.target || undefined,
-        details: l.details,
-        ipAddress: l.ipAddress || undefined,
-        timestamp: l.createdAt.toISOString(),
-      }));
-    }
-  } catch {
-    // Database fallback to runtime memory
+    return dbLogs.map((l) => ({
+      id: l.id,
+      action: l.action as AuditAction,
+      severity: (l.severity || 'INFO') as AuditSeverity,
+      actor: l.actor,
+      target: l.target || undefined,
+      details: l.details,
+      ipAddress: l.ipAddress || undefined,
+      timestamp: l.createdAt.toISOString(),
+    }));
+  } catch (err) {
+    console.error('[AUDIT LOG] Error querying audit logs from DB:', err);
+    return [];
   }
-
-  return [...auditLogs];
 }
 
 export async function getAuditLogs(): Promise<AuditLogItem[]> {

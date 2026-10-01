@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db/prisma';
+import { unstable_cache } from 'next/cache';
 
 export interface BroadcastHistoryItem {
   id: string;
@@ -10,28 +11,14 @@ export interface BroadcastHistoryItem {
   status: 'SENT' | 'FAILED' | 'PARTIAL';
 }
 
-const globalStore = globalThis as unknown as {
-  broadcastHistory?: BroadcastHistoryItem[];
-};
-
-if (!globalStore.broadcastHistory) {
-  globalStore.broadcastHistory = [];
-}
-
-export const broadcastHistory = globalStore.broadcastHistory;
-
-export async function addBroadcastRecord(item: Omit<BroadcastHistoryItem, 'id' | 'sentAt'>) {
-  const sentAt = new Date().toISOString();
-  const record: BroadcastHistoryItem = {
-    id: `bc-${Date.now()}`,
-    ...item,
-    sentAt,
-  };
-
-  broadcastHistory.unshift(record);
+/**
+ * Persist a broadcast dispatch record directly to PostgreSQL database.
+ */
+export async function addBroadcastRecord(item: Omit<BroadcastHistoryItem, 'id' | 'sentAt'>): Promise<BroadcastHistoryItem> {
+  const sentAt = new Date();
 
   try {
-    await prisma.broadcast.create({
+    const created = await prisma.broadcast.create({
       data: {
         subject: item.subject,
         headline: item.headline,
@@ -41,15 +28,29 @@ export async function addBroadcastRecord(item: Omit<BroadcastHistoryItem, 'id' |
         status: item.status,
       },
     });
-  } catch {
-    // Database connection fallback
-  }
 
-  return record;
+    return {
+      id: created.id,
+      subject: created.subject,
+      headline: created.headline,
+      badgeTitle: created.badgeTitle,
+      recipientCount: created.recipientCount,
+      status: created.status as 'SENT' | 'FAILED' | 'PARTIAL',
+      sentAt: created.createdAt.toISOString(),
+    };
+  } catch (err) {
+    console.error('[BROADCAST] Error creating broadcast record in DB:', err);
+    return {
+      id: `bc-${Date.now()}`,
+      ...item,
+      sentAt: sentAt.toISOString(),
+    };
+  }
 }
 
-import { unstable_cache } from 'next/cache';
-
+/**
+ * Fetch broadcast dispatch history from PostgreSQL database.
+ */
 async function fetchDbBroadcastHistory(): Promise<BroadcastHistoryItem[]> {
   try {
     const dbBroadcasts = await prisma.broadcast.findMany({
@@ -57,22 +58,19 @@ async function fetchDbBroadcastHistory(): Promise<BroadcastHistoryItem[]> {
       take: 50,
     });
 
-    if (dbBroadcasts && dbBroadcasts.length > 0) {
-      return dbBroadcasts.map((b) => ({
-        id: b.id,
-        subject: b.subject,
-        headline: b.headline,
-        badgeTitle: b.badgeTitle,
-        recipientCount: b.recipientCount,
-        status: b.status as 'SENT' | 'FAILED' | 'PARTIAL',
-        sentAt: b.createdAt.toISOString(),
-      }));
-    }
-  } catch {
-    // Database fallback
+    return dbBroadcasts.map((b) => ({
+      id: b.id,
+      subject: b.subject,
+      headline: b.headline,
+      badgeTitle: b.badgeTitle,
+      recipientCount: b.recipientCount,
+      status: b.status as 'SENT' | 'FAILED' | 'PARTIAL',
+      sentAt: b.createdAt.toISOString(),
+    }));
+  } catch (err) {
+    console.error('[BROADCAST] Error querying broadcast history from DB:', err);
+    return [];
   }
-
-  return [...broadcastHistory];
 }
 
 export async function getDbBroadcastHistory(): Promise<BroadcastHistoryItem[]> {
