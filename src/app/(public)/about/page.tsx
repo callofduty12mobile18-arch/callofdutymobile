@@ -19,13 +19,20 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { prisma } from '@/lib/db/prisma';
+import { PublishStatus } from '@prisma/client';
 
 export const metadata: Metadata = {
   title: 'About Us & Vision | Indian CODM Player Directory',
   description: 'The official open directory and competitive profile archive for Indian Call of Duty: Mobile players, clans, and teams.',
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const [playerCount, teamCount] = await Promise.all([
+    prisma.player.count({ where: { publishStatus: PublishStatus.PUBLISHED } }),
+    prisma.team.count({ where: { publishStatus: PublishStatus.PUBLISHED } }),
+  ]);
+
   const corePillars = [
     {
       icon: UserCheck,
@@ -58,8 +65,8 @@ export default function AboutPage() {
   ];
 
   const milestones = [
-    { number: '1,000+', label: 'Registered Players', sub: 'Verified across all roles and tiers' },
-    { number: '120+', label: 'Clans & Teams Listed', sub: 'From major organizations to grassroots clans' },
+    { number: playerCount.toLocaleString(), label: 'Registered Players', sub: 'Verified across all roles and tiers' },
+    { number: teamCount.toLocaleString(), label: 'Clans & Teams Listed', sub: 'From major organizations to grassroots clans' },
     { number: '100%', label: 'Player-First Platform', sub: 'Self-service studio to manage your profile' },
     { number: 'Free', label: 'Open Access Directory', sub: 'Accessible for the entire Indian gaming scene' },
   ];
