@@ -1,8 +1,8 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Swords, Plus, ShieldCheck, Flame, Filter, Users, Trophy } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Swords, ShieldCheck, Flame, Filter, Users, Trophy } from 'lucide-react';
+
 import { Badge } from '@/components/ui/Badge';
 import { ScrimCard } from '@/components/scrims/ScrimCard';
 import { getScrimLobbies } from '@/server/actions/scrims';
@@ -53,14 +53,7 @@ export default async function ScrimsDirectoryPage({
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <Link href="/scrims/create">
-              <Button size="lg" variant="primary" className="w-full sm:w-auto shadow-lg shadow-[#FFE93B]/10">
-                <Plus className="w-4 h-4 mr-2" />
-                HOST A SCRIM LOBBY
-              </Button>
-            </Link>
-          </div>
+
         </div>
 
         {/* Live Counters */}
@@ -118,11 +111,7 @@ export default async function ScrimsDirectoryPage({
           <p className="text-xs text-[#ADABAB] max-w-sm mx-auto">
             There are no scrim lobbies matching your selected tier filter. Be the first team to host a lobby!
           </p>
-          <Link href="/scrims/create">
-            <Button size="sm" variant="primary">
-              <Plus className="w-4 h-4 mr-1.5" /> HOST FIRST SCRIM
-            </Button>
-          </Link>
+
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
