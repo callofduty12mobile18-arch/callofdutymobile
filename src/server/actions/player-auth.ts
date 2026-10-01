@@ -5,7 +5,8 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { recordAuditLog } from '../data/audit-store';
 import { prisma } from '@/lib/db/prisma';
-import { PlayerRole, VerificationStatus, PublishStatus, EntityType, MediaType, SocialPlatform } from '@prisma/client';
+import { Prisma, PlayerRole, VerificationStatus, PublishStatus, EntityType, MediaType, SocialPlatform } from '@prisma/client';
+import { safeHttpUrl, safeMediaUrl } from '@/lib/security';
 import { verifyPassword } from '@/lib/auth/password';
 import { getClientIp, rateLimit } from '@/lib/auth/rate-limit';
 import { signSession, verifySession } from '@/lib/auth/session-token';
@@ -143,50 +144,74 @@ export async function updatePlayerSelfProfile(
     return { success: false, message: 'Session expired. Please log in again.' };
   }
 
-  const ign = (formData.get('ign') as string)?.trim();
-  const displayName = (formData.get('displayName') as string)?.trim();
-  const realName = (formData.get('realName') as string)?.trim();
-  const primaryRole = (formData.get('primaryRole') as PlayerRole) || 'FLEX';
-  const state = (formData.get('state') as string)?.trim();
-  const codmUid = (formData.get('codmUid') as string)?.trim();
-  const joinedYear = (formData.get('joinedYear') as string)?.trim();
-  const avatarUrl = (formData.get('avatarUrl') as string)?.trim();
-  const coverImageUrl = (formData.get('coverImageUrl') as string)?.trim();
-  const teamName = (formData.get('teamName') as string)?.trim();
-  const teamTag = (formData.get('teamTag') as string)?.trim();
-  const bio = (formData.get('bio') as string)?.trim();
-  const youtubeUrl = (formData.get('youtubeUrl') as string)?.trim();
-  const instagramUrl = (formData.get('instagramUrl') as string)?.trim();
-  const twitterUrl = (formData.get('twitterUrl') as string)?.trim();
-  const seoKeywords = (formData.get('seoKeywords') as string)?.trim();
-  const seoDescription = (formData.get('seoDescription') as string)?.trim();
+  const field = (key: string, max: number) => (formData.get(key) as string | null)?.trim().slice(0, max) ?? '';
+  const ign = field('ign', 50);
+  const displayName = field('displayName', 100);
+  const realName = field('realName', 100);
+  const primaryRoleInput = field('primaryRole', 20);
+  const primaryRole = (Object.values(PlayerRole) as string[]).includes(primaryRoleInput)
+    ? (primaryRoleInput as PlayerRole)
+    : PlayerRole.FLEX;
+  const state = field('state', 100);
+  const codmUid = field('codmUid', 100);
+  const joinedYear = field('joinedYear', 10000);
+  const teamName = field('teamName', 100);
+  const teamTag = field('teamTag', 10);
+  const bio = field('bio', 5000);
+  const seoKeywords = field('seoKeywords', 200);
+  const seoDescription = field('seoDescription', 500);
 
   if (!ign) {
     return { success: false, message: 'IGN / Gamer Tag is required.' };
   }
 
+  const avatarRaw = field('avatarUrl', 500);
+  const coverRaw = field('coverImageUrl', 500);
+  const avatarUrl = avatarRaw ? safeMediaUrl(avatarRaw) : null;
+  const coverImageUrl = coverRaw ? safeMediaUrl(coverRaw) : null;
+  if ((avatarRaw && !avatarUrl) || (coverRaw && !coverImageUrl)) {
+    return { success: false, message: 'Avatar and cover images must be uploaded files or https links.' };
+  }
+
+  const socials: Record<'youtubeUrl' | 'instagramUrl' | 'twitterUrl', string | null> = {
+    youtubeUrl: null,
+    instagramUrl: null,
+    twitterUrl: null,
+  };
+  for (const key of Object.keys(socials) as (keyof typeof socials)[]) {
+    const raw = field(key, 500);
+    if (!raw) continue;
+    const url = safeHttpUrl(raw);
+    if (!url) return { success: false, message: 'Social links must be valid web addresses.' };
+    socials[key] = url;
+  }
+  const { youtubeUrl, instagramUrl, twitterUrl } = socials;
+
   const newSlug = ign.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
-  let photoUrls: string[] = [];
-  let videoUrls: string[] = [];
-
-  const photoFeedJson = (formData.get('photoFeed') as string)?.trim();
-  const videoFeedJson = (formData.get('videoFeed') as string)?.trim();
-
-  try {
-    if (photoFeedJson) photoUrls = JSON.parse(photoFeedJson);
-  } catch {
-    // fallback
-  }
-  try {
-    if (videoFeedJson) videoUrls = JSON.parse(videoFeedJson);
-  } catch {
-    // fallback
-  }
-
+  const parseUrlList = (key: string, limit: number): string[] => {
+    try {
+      const parsed: unknown = JSON.parse(field(key, 20000) || '[]');
+      if (!Array.isArray(parsed)) return [];
+      return parsed.map(safeMediaUrl).filter((u): u is string => !!u).slice(0, limit);
+    } catch {
+      return [];
+    }
+  };
   // Limit strictly to 5 photos and 2 videos
-  photoUrls = photoUrls.filter(Boolean).slice(0, 5);
-  videoUrls = videoUrls.filter(Boolean).slice(0, 2);
+  const photoUrls = parseUrlList('photoFeed', 5);
+  const videoUrls = parseUrlList('videoFeed', 2);
+
+  // Resolve the profile owned by this account; a player may never edit someone else's profile.
+  const ownedPlayer = await prisma.player.findFirst({
+    where: { userId: session.playerId },
+    orderBy: { createdAt: 'asc' },
+    select: { id: true },
+  });
+  const slugOwner = await prisma.player.findUnique({ where: { slug: newSlug }, select: { id: true } });
+  if (slugOwner && slugOwner.id !== ownedPlayer?.id) {
+    return { success: false, message: 'That IGN is already taken by another player. Please choose a different one.' };
+  }
 
   // Live PostgreSQL database update
   try {
@@ -197,7 +222,7 @@ export async function updatePlayerSelfProfile(
       teamSlug && teamName
         ? prisma.team.upsert({
             where: { slug: teamSlug },
-            update: { name: teamName, tag: teamTag || 'PRO' },
+            update: {},
             create: {
               slug: teamSlug,
               name: teamName,
@@ -206,42 +231,45 @@ export async function updatePlayerSelfProfile(
             },
           })
         : Promise.resolve(null),
-      prisma.player.upsert({
-        where: { slug: newSlug },
-        update: {
+      ownedPlayer
+        ? prisma.player.update({
+            where: { id: ownedPlayer.id },
+            data: {
+              slug: newSlug,
           ign,
           displayName: displayName || null,
           realName: realName || null,
           primaryRole,
           state: state || null,
           city: codmUid || null,
-          avatarUrl: avatarUrl || null,
-          coverImageUrl: coverImageUrl || null,
+          avatarUrl,
+          coverImageUrl,
           bio: bio || null,
           competitiveHistory: joinedYear || null,
           seoTitle: seoKeywords || null,
           seoDescription: seoDescription || null,
-          publishStatus: PublishStatus.PUBLISHED,
-          verificationStatus: VerificationStatus.VERIFIED,
-        },
-        create: {
-          slug: newSlug,
+            },
+          })
+        : prisma.player.create({
+            data: {
+              slug: newSlug,
+              userId: session.playerId,
           ign,
           displayName: displayName || null,
           realName: realName || null,
           primaryRole,
           state: state || null,
           city: codmUid || null,
-          avatarUrl: avatarUrl || null,
-          coverImageUrl: coverImageUrl || null,
+          avatarUrl,
+          coverImageUrl,
           bio: bio || null,
           competitiveHistory: joinedYear || null,
           seoTitle: seoKeywords || null,
           seoDescription: seoDescription || null,
-          publishStatus: PublishStatus.PUBLISHED,
-          verificationStatus: VerificationStatus.VERIFIED,
-        },
-      }),
+              publishStatus: PublishStatus.PUBLISHED,
+              verificationStatus: VerificationStatus.UNVERIFIED,
+            },
+          }),
     ]);
 
     const mediaRecords = [
@@ -283,7 +311,7 @@ export async function updatePlayerSelfProfile(
         entityType: EntityType.PLAYER,
         playerId: player.id,
         platform: SocialPlatform.YOUTUBE,
-        url: youtubeUrl.startsWith('http') ? youtubeUrl : `https://${youtubeUrl}`,
+        url: youtubeUrl,
         handle: youtubeUrl.split('/').pop() || null,
       });
     }
@@ -293,7 +321,7 @@ export async function updatePlayerSelfProfile(
         entityType: EntityType.PLAYER,
         playerId: player.id,
         platform: SocialPlatform.INSTAGRAM,
-        url: instagramUrl.startsWith('http') ? instagramUrl : `https://${instagramUrl}`,
+        url: instagramUrl,
         handle: instagramUrl.split('/').pop() || null,
       });
     }
@@ -303,13 +331,13 @@ export async function updatePlayerSelfProfile(
         entityType: EntityType.PLAYER,
         playerId: player.id,
         platform: SocialPlatform.TWITTER_X,
-        url: twitterUrl.startsWith('http') ? twitterUrl : `https://${twitterUrl}`,
+        url: twitterUrl,
         handle: twitterUrl.split('/').pop() || null,
       });
     }
 
     // Single transaction for membership, media, and social records
-    const operations: any[] = [
+    const operations: Prisma.PrismaPromise<unknown>[] = [
       prisma.media.deleteMany({
         where: {
           playerId: player.id,

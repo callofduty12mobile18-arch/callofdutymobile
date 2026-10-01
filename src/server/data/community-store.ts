@@ -179,7 +179,6 @@ export async function approveRequest(
         rawData: {
           gamerTag: defaultIgn,
           fullName: fullName || '',
-          password: plainPassword,
         },
       },
     }),
