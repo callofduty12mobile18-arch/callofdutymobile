@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Shield, Swords, Plus, Users, Trophy } from 'lucide-react';
+import { Shield, Swords, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { TeamCard } from '@/components/teams/TeamCard';
 import { getPublishedTeams } from '@/server/queries/teams';
@@ -12,20 +12,8 @@ export const metadata: Metadata = {
     'Directory of active competitive Call of Duty: Mobile teams, starting rosters, organizations, and championships in India.',
 };
 
-export default async function TeamsPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ tier?: string }>;
-}) {
-  const resolvedParams = searchParams ? await searchParams : {};
+export default async function TeamsPage() {
   const teams = await getPublishedTeams();
-
-  const totalStartingPlayers = teams.reduce((acc, t) => {
-    const active = t.members?.filter((m) => m.isCurrent) || [];
-    return acc + active.length;
-  }, 0);
-
-  const teamsWithAchievements = teams.filter((t) => t.achievements && t.achievements.length > 0).length;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
@@ -56,26 +44,6 @@ export default async function TeamsPage({
             </Link>
           </div>
         </div>
-
-        {/* Live Counters */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-[#2A2A2A]/80 text-xs">
-          <div>
-            <span className="text-[#ADABAB] block">Active Rosters</span>
-            <span className="font-display font-bold text-xl text-white">{teams.length} Verified</span>
-          </div>
-          <div>
-            <span className="text-[#ADABAB] block">Starting Competitors</span>
-            <span className="font-display font-bold text-xl text-[#FFE93B]">{totalStartingPlayers} Players</span>
-          </div>
-          <div>
-            <span className="text-[#ADABAB] block">Championship Teams</span>
-            <span className="font-display font-bold text-xl text-emerald-400">{teamsWithAchievements} Decorated</span>
-          </div>
-          <div>
-            <span className="text-[#ADABAB] block">Matchmaking</span>
-            <span className="font-display font-bold text-xl text-white">CDL Certified</span>
-          </div>
-        </div>
       </div>
 
       {/* Filter / Summary Bar */}
@@ -84,12 +52,6 @@ export default async function TeamsPage({
           <span className="font-display text-xs font-bold px-3.5 py-1.5 rounded-[2px] bg-[#FFE93B] text-black border border-[#FFE93B]">
             ALL TEAMS
           </span>
-          <Link
-            href="/lft"
-            className="font-display text-xs font-bold px-3.5 py-1.5 rounded-[2px] bg-[#141414] text-[#ADABAB] border border-[#2A2A2A] hover:text-white hover:border-[#3A3A3A] transition-all"
-          >
-            SCOUT FREE AGENTS (LFT)
-          </Link>
         </div>
 
         <div className="text-xs text-[#ADABAB]">

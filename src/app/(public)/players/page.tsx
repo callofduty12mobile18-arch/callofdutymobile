@@ -1,10 +1,9 @@
 import * as React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Search, Filter, ShieldCheck, User, Plus, Crosshair } from 'lucide-react';
+import { Search, User } from 'lucide-react';
 import { PlayerGrid } from '@/components/players/PlayerGrid';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { getPublishedPlayers } from '@/server/queries/players';
 import { PlayerRole } from '@prisma/client';
 
@@ -34,7 +33,7 @@ export default async function PlayersPage({
   const selectedRole = resolvedParams.role as PlayerRole | undefined;
   const verifiedOnly = resolvedParams.verified === 'true';
 
-  const { players, total } = await getPublishedPlayers({
+  const { players } = await getPublishedPlayers({
     query,
     role: selectedRole,
     verifiedOnly,
@@ -61,32 +60,12 @@ export default async function PlayersPage({
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <Link href="/lft">
+            <Link href="/join">
               <Button size="lg" variant="primary" className="w-full sm:w-auto shadow-lg shadow-[#FFE93B]/10">
-                <Crosshair className="w-4 h-4 mr-2" />
-                SCOUT FREE AGENTS
+                <User className="w-4 h-4 mr-2" />
+                JOIN COMMUNITY
               </Button>
             </Link>
-          </div>
-        </div>
-
-        {/* Live Counters */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-[#2A2A2A]/80 text-xs">
-          <div>
-            <span className="text-[#ADABAB] block">Registered Profiles</span>
-            <span className="font-display font-bold text-xl text-white">{total} Verified</span>
-          </div>
-          <div>
-            <span className="text-[#ADABAB] block">Competitive Roles</span>
-            <span className="font-display font-bold text-xl text-[#FFE93B]">6 Disciplines</span>
-          </div>
-          <div>
-            <span className="text-[#ADABAB] block">Anti-Cheat Screening</span>
-            <span className="font-display font-bold text-xl text-emerald-400">100% Verified</span>
-          </div>
-          <div>
-            <span className="text-[#ADABAB] block">Circuit Standard</span>
-            <span className="font-display font-bold text-xl text-white">CDL Approved</span>
           </div>
         </div>
       </div>

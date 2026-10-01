@@ -53,7 +53,7 @@ export default function AboutPage() {
       title: 'Player Matchmaking & Scrims',
       tag: 'COMMUNITY',
       color: 'text-emerald-400',
-      description: 'Self-service custom room scrim coordination and LFT squad finder connecting players with active clans and teams across India.',
+      description: 'Self-service custom room scrim coordination and tournament discovery connecting players with active clans and teams across India.',
     },
   ];
 
@@ -77,8 +77,8 @@ export default function AboutPage() {
     },
     {
       step: '03',
-      title: 'Free Agent & LFT Discovery',
-      desc: 'Looking For Team (LFT) portal allowing unattached players to broadcast availability to team captains and clan leaders.',
+      title: 'Competitive Matchmaking & Scrims',
+      desc: 'Self-service scrim lobby hosting allowing teams and clans to coordinate practice matches with verified rosters.',
     },
     {
       step: '04',
@@ -193,7 +193,7 @@ export default function AboutPage() {
                     <CheckCircle2 className="w-3.5 h-3.5" />
                   </div>
                   <span className="text-xs text-[#ADABAB]">
-                    <strong className="text-white">Matchmaking & LFT:</strong> Direct hub for finding scrims and recruiting players.
+                    <strong className="text-white">Matchmaking & Scrims:</strong> Direct hub for finding competitive practice and custom lobbies.
                   </span>
                 </div>
               </div>

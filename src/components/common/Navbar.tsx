@@ -16,7 +16,6 @@ export const Navbar: React.FC = () => {
     { label: 'TEAMS', href: '/teams' },
     { label: 'TOURNAMENTS', href: '/tournaments' },
     { label: 'SCRIMS', href: '/scrims' },
-    { label: 'LFT SQUAD', href: '/lft' },
     { label: 'ABOUT', href: '/about' },
   ];
 
