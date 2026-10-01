@@ -1,5 +1,4 @@
 import * as React from 'react';
-import Link from 'next/link';
 import {
   Users,
   Shield,
@@ -10,7 +9,6 @@ import {
   Plus,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { getPublishedPlayers } from '@/server/queries/players';
 import { getPublishedTeams } from '@/server/queries/teams';
@@ -132,14 +130,13 @@ export default async function AdminDashboardPage() {
                 <tr>
                   <th className="pb-3 font-semibold">Email</th>
                   <th className="pb-3 font-semibold">Name / Gamer Tag</th>
-                  <th className="pb-3 font-semibold">Status</th>
-                  <th className="pb-3 font-semibold text-right">Action</th>
+                  <th className="pb-3 font-semibold text-right">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#2A2A2A]">
                 {requests.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-6 text-center text-[#837D72]">
+                    <td colSpan={3} className="py-6 text-center text-[#837D72]">
                       No join requests received yet. New requests submitted via /join will appear here.
                     </td>
                   </tr>
@@ -148,7 +145,7 @@ export default async function AdminDashboardPage() {
                     <tr key={req.id}>
                       <td className="py-3 font-display font-bold text-white">{req.email}</td>
                       <td className="py-3 text-[#ADABAB]">{req.fullName || req.gamerTag || '—'}</td>
-                      <td className="py-3">
+                      <td className="py-3 text-right">
                         <Badge
                           variant={
                             req.status === 'APPROVED'
@@ -160,13 +157,6 @@ export default async function AdminDashboardPage() {
                         >
                           {req.status}
                         </Badge>
-                      </td>
-                      <td className="py-3 text-right">
-                        <Link href="/admin/requests">
-                          <Button size="sm" variant="primary">
-                            Manage
-                          </Button>
-                        </Link>
                       </td>
                     </tr>
                   ))
