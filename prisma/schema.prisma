@@ -120,13 +120,18 @@ model User {
   supabaseUid  String?      @unique @map("supabase_uid")
   email        String       @unique
   passwordHash String?      @map("password_hash")
-  role         RoleType     @default(PLAYER)
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
+  role                           RoleType     @default(PLAYER)
+  failedLoginAttempts            Int          @default(0) @map("failed_login_attempts")
+  lockedUntil                    DateTime?    @map("locked_until")
+  emailVerified                  Boolean      @default(false) @map("email_verified")
+  emailVerificationToken         String?      @map("email_verification_token")
+  emailVerificationTokenExpiresAt DateTime?   @map("email_verification_token_expires_at")
+  createdAt                      DateTime     @default(now()) @map("created_at")
+  updatedAt                      DateTime     @updatedAt @map("updated_at")
 
-  players      Player[]     @relation("UserClaimedPlayer")
-  articles     Article[]
-  reviewedSubs Submission[] @relation("AdminReviewedSubmissions")
+  players                        Player[]     @relation("UserClaimedPlayer")
+  articles                       Article[]
+  reviewedSubs                   Submission[] @relation("AdminReviewedSubmissions")
 
   @@map("users")
 }

@@ -9,6 +9,9 @@ import { RoleType } from '@prisma/client';
 import { verifyPassword } from '@/lib/auth/password';
 import { getClientIp, rateLimit } from '@/lib/auth/rate-limit';
 import { signSession, verifySession } from '@/lib/auth/session-token';
+import { passwordComplexitySchema } from '@/lib/validation/auth';
+import { sendAccountLockoutEmail } from '@/lib/email/mailer';
+import { logger } from '@/lib/logger';
 
 export interface AdminSession {
   email: string;
@@ -98,18 +101,35 @@ export async function loginAdminAction(
     return { success: false, message: 'Please provide both admin username/email and password.' };
   }
 
+  // Enforce password complexity check on admin login (min 12 chars, uppercase, digit, special char)
+  const complexityResult = passwordComplexitySchema.safeParse(password);
+  if (!complexityResult.success) {
+    return {
+      success: false,
+      message: 'Password must be at least 12 characters and include an uppercase letter, a number, and a special character.',
+    };
+  }
+
   const ip = await getClientIp();
-  if (
-    !rateLimit(`login:admin:ip:${ip}`, 20, 15 * 60 * 1000) ||
-    !rateLimit(`login:admin:id:${identifier}`, 5, 15 * 60 * 1000)
-  ) {
+  const [ipAllowed, idAllowed] = await Promise.all([
+    rateLimit(`login:admin:ip:${ip}`, 20, 15 * 60 * 1000),
+    rateLimit(`login:admin:id:${identifier}`, 5, 15 * 60 * 1000),
+  ]);
+
+  if (!ipAllowed || !idAllowed) {
     return { success: false, message: 'Too many login attempts. Please try again in 15 minutes.' };
   }
 
   let authenticated = false;
   let adminEmail = identifier;
   let adminUsername = identifier;
-  let matchingDbUser: { id: string; email: string; passwordHash: string | null } | null = null;
+  let matchingDbUser: {
+    id: string;
+    email: string;
+    passwordHash: string | null;
+    failedLoginAttempts: number;
+    lockedUntil: Date | null;
+  } | null = null;
 
   // Query administrator account from PostgreSQL database
   try {
@@ -123,17 +143,64 @@ export async function loginAdminAction(
       },
     });
 
-    if (user && user.passwordHash) {
-      const isMatch = await verifyPassword(password, user.passwordHash);
-      if (isMatch) {
-        authenticated = true;
-        adminEmail = user.email;
-        adminUsername = user.email.includes('@') ? user.email.split('@')[0] : user.email;
-        matchingDbUser = user;
+    if (user) {
+      matchingDbUser = user;
+
+      // Account Lockout Protection: verify if account is currently locked
+      if (user.lockedUntil && user.lockedUntil > new Date()) {
+        const remainingMinutes = Math.ceil((user.lockedUntil.getTime() - Date.now()) / (60 * 1000));
+        return {
+          success: false,
+          message: `Account is temporarily locked due to repeated failed login attempts. Please try again in ${remainingMinutes} minute(s).`,
+        };
+      }
+
+      if (user.passwordHash) {
+        const isMatch = await verifyPassword(password, user.passwordHash);
+        if (isMatch) {
+          authenticated = true;
+          adminEmail = user.email;
+          adminUsername = user.email.includes('@') ? user.email.split('@')[0] : user.email;
+
+          // Reset failed attempts upon successful authentication
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              failedLoginAttempts: 0,
+              lockedUntil: null,
+            },
+          });
+        } else {
+          // Increment failed attempts and trigger 30-min lockout if reaching 5 attempts
+          const newFailedAttempts = user.failedLoginAttempts + 1;
+          const shouldLock = newFailedAttempts >= 5;
+          const lockTime = shouldLock ? new Date(Date.now() + 30 * 60 * 1000) : null;
+
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              failedLoginAttempts: shouldLock ? 0 : newFailedAttempts,
+              lockedUntil: lockTime,
+            },
+          });
+
+          if (shouldLock) {
+            await sendAccountLockoutEmail({
+              to: user.email,
+              ip,
+              lockoutMinutes: 30,
+            });
+
+            return {
+              success: false,
+              message: 'Account locked for 30 minutes due to 5 consecutive failed login attempts. A security alert email has been sent.',
+            };
+          }
+        }
       }
     }
   } catch (err) {
-    console.error('Database query error during admin authentication:', err);
+    logger.error('Database query error during admin authentication:', err);
     return {
       success: false,
       message: 'Database authentication error. Please ensure database connection is healthy.',

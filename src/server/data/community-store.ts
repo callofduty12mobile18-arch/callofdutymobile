@@ -103,7 +103,11 @@ export async function addCommunityRequest(
  */
 export async function approveRequest(
   requestId: string
-): Promise<{ request: CommunityRequestItem; credentials: { email: string; password: string } } | null> {
+): Promise<{
+  request: CommunityRequestItem;
+  credentials: { email: string; password: string };
+  verificationToken: string;
+} | null> {
   const whereConditions: Array<{ id?: string; submitterEmail?: string }> = [
     { submitterEmail: requestId.toLowerCase() },
   ];
@@ -129,9 +133,13 @@ export async function approveRequest(
   const fullName = raw.fullName || dbSub.submitterName || undefined;
   const gamerTag = raw.gamerTag || undefined;
 
-  // Generate secure randomized access key
-  const plainPassword = `CODM-${randomBytes(9).toString('base64url')}`;
+  // Generate secure randomized access key meeting complexity rules: 12+ chars, uppercase, number, special char
+  const randomSuffix = randomBytes(8).toString('hex').toUpperCase();
+  const plainPassword = `CODM#${randomSuffix}9!`;
   const hashedPassword = await hashPassword(plainPassword);
+
+  const verificationToken = randomBytes(24).toString('hex');
+  const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
   const defaultIgn = gamerTag || email.split('@')[0];
   const slug = defaultIgn.toLowerCase().replace(/[^a-z0-9]/g, '-');
@@ -142,14 +150,23 @@ export async function approveRequest(
     update: {
       passwordHash: hashedPassword,
       role: 'PLAYER',
+      emailVerified: false,
+      emailVerificationToken: verificationToken,
+      emailVerificationTokenExpiresAt: tokenExpiresAt,
+      failedLoginAttempts: 0,
+      lockedUntil: null,
     },
     create: {
       email,
       passwordHash: hashedPassword,
       role: 'PLAYER',
+      emailVerified: false,
+      emailVerificationToken: verificationToken,
+      emailVerificationTokenExpiresAt: tokenExpiresAt,
     },
   });
 
+  // Player profile stays in DRAFT until email is verified
   await Promise.all([
     prisma.player.upsert({
       where: { slug },
@@ -157,8 +174,8 @@ export async function approveRequest(
         ign: defaultIgn,
         displayName: fullName || defaultIgn,
         userId: user.id,
-        publishStatus: PublishStatus.PUBLISHED,
-        verificationStatus: VerificationStatus.VERIFIED,
+        publishStatus: PublishStatus.DRAFT,
+        verificationStatus: VerificationStatus.UNVERIFIED,
       },
       create: {
         slug,
@@ -167,8 +184,8 @@ export async function approveRequest(
         realName: fullName || null,
         userId: user.id,
         primaryRole: PlayerRole.FLEX,
-        publishStatus: PublishStatus.PUBLISHED,
-        verificationStatus: VerificationStatus.VERIFIED,
+        publishStatus: PublishStatus.DRAFT,
+        verificationStatus: VerificationStatus.UNVERIFIED,
       },
     }),
     prisma.submission.update({
@@ -201,6 +218,7 @@ export async function approveRequest(
       email,
       password: plainPassword,
     },
+    verificationToken,
   };
 }
 

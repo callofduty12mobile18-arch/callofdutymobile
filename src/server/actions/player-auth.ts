@@ -10,6 +10,8 @@ import { safeHttpUrl, safeMediaUrl } from '@/lib/security';
 import { verifyPassword } from '@/lib/auth/password';
 import { getClientIp, rateLimit } from '@/lib/auth/rate-limit';
 import { signSession, verifySession } from '@/lib/auth/session-token';
+import { sendAccountLockoutEmail } from '@/lib/email/mailer';
+import { logger } from '@/lib/logger';
 
 export interface PlayerSession {
   email: string;
@@ -38,10 +40,12 @@ export async function loginPlayerAction(
   }
 
   const ip = await getClientIp();
-  if (
-    !rateLimit(`login:player:ip:${ip}`, 20, 15 * 60 * 1000) ||
-    !rateLimit(`login:player:id:${email}`, 5, 15 * 60 * 1000)
-  ) {
+  const [ipAllowed, emailAllowed] = await Promise.all([
+    rateLimit(`login:player:ip:${ip}`, 20, 15 * 60 * 1000),
+    rateLimit(`login:player:id:${email}`, 5, 15 * 60 * 1000),
+  ]);
+
+  if (!ipAllowed || !emailAllowed) {
     return { success: false, message: 'Too many login attempts. Please try again in 15 minutes.' };
   }
 
@@ -55,21 +59,67 @@ export async function loginPlayerAction(
       include: { players: true },
     });
 
-    if (dbUser && dbUser.passwordHash) {
-      const isMatch = await verifyPassword(password, dbUser.passwordHash);
-      if (isMatch) {
-        const primaryPlayer = dbUser.players?.[0];
-        authenticatedUser = {
-          id: dbUser.id,
-          email: dbUser.email,
-          ign: primaryPlayer?.ign || email.split('@')[0],
-          slug: primaryPlayer?.slug || email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-'),
+    if (dbUser) {
+      // Check Account Lockout status
+      if (dbUser.lockedUntil && dbUser.lockedUntil > new Date()) {
+        const remainingMinutes = Math.ceil((dbUser.lockedUntil.getTime() - Date.now()) / (60 * 1000));
+        return {
+          success: false,
+          message: `Account is temporarily locked due to repeated failed attempts. Please try again in ${remainingMinutes} minute(s).`,
         };
-        matchingDbUser = dbUser;
+      }
+
+      if (dbUser.passwordHash) {
+        const isMatch = await verifyPassword(password, dbUser.passwordHash);
+        if (isMatch) {
+          const primaryPlayer = dbUser.players?.[0];
+          authenticatedUser = {
+            id: dbUser.id,
+            email: dbUser.email,
+            ign: primaryPlayer?.ign || email.split('@')[0],
+            slug: primaryPlayer?.slug || email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-'),
+          };
+          matchingDbUser = dbUser;
+
+          // Reset failed attempts on success
+          await prisma.user.update({
+            where: { id: dbUser.id },
+            data: {
+              failedLoginAttempts: 0,
+              lockedUntil: null,
+            },
+          });
+        } else {
+          // Increment failed attempts and trigger lockout if >= 5
+          const newFailedAttempts = dbUser.failedLoginAttempts + 1;
+          const shouldLock = newFailedAttempts >= 5;
+          const lockTime = shouldLock ? new Date(Date.now() + 30 * 60 * 1000) : null;
+
+          await prisma.user.update({
+            where: { id: dbUser.id },
+            data: {
+              failedLoginAttempts: shouldLock ? 0 : newFailedAttempts,
+              lockedUntil: lockTime,
+            },
+          });
+
+          if (shouldLock) {
+            await sendAccountLockoutEmail({
+              to: dbUser.email,
+              ip,
+              lockoutMinutes: 30,
+            });
+
+            return {
+              success: false,
+              message: 'Account locked for 30 minutes following 5 consecutive failed login attempts. A security alert email has been sent.',
+            };
+          }
+        }
       }
     }
   } catch (err) {
-    console.error('Database query error during player login:', err);
+    logger.error('Database query error during player login:', err);
     return {
       success: false,
       message: 'Database authentication error. Please try again.',
@@ -214,7 +264,16 @@ export async function updatePlayerSelfProfile(
   }
 
   // Live PostgreSQL database update
+  let isEmailVerified = false;
   try {
+    const userAccount = await prisma.user.findUnique({
+      where: { id: session.playerId },
+      select: { emailVerified: true },
+    });
+
+    isEmailVerified = !!userAccount?.emailVerified;
+    const targetPublishStatus = isEmailVerified ? PublishStatus.PUBLISHED : PublishStatus.DRAFT;
+
     const teamSlug = teamName ? teamName.toLowerCase().replace(/[^a-z0-9]/g, '-') : null;
 
     // Concurrently execute Team and Player upserts
@@ -236,37 +295,38 @@ export async function updatePlayerSelfProfile(
             where: { id: ownedPlayer.id },
             data: {
               slug: newSlug,
-          ign,
-          displayName: displayName || null,
-          realName: realName || null,
-          primaryRole,
-          state: state || null,
-          city: codmUid || null,
-          avatarUrl,
-          coverImageUrl,
-          bio: bio || null,
-          competitiveHistory: joinedYear || null,
-          seoTitle: seoKeywords || null,
-          seoDescription: seoDescription || null,
+              ign,
+              displayName: displayName || null,
+              realName: realName || null,
+              primaryRole,
+              state: state || null,
+              city: codmUid || null,
+              avatarUrl,
+              coverImageUrl,
+              bio: bio || null,
+              competitiveHistory: joinedYear || null,
+              seoTitle: seoKeywords || null,
+              seoDescription: seoDescription || null,
+              publishStatus: targetPublishStatus,
             },
           })
         : prisma.player.create({
             data: {
               slug: newSlug,
               userId: session.playerId,
-          ign,
-          displayName: displayName || null,
-          realName: realName || null,
-          primaryRole,
-          state: state || null,
-          city: codmUid || null,
-          avatarUrl,
-          coverImageUrl,
-          bio: bio || null,
-          competitiveHistory: joinedYear || null,
-          seoTitle: seoKeywords || null,
-          seoDescription: seoDescription || null,
-              publishStatus: PublishStatus.PUBLISHED,
+              ign,
+              displayName: displayName || null,
+              realName: realName || null,
+              primaryRole,
+              state: state || null,
+              city: codmUid || null,
+              avatarUrl,
+              coverImageUrl,
+              bio: bio || null,
+              competitiveHistory: joinedYear || null,
+              seoTitle: seoKeywords || null,
+              seoDescription: seoDescription || null,
+              publishStatus: targetPublishStatus,
               verificationStatus: VerificationStatus.UNVERIFIED,
             },
           }),
@@ -431,7 +491,9 @@ export async function updatePlayerSelfProfile(
 
   return {
     success: true,
-    message: 'Profile saved and published to the database successfully!',
+    message: isEmailVerified
+      ? 'Profile saved and published to the public directory!'
+      : 'Profile saved in Draft mode! Please verify your email via the verification link sent to your inbox to publish your profile publicly.',
     slug: newSlug,
   };
 }
