@@ -54,14 +54,7 @@ export default async function TournamentsPage({
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <Link href="/scrims">
-              <Button size="lg" variant="primary" className="w-full sm:w-auto shadow-lg shadow-[#FFE93B]/10">
-                <Swords className="w-4 h-4 mr-2" />
-                SCRIM MATCHMAKING
-              </Button>
-            </Link>
-          </div>
+
         </div>
 
         {/* Live Counters */}
