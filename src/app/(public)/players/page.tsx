@@ -18,12 +18,17 @@ export const metadata: Metadata = {
 
 const ROLES: Array<{ label: string; value?: PlayerRole }> = [
   { label: 'ALL ROLES' },
-  { label: 'SLAYERS', value: 'SLAYER' },
+  { label: 'ENTRY FRAGGER', value: 'ENTRY_FRAGGER' },
+  { label: 'FRAGGER / SLAYER', value: 'FRAGGER_SLAYER' },
   { label: 'ANCHORS', value: 'ANCHOR' },
-  { label: 'OBJECTIVE', value: 'OBJ' },
-  { label: 'IGL', value: 'IGL' },
-  { label: 'SNIPERS', value: 'SNIPER' },
+  { label: 'SCOUT / RECON', value: 'SCOUT_RECON' },
   { label: 'SUPPORT', value: 'SUPPORT' },
+  { label: 'IGL', value: 'IGL' },
+  { label: 'OVERWATCH', value: 'OVERWATCH' },
+  { label: 'RUSHER', value: 'RUSHER' },
+  { label: 'FLANKER', value: 'FLANKER' },
+  { label: 'MEDIC / REVIVER', value: 'MEDIC_REVIVER' },
+  { label: 'OBJECTIVE', value: 'OBJECTIVE_PLAYER' },
 ];
 
 export default async function PlayersPage({

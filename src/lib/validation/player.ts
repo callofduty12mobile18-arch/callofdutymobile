@@ -1,11 +1,19 @@
 import { z } from 'zod';
 
 export const PlayerRoleEnum = z.enum([
-  'SLAYER',
+  'ENTRY_FRAGGER',
+  'FRAGGER_SLAYER',
   'ANCHOR',
-  'OBJ',
+  'SCOUT_RECON',
   'SUPPORT',
   'IGL',
+  'OVERWATCH',
+  'RUSHER',
+  'FLANKER',
+  'MEDIC_REVIVER',
+  'OBJECTIVE_PLAYER',
+  'SLAYER',
+  'OBJ',
   'FLEX',
   'SNIPER',
 ]);
