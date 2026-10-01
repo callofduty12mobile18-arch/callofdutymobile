@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifySession } from '@/lib/auth/session-token';
 
-const ADMIN_COOKIE_NAME = 'codm_admin_session';
+const ADMIN_COOKIE_NAME = 'MobileRoster_admin_session';
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

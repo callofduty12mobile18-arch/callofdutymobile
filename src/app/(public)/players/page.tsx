@@ -11,9 +11,9 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: 'Indian CODM Players Directory | CODM India',
+  title: 'Indian MobileRoster Players Directory | MOBILEROSTER',
   description:
-    'Browse verified Indian Call of Duty: Mobile competitive players, in-game leaders, slayers, anchors, and snipers.',
+    'Browse verified Indian MobileRoster competitive players, in-game leaders, slayers, anchors, and snipers.',
 };
 
 const ROLES: Array<{ label: string; value?: PlayerRole }> = [
@@ -63,7 +63,7 @@ export default async function PlayersPage({
               PLAYER <span className="text-[#FFE93B]">DIRECTORY</span>
             </h1>
             <p className="text-sm sm:text-base text-[#ADABAB] leading-relaxed">
-              Official records of verified Indian Call of Duty: Mobile competitive competitors, rosters, roles, and statistics.
+              Official records of verified Indian MobileRoster competitive competitors, rosters, roles, and statistics.
             </p>
           </div>
 

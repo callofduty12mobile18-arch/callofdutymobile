@@ -39,7 +39,7 @@ interface InitialData {
   primaryRole: string;
   state: string;
   city?: string;
-  codmUid?: string;
+  MobileRosterUid?: string;
   joinedYear?: string;
   avatarUrl?: string;
   coverImageUrl?: string;
@@ -491,12 +491,12 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
             </div>
             <div>
               <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB] mb-1.5">
-                CODM UID *
+                MobileRoster UID *
               </label>
               <Input
-                name="codmUid"
+                name="MobileRosterUid"
                 required
-                defaultValue={initialData.codmUid}
+                defaultValue={initialData.MobileRosterUid}
                 placeholder="e.g. 6742819382109482910"
               />
             </div>
@@ -820,13 +820,13 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
             </div>
             <div className="bg-[#0A0A0A] p-3 rounded-[2px] border border-[#1F1F1F] space-y-1 font-sans">
               <div className="text-[11px] text-[#837D72] flex items-center gap-1">
-                <span>https://callofdutymobile.in/players/{activeSlug}</span>
+                <span>https://MobileRoster.in/players/{activeSlug}</span>
               </div>
               <div className="text-sm font-medium text-[#8ab4f8] hover:underline cursor-pointer">
-                {initialData.ign || 'Player'} {initialData.displayName ? `(${initialData.displayName})` : ''} — Indian Call of Duty Mobile Player
+                {initialData.ign || 'Player'} {initialData.displayName ? `(${initialData.displayName})` : ''} — Indian MobileRoster Mobile Player
               </div>
               <div className="text-xs text-[#bdc1c6] leading-relaxed">
-                {initialData.seoDescription || initialData.bio || `Official Call of Duty Mobile competitive profile for ${initialData.ign || 'player'}, featuring verified tournaments, team history, and highlights.`}
+                {initialData.seoDescription || initialData.bio || `Official MobileRoster Mobile competitive profile for ${initialData.ign || 'player'}, featuring verified tournaments, team history, and highlights.`}
               </div>
             </div>
           </div>
@@ -839,7 +839,7 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
               <Input
                 name="seoKeywords"
                 defaultValue={initialData.seoKeywords}
-                placeholder="e.g. shivan_ashwin, codm ashwin, shivan ashwin call of duty, ashwin codm india"
+                placeholder="e.g. shivan_ashwin, MobileRoster ashwin, shivan ashwin MobileRoster, ashwin MOBILEROSTER"
               />
               <p className="text-[11px] text-[#837D72] mt-1">
                 Enter name variations and phrases people might search on Google to find your profile.
@@ -854,7 +854,7 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
                 name="seoDescription"
                 rows={2}
                 defaultValue={initialData.seoDescription}
-                placeholder="e.g. Official Call of Duty Mobile player profile for Shivan_ashwin. Verified tournament achievements, team history, frags, and socials."
+                placeholder="e.g. Official MobileRoster Mobile player profile for Shivan_ashwin. Verified tournament achievements, team history, frags, and socials."
                 className="w-full bg-[#1F1F1F] text-white border border-[#837D72] rounded-[2px] p-3 text-sm focus:outline-none focus:border-[#FFE93B] placeholder:text-[#837D72]"
               />
               <p className="text-[11px] text-[#837D72] mt-1">

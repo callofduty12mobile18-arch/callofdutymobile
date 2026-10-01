@@ -37,7 +37,7 @@ export function AdminLoginForm() {
         {/* Header Branding */}
         <div className="text-center space-y-3">
           <div className="w-16 h-16 rounded-[2px] bg-[#141414] border border-[#FFE93B]/40 shadow-[0_0_30px_rgba(255,233,59,0.15)] flex items-center justify-center mx-auto mb-3">
-            <img src="/photos/logo1.png" alt="CODM Admin" className="w-11 h-11 object-contain" />
+            <img src="/photos/logo1.png" alt="MobileRoster Admin" className="w-11 h-11 object-contain" />
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#141414] border border-[#837D72]/40 rounded-[3px] text-[11px] font-display tracking-widest uppercase text-[#FFE93B]">

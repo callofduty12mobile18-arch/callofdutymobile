@@ -297,11 +297,11 @@ async function fetchCommunityRequestsList() {
       let password = raw.password || undefined;
       if (!password && s.status === 'APPROVED') {
         if (s.submitterEmail.toLowerCase().includes('polonium84r')) {
-          password = 'CODM#DAGEB24885D371619!';
+          password = 'MobileRoster#DAGEB24885D371619!';
         } else if (s.submitterEmail.toLowerCase().includes('dhoniashwin18')) {
-          password = 'CODM#DA6EB24885D371619!';
+          password = 'MobileRoster#DA6EB24885D371619!';
         } else {
-          password = `CODM#${s.id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 14).toUpperCase()}9!`;
+          password = `MobileRoster#${s.id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 14).toUpperCase()}9!`;
         }
       }
       return {

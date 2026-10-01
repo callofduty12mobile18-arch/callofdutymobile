@@ -59,7 +59,7 @@ export async function sendPlayerCredentialsEmail({
     const loginUrl = `${siteUrl}/player/login`;
     const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Esports" <${process.env.SMTP_USER || 'callofduty12mobile18@gmail.com'}>`;
 
-    const badgeText = isInvitation ? 'OFFICIAL PLAYER INVITATION' : 'INDIAN CODM ARCHIVE';
+    const badgeText = isInvitation ? 'OFFICIAL PLAYER INVITATION' : 'INDIAN MobileRoster ARCHIVE';
     const mainHeading = isInvitation ? 'YOU HAVE BEEN INVITED' : 'YOUR ACCESS CREDENTIALS';
     const leadMessage = isInvitation
       ? `You have been officially invited by the platform administrators to join the <strong style="color: #FFE93B;">CallOfDutyMobile</strong> competitive community platform.`
@@ -320,7 +320,7 @@ export async function sendBroadcastEmail({
           <tr>
             <td style="padding: 24px 32px; background-color: #0F0F0F; border-top: 1px solid #2A2A2A; font-size: 11px; color: #837D72; text-align: center;">
               You received this official dispatch as a registered player on <a href="${siteUrl}" style="color: #FFE93B; text-decoration: none;">CallOfDutyMobile India</a>.<br>
-              Indian CODM Competitive Archive & Editorial Platform.
+              Indian MobileRoster Competitive Archive & Editorial Platform.
             </td>
           </tr>
 

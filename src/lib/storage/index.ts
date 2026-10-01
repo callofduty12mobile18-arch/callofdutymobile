@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { StorageService, UploadFileInput, UploadResult } from './types';
 
-const DEFAULT_BUCKET = 'codm-media';
+const DEFAULT_BUCKET = 'MobileRoster-media';
 
 class SupabaseStorageService implements StorageService {
   private getClient() {

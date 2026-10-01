@@ -18,19 +18,19 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | CallOfDutyMobile — Indian CODM',
-    default: 'CallOfDutyMobile — Indian Call of Duty: Mobile Directory & Platform',
+    template: '%s | CallOfDutyMobile — Indian MobileRoster',
+    default: 'CallOfDutyMobile — Indian MobileRoster Directory & Platform',
   },
   description:
-    'The premier independent platform documenting the Indian Call of Duty: Mobile competitive scene. Explore verified player profiles, team rosters, tournament standings, and career achievements.',
+    'The premier independent platform documenting the Indian MobileRoster competitive scene. Explore verified player profiles, team rosters, tournament standings, and career achievements.',
   keywords: [
-    'CODM India',
-    'Call of Duty Mobile India',
+    'MOBILEROSTER',
+    'MobileRoster Mobile India',
     'Indian Gaming',
-    'CODM Profiles',
+    'MobileRoster Profiles',
     'Indian Competitive Gaming',
-    'CODM Tournaments',
-    'CODM Players Directory',
+    'MobileRoster Tournaments',
+    'MobileRoster Players Directory',
   ],
   authors: [{ name: 'CallOfDutyMobile Community' }],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -39,15 +39,15 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: '/',
     siteName: 'CallOfDutyMobile',
-    title: 'CallOfDutyMobile — Indian CODM Platform',
+    title: 'CallOfDutyMobile — Indian MobileRoster Platform',
     description:
-      'Official directory and records of competitive Indian Call of Duty: Mobile players, teams, and tournament championships.',
+      'Official directory and records of competitive Indian MobileRoster players, teams, and tournament championships.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CallOfDutyMobile — Indian CODM Platform',
+    title: 'CallOfDutyMobile — Indian MobileRoster Platform',
     description:
-      'Official directory and records of competitive Indian Call of Duty: Mobile players, teams, and tournament championships.',
+      'Official directory and records of competitive Indian MobileRoster players, teams, and tournament championships.',
   },
   icons: {
     icon: '/photos/logo1.png',

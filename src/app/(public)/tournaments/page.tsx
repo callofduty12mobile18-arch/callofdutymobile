@@ -10,9 +10,9 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: 'Indian CODM Tournaments & Championships | CODM India',
+  title: 'Indian MobileRoster Tournaments & Championships | MOBILEROSTER',
   description:
-    'Verified calendar, championship prize pools, standings, and results for Indian Call of Duty: Mobile competitive tournaments.',
+    'Verified calendar, championship prize pools, standings, and results for Indian MobileRoster competitive tournaments.',
 };
 
 export default async function TournamentsPage({
@@ -44,7 +44,7 @@ export default async function TournamentsPage({
           <div className="space-y-3 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[2px] bg-[#FFE93B]/10 border border-[#FFE93B]/30 text-xs font-bold text-[#FFE93B]">
               <Trophy className="w-3.5 h-3.5" />
-              <span>CODM INDIA COMPETITIVE CIRCUIT</span>
+              <span>MOBILEROSTER COMPETITIVE CIRCUIT</span>
             </div>
             <h1 className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-white uppercase tracking-tight leading-none">
               TOURNAMENT <span className="text-[#FFE93B]">CALENDAR</span>

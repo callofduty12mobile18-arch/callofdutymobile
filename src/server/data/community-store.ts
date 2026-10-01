@@ -137,10 +137,10 @@ export async function approveRequest(
   let plainPassword = (raw as Record<string, string>).password;
   if (!plainPassword) {
     if (email.toLowerCase().includes('polonium84r')) {
-      plainPassword = 'CODM#DAGEB24885D371619!';
+      plainPassword = 'MobileRoster#DAGEB24885D371619!';
     } else {
       const randomSuffix = randomBytes(8).toString('hex').toUpperCase();
-      plainPassword = `CODM#${randomSuffix}9!`;
+      plainPassword = `MobileRoster#${randomSuffix}9!`;
     }
   }
   const hashedPassword = await hashPassword(plainPassword);

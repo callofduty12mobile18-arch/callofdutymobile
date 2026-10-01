@@ -54,7 +54,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({ team }) => {
               {team.logoUrl ? (
                 <img src={team.logoUrl} alt={team.name} className="w-full h-full object-contain p-1.5" />
               ) : (
-                <img src="/photos/codm-team.jpg" alt={team.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                <img src="/photos/MobileRoster-team.jpg" alt={team.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
               )}
             </div>
 

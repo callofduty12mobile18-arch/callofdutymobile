@@ -16,7 +16,7 @@ import { OrganizerPermissionsCard } from '@/components/players/OrganizerPermissi
 
 export const metadata: Metadata = {
   title: 'Player Profile Studio | Manage Your Profile',
-  description: 'Self-service competitive profile builder for verified Indian CODM competitors.',
+  description: 'Self-service competitive profile builder for verified Indian MobileRoster competitors.',
 };
 
 export const dynamic = 'force-dynamic';
@@ -93,7 +93,7 @@ export default async function PlayerDashboardPage() {
           realName: existingPlayer?.realName || '',
           primaryRole: existingPlayer?.primaryRole || 'ENTRY_FRAGGER',
           state: existingPlayer?.state || '',
-          codmUid: existingPlayer?.city || '',
+          MobileRosterUid: existingPlayer?.city || '',
           joinedYear: existingPlayer?.competitiveHistory || '',
           avatarUrl: existingPlayer?.avatarUrl || '',
           coverImageUrl: existingPlayer?.coverImageUrl || '',

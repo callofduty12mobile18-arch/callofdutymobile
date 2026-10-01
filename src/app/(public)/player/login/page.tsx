@@ -30,7 +30,7 @@ export default function PlayerLoginPage() {
         {/* Title */}
         <div className="text-center space-y-2">
           <div className="w-16 h-16 rounded-[2px] overflow-hidden flex items-center justify-center mx-auto mb-4 bg-[#141414] border border-[#2A2A2A]">
-            <img src="/photos/logo1.png" alt="CODM India Logo" className="w-12 h-12 object-contain" />
+            <img src="/photos/logo1.png" alt="MOBILEROSTER Logo" className="w-12 h-12 object-contain" />
           </div>
           <h1 className="font-display font-black text-2xl sm:text-4xl text-white uppercase tracking-tight">
             PLAYER <span className="text-[#FFE93B]">LOGIN</span>

@@ -11,8 +11,8 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: 'Competitive Scrim Finder & Matchmaking | CODM India',
-  description: 'Find, schedule, and challenge tier-verified Call of Duty: Mobile scrims and matches across Indian esports rosters.',
+  title: 'Competitive Scrim Finder & Matchmaking | MOBILEROSTER',
+  description: 'Find, schedule, and challenge tier-verified MobileRoster scrims and matches across Indian esports rosters.',
 };
 
 export default async function ScrimsDirectoryPage({
@@ -43,7 +43,7 @@ export default async function ScrimsDirectoryPage({
           <div className="space-y-3 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[2px] bg-[#FFE93B]/10 border border-[#FFE93B]/30 text-xs font-bold text-[#FFE93B]">
               <Swords className="w-3.5 h-3.5" />
-              <span>CODM INDIA SCRIM MATCHMAKING ENGINE</span>
+              <span>MOBILEROSTER SCRIM MATCHMAKING ENGINE</span>
             </div>
             <h1 className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-white uppercase tracking-tight leading-none">
               COMPETITIVE <span className="text-[#FFE93B]">SCRIMS</span> HUB

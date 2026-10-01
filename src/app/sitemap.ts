@@ -4,7 +4,7 @@ import { getPublishedTeams } from '@/server/queries/teams';
 import { getPublishedTournaments } from '@/server/queries/tournaments';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://callofdutymobile.in';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://MobileRoster.in';
 
   const [playersData, teams, tournaments] = await Promise.all([
     getPublishedPlayers({ limit: 100 }),
