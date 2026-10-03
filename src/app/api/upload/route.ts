@@ -67,37 +67,43 @@ async function uploadToSupabaseStorage(
     return null;
   }
 
+  const buckets = ['MobileRoster-media', 'media', 'avatars', 'public'];
+
   try {
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    const bucket = 'media';
-
-    // Attempt upload
-    const filePath = `${subfolder}/${fileName}`;
-    const { error } = await supabase.storage.from(bucket).upload(filePath, buffer, {
-      contentType: mimeType,
-      upsert: true,
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
     });
+    const filePath = `${subfolder}/${fileName}`;
 
-    if (error) {
-      // If bucket doesn't exist, create it and retry once
-      if (error.message.includes('not found') || error.message.includes('Bucket')) {
-        await supabase.storage.createBucket(bucket, { public: true });
-        const retry = await supabase.storage.from(bucket).upload(filePath, buffer, {
+    for (const bucket of buckets) {
+      try {
+        const { error } = await supabase.storage.from(bucket).upload(filePath, buffer, {
           contentType: mimeType,
           upsert: true,
         });
-        if (retry.error) {
-          console.warn('[SUPABASE STORAGE RETRY ERROR]:', retry.error);
-          return null;
+
+        if (!error) {
+          const { data: publicData } = supabase.storage.from(bucket).getPublicUrl(filePath);
+          if (publicData?.publicUrl) return publicData.publicUrl;
         }
-      } else {
-        console.warn('[SUPABASE STORAGE ERROR]:', error);
-        return null;
+
+        if (error && (error.message.includes('not found') || error.message.includes('Bucket'))) {
+          // Try to create bucket
+          await supabase.storage.createBucket(bucket, { public: true });
+          const retry = await supabase.storage.from(bucket).upload(filePath, buffer, {
+            contentType: mimeType,
+            upsert: true,
+          });
+          if (!retry.error) {
+            const { data: publicData } = supabase.storage.from(bucket).getPublicUrl(filePath);
+            if (publicData?.publicUrl) return publicData.publicUrl;
+          }
+        }
+      } catch {
+        continue;
       }
     }
-
-    const { data: publicData } = supabase.storage.from(bucket).getPublicUrl(filePath);
-    return publicData.publicUrl || null;
+    return null;
   } catch (err) {
     console.warn('[SUPABASE STORAGE EXCEPTION]:', err);
     return null;
