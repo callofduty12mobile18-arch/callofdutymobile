@@ -62,7 +62,7 @@ export async function submitCommunityJoinRequest(
     const defaultIgn = gamerTag || result.credentials.email.split('@')[0];
 
     // Dispatch credentials & email verification directly to applicant
-    const [credResult, verifyResult] = await Promise.all([
+    const [credResult] = await Promise.all([
       sendPlayerCredentialsEmail({
         to: result.credentials.email,
         ign: defaultIgn,
@@ -76,6 +76,16 @@ export async function submitCommunityJoinRequest(
         token: result.verificationToken,
       }),
     ]);
+
+    if (!credResult.success) {
+      console.error('[COMMUNITY JOIN] Email dispatch failed:', credResult.error);
+      return {
+        success: false,
+        message: credResult.error
+          ? `Failed to send email: ${credResult.error}. Please check your SMTP settings.`
+          : 'Failed to send email. Please check your SMTP configuration or try again.',
+      };
+    }
 
     // Record Audit Log in DB
     await recordAuditLog(
