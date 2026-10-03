@@ -102,7 +102,7 @@ export default function TermsPage() {
               <strong>Trademark Disclaimer:</strong> This platform is NOT affiliated with, endorsed by, sponsored by, or operated by Activision Publishing, Inc., TiMi Studio Group, Tencent Games, or any of their subsidiaries. 
             </p>
             <p>
-              "Call of Duty", "Call of Duty: Mobile", and "CODM" are registered trademarks of Activision Publishing, Inc. All other trademarks, logos, and copyrights are the property of their respective owners. Any reference to these games is made under nominative fair use for identification purposes only, to indicate the specific game the community plays.
+              &quot;Call of Duty&quot;, &quot;Call of Duty: Mobile&quot;, and &quot;CODM&quot; are registered trademarks of Activision Publishing, Inc. All other trademarks, logos, and copyrights are the property of their respective owners. Any reference to these games is made under nominative fair use for identification purposes only, to indicate the specific game the community plays.
             </p>
           </CardContent>
         </Card>
