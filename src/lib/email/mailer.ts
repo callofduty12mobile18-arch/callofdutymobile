@@ -10,10 +10,17 @@ interface SendCredentialsOptions {
 }
 
 function getSiteUrl(): string {
-  if (process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')) {
+  if (
+    process.env.NEXT_PUBLIC_SITE_URL &&
+    !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost') &&
+    !process.env.NEXT_PUBLIC_SITE_URL.includes('codmdirectory')
+  ) {
     return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
   }
-  if (process.env.VERCEL_URL) {
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL && !process.env.VERCEL_PROJECT_PRODUCTION_URL.includes('codmdirectory')) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  if (process.env.VERCEL_URL && !process.env.VERCEL_URL.includes('codmdirectory')) {
     return `https://${process.env.VERCEL_URL}`;
   }
   return 'https://callofdutymobile-one.vercel.app';
