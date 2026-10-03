@@ -22,8 +22,8 @@ function getSiteUrl(): string {
 export function getEmailTransporter() {
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
   const port = parseInt(process.env.SMTP_PORT || '465', 10);
-  const user = process.env.SMTP_USER || 'callofduty12mobile18@gmail.com';
-  const rawPass = process.env.SMTP_PASS || 'mfefrpbmvwgbwekm';
+  const user = process.env.SMTP_USER;
+  const rawPass = process.env.SMTP_PASS;
   const pass = rawPass ? rawPass.replace(/\s+/g, '') : undefined;
 
   if (!user || !pass) {
@@ -57,7 +57,7 @@ export async function sendPlayerCredentialsEmail({
 
     const siteUrl = getSiteUrl();
     const loginUrl = `${siteUrl}/player/login`;
-    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Esports" <${process.env.SMTP_USER || 'callofduty12mobile18@gmail.com'}>`;
+    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Esports" <${process.env.SMTP_USER || 'noreply@mobileroster.in'}>`;
 
     const badgeText = isInvitation ? 'OFFICIAL PLAYER INVITATION' : 'INDIAN MobileRoster ARCHIVE';
     const mainHeading = isInvitation ? 'YOU HAVE BEEN INVITED' : 'YOUR ACCESS CREDENTIALS';
@@ -242,7 +242,7 @@ export async function sendBroadcastEmail({
       return { success: false, sentCount: 0, failedCount: toList.length, error: 'SMTP not configured in environment' };
     }
 
-    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile India" <${process.env.SMTP_USER || 'callofduty12mobile18@gmail.com'}>`;
+    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile India" <${process.env.SMTP_USER || 'noreply@mobileroster.in'}>`;
     const siteUrl = getSiteUrl();
     const targetCtaUrl = ctaUrl
       ? safeHttpUrl(ctaUrl.startsWith('/') ? `${siteUrl}${ctaUrl}` : ctaUrl) ?? undefined
@@ -379,7 +379,7 @@ export async function sendAccountLockoutEmail({
       return { success: false, error: 'SMTP not configured' };
     }
 
-    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Security" <${process.env.SMTP_USER || 'callofduty12mobile18@gmail.com'}>`;
+    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Security" <${process.env.SMTP_USER || 'noreply@mobileroster.in'}>`;
     const siteUrl = getSiteUrl();
 
     const htmlContent = `
@@ -461,7 +461,7 @@ export async function sendEmailVerificationEmail({
 
     const siteUrl = getSiteUrl();
     const verificationUrl = `${siteUrl}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(to)}`;
-    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Verification" <${process.env.SMTP_USER || 'callofduty12mobile18@gmail.com'}>`;
+    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Verification" <${process.env.SMTP_USER || 'noreply@mobileroster.in'}>`;
 
     const htmlContent = `
 <!DOCTYPE html>
