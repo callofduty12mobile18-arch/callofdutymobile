@@ -20,12 +20,13 @@ export function safeHttpUrl(input: string | null | undefined): string | null {
   }
 }
 
-/** Accepts only our own `/uploads/...` files or https URLs; rejects everything else. */
+/** Accepts /uploads/... files, https URLs, or safe image data URIs; rejects everything else. */
 export function safeMediaUrl(input: unknown): string | null {
   if (typeof input !== 'string') return null;
   const raw = input.trim();
   if (/^\/uploads\/[a-z_]+\/[A-Za-z0-9._-]+$/.test(raw) && !raw.includes('..')) return raw;
-  if (/^https:\/\//i.test(raw)) return safeHttpUrl(raw);
+  if (/^https?:\/\//i.test(raw)) return safeHttpUrl(raw);
+  if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/i.test(raw)) return raw;
   return null;
 }
 

@@ -306,13 +306,7 @@ async function fetchCommunityRequestsList() {
       const raw = (s.rawData as Record<string, string>) || {};
       let password = raw.password || undefined;
       if (!password && s.status === 'APPROVED') {
-        if (s.submitterEmail.toLowerCase().includes('polonium84r')) {
-          password = 'MobileRoster#DAGEB24885D371619!';
-        } else if (s.submitterEmail.toLowerCase().includes('dhoniashwin18')) {
-          password = 'MobileRoster#DA6EB24885D371619!';
-        } else {
-          password = `MobileRoster#${s.id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 14).toUpperCase()}9!`;
-        }
+        password = `CODM#${s.id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 12).toUpperCase()}!`;
       }
       return {
         id: s.id,
