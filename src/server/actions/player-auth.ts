@@ -337,8 +337,8 @@ export async function updatePlayerSelfProfile(
         fileName: `feed-photo-${i + 1}.jpg`,
         mimeType: 'image/jpeg',
         fileSizeBytes: 1024 * 1024,
-        storagePath: url,
-        publicUrl: url,
+        storagePath: url.slice(0, 490),
+        publicUrl: url.slice(0, 490),
         caption: `Landscape Highlight Photo #${i + 1}`,
       })),
       ...videoUrls.map((url, i) => ({
@@ -348,8 +348,8 @@ export async function updatePlayerSelfProfile(
         fileName: `feed-clip-${i + 1}.mp4`,
         mimeType: 'video/mp4',
         fileSizeBytes: 10 * 1024 * 1024,
-        storagePath: url,
-        publicUrl: url,
+        storagePath: url.slice(0, 490),
+        publicUrl: url.slice(0, 490),
         durationSeconds: 60,
         caption: `Gameplay Highlight Clip #${i + 1}`,
       })),
@@ -368,8 +368,8 @@ export async function updatePlayerSelfProfile(
         entityType: EntityType.PLAYER,
         playerId: player.id,
         platform: SocialPlatform.YOUTUBE,
-        url: youtubeUrl,
-        handle: youtubeUrl.split('/').pop() || null,
+        url: youtubeUrl.slice(0, 250),
+        handle: (youtubeUrl.split('/').pop() || '').slice(0, 100) || null,
       });
     }
 
@@ -378,8 +378,8 @@ export async function updatePlayerSelfProfile(
         entityType: EntityType.PLAYER,
         playerId: player.id,
         platform: SocialPlatform.INSTAGRAM,
-        url: instagramUrl,
-        handle: instagramUrl.split('/').pop() || null,
+        url: instagramUrl.slice(0, 250),
+        handle: (instagramUrl.split('/').pop() || '').slice(0, 100) || null,
       });
     }
 
@@ -388,8 +388,8 @@ export async function updatePlayerSelfProfile(
         entityType: EntityType.PLAYER,
         playerId: player.id,
         platform: SocialPlatform.TWITTER_X,
-        url: twitterUrl,
-        handle: twitterUrl.split('/').pop() || null,
+        url: twitterUrl.slice(0, 250),
+        handle: (twitterUrl.split('/').pop() || '').slice(0, 100) || null,
       });
     }
 
