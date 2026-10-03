@@ -125,32 +125,16 @@ export default function JoinCommunityPage() {
                 SUCCESSFUL REQUEST
               </span>
               <h3 className="font-display font-black text-2xl sm:text-3xl text-white uppercase tracking-tight">
-                {state?.emailSent === false ? 'WELCOME TO THE COMMUNITY!' : 'CHECK YOUR MAIL!'}
+                CHECK YOUR MAIL!
               </h3>
               <p className="text-sm text-[#ADABAB] leading-relaxed">
-                {state?.message}
+                The credentials and access link have been shared to your email. Check your inbox to log in and set up your official player profile.
               </p>
-              
-              {state?.email && state?.emailSent !== false && (
+              {state?.email && (
                 <div className="pt-1">
                   <span className="inline-block px-3 py-1 bg-[#1F1F1F] border border-[#2A2A2A] rounded-[2px] text-xs font-mono text-[#FFE93B]">
                     {state.email}
                   </span>
-                </div>
-              )}
-
-              {state?.emailSent === false && state?.password && (
-                <div className="mt-4 p-4 bg-[#FFE93B]/10 border border-[#FFE93B]/30 rounded-[2px] text-left">
-                  <div className="text-xs text-[#FFE93B] uppercase tracking-wider mb-2 font-bold">Your Temporary Credentials:</div>
-                  <div className="text-sm text-white font-mono break-all mb-1">
-                    <span className="text-[#837D72] mr-2">Email:</span> {state.email}
-                  </div>
-                  <div className="text-sm text-white font-mono break-all">
-                    <span className="text-[#837D72] mr-2">Password:</span> {state.password}
-                  </div>
-                  <div className="mt-3 text-xs text-[#ADABAB]">
-                    Please copy and save these credentials now. You will need them to log in.
-                  </div>
                 </div>
               )}
             </div>
