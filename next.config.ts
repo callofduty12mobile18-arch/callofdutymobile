@@ -46,13 +46,29 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  compress: true,
+  poweredByHeader: false,
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 86400,
+  },
   experimental: {
+    optimizePackageImports: ['lucide-react', 'clsx', 'tailwind-merge'],
     serverActions: {
       bodySizeLimit: '10mb',
     },
   },
   async headers() {
     return [
+      {
+        source: '/photos/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
       {
         source: '/(.*)',
         headers: securityHeaders,

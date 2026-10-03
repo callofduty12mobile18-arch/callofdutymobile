@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { getPublishedPlayers } from '@/server/queries/players';
 import { PlayerRole } from '@prisma/client';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'Indian MobileRoster Players Directory | MOBILEROSTER',
