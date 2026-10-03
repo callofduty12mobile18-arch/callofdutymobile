@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { TeamCard } from '@/components/teams/TeamCard';
 import { getPublishedTeams } from '@/server/queries/teams';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'Indian MobileRoster Competitive Teams & Rosters | MOBILEROSTER',
