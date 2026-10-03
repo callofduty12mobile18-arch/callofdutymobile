@@ -15,13 +15,8 @@ function getSiteUrl(): string {
     !process.env.NEXT_PUBLIC_SITE_URL.includes('localhost') &&
     !process.env.NEXT_PUBLIC_SITE_URL.includes('codmdirectory')
   ) {
-    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
-  }
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL && !process.env.VERCEL_PROJECT_PRODUCTION_URL.includes('codmdirectory')) {
-    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-  }
-  if (process.env.VERCEL_URL && !process.env.VERCEL_URL.includes('codmdirectory')) {
-    return `https://${process.env.VERCEL_URL}`;
+    const url = process.env.NEXT_PUBLIC_SITE_URL.trim().replace(/\/$/, '');
+    return url.startsWith('http') ? url : `https://${url}`;
   }
   return 'https://callofdutymobile-one.vercel.app';
 }
