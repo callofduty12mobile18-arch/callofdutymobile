@@ -24,6 +24,8 @@ export interface JoinResponse {
   message: string;
   email?: string;
   error?: string;
+  password?: string;
+  emailSent?: boolean;
 }
 
 export async function submitCommunityJoinRequest(
@@ -62,7 +64,7 @@ export async function submitCommunityJoinRequest(
     const defaultIgn = gamerTag || result.credentials.email.split('@')[0];
 
     // Dispatch credentials & email verification directly to applicant
-    await Promise.allSettled([
+    const [credResult, verifyResult] = await Promise.all([
       sendPlayerCredentialsEmail({
         to: result.credentials.email,
         ign: defaultIgn,
@@ -91,10 +93,17 @@ export async function submitCommunityJoinRequest(
     revalidatePath('/admin/audit-logs');
     revalidatePath('/players');
 
+    const emailSent = credResult.success;
+    const message = emailSent 
+      ? 'Your access credentials have been generated and sent to your email!' 
+      : 'Account created, but email dispatch failed (SMTP not configured). Please copy your credentials now.';
+
     return {
       success: true,
-      message: 'Your access credentials have been generated and sent to your email!',
+      message,
       email: req.email,
+      password: result.credentials.password,
+      emailSent,
     };
   } catch (err: unknown) {
     console.error('Community join error:', err);
