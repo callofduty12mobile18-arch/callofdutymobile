@@ -136,12 +136,8 @@ export async function approveRequest(
   // Use existing generated password if available; otherwise create a secure randomized access key
   let plainPassword = (raw as Record<string, string>).password;
   if (!plainPassword) {
-    if (email.toLowerCase().includes('polonium84r')) {
-      plainPassword = 'MobileRoster#DAGEB24885D371619!';
-    } else {
-      const randomSuffix = randomBytes(8).toString('hex').toUpperCase();
-      plainPassword = `MobileRoster#${randomSuffix}9!`;
-    }
+    const randomSuffix = randomBytes(8).toString('hex').toUpperCase();
+    plainPassword = `CODM#${randomSuffix}!`;
   }
   const hashedPassword = await hashPassword(plainPassword);
 

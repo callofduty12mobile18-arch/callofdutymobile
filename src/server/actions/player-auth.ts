@@ -219,12 +219,12 @@ export async function updatePlayerSelfProfile(
     return { success: false, message: 'MobileRoster UID is required.' };
   }
 
-  const avatarRaw = field('avatarUrl', 500);
-  const coverRaw = field('coverImageUrl', 500);
+  const avatarRaw = field('avatarUrl', 5000000);
+  const coverRaw = field('coverImageUrl', 5000000);
   const avatarUrl = avatarRaw ? safeMediaUrl(avatarRaw) : null;
   const coverImageUrl = coverRaw ? safeMediaUrl(coverRaw) : null;
   if ((avatarRaw && !avatarUrl) || (coverRaw && !coverImageUrl)) {
-    return { success: false, message: 'Avatar and cover images must be uploaded files or https links.' };
+    return { success: false, message: 'Avatar and cover images must be uploaded files or valid image links.' };
   }
 
   const socials: Record<'youtubeUrl' | 'instagramUrl' | 'twitterUrl', string | null> = {
