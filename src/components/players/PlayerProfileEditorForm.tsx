@@ -494,7 +494,7 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
             </div>
             <div>
               <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB] mb-1.5">
-                MobileRoster UID (19 Digits) *
+                CODM UID (19 Digits) *
               </label>
               <Input
                 name="MobileRosterUid"
@@ -831,10 +831,10 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
                 <span>https://MobileRoster.in/players/{activeSlug}</span>
               </div>
               <div className="text-sm font-medium text-[#8ab4f8] hover:underline cursor-pointer">
-                {initialData.ign || 'Player'} {initialData.displayName ? `(${initialData.displayName})` : ''} — Indian MobileRoster Mobile Player
+                {initialData.ign || 'Player'} {initialData.displayName ? `(${initialData.displayName})` : ''} — Indian CODM Player
               </div>
               <div className="text-xs text-[#bdc1c6] leading-relaxed">
-                {initialData.seoDescription || initialData.bio || `Official MobileRoster Mobile competitive profile for ${initialData.ign || 'player'}, featuring verified tournaments, team history, and highlights.`}
+                {initialData.seoDescription || initialData.bio || `Official CODM competitive profile for ${initialData.ign || 'player'}, featuring verified tournaments, team history, and highlights.`}
               </div>
             </div>
           </div>
@@ -847,7 +847,7 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
               <Input
                 name="seoKeywords"
                 defaultValue={initialData.seoKeywords}
-                placeholder="e.g. shivan_ashwin, MobileRoster ashwin, shivan ashwin MobileRoster, ashwin MOBILEROSTER"
+                placeholder="e.g. shivan_ashwin, codm ashwin, shivan ashwin codm, ashwin CODM"
               />
               <p className="text-[11px] text-[#837D72] mt-1">
                 Enter name variations and phrases people might search on Google to find your profile.
@@ -862,7 +862,7 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
                 name="seoDescription"
                 rows={2}
                 defaultValue={initialData.seoDescription}
-                placeholder="e.g. Official MobileRoster Mobile player profile for Shivan_ashwin. Verified tournament achievements, team history, frags, and socials."
+                placeholder="e.g. Official CODM player profile for Shivan_ashwin. Verified tournament achievements, team history, frags, and socials."
                 className="w-full bg-[#1F1F1F] text-white border border-[#837D72] rounded-[2px] p-3 text-sm focus:outline-none focus:border-[#FFE93B] placeholder:text-[#837D72]"
               />
               <p className="text-[11px] text-[#837D72] mt-1">

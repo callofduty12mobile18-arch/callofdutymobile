@@ -25,7 +25,7 @@ export async function generateMetadata({
     return { title: 'Tournament Not Found' };
   }
 
-  const title = `${tournament.name} - Indian MobileRoster Tournament Profile`;
+  const title = `${tournament.name} - Indian CODM Tournament Profile`;
   const description =
     tournament.formatDescription ||
     `Official standings, results, and prize pool for ${tournament.name}.`;

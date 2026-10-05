@@ -9,9 +9,9 @@ import { getPublishedTournaments } from '@/server/queries/tournaments';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'Indian MobileRoster Tournaments & Championships | MOBILEROSTER',
+  title: 'Indian CODM Tournaments & Championships | Call of Duty: Mobile',
   description:
-    'Verified calendar, championship prize pools, standings, and results for Indian MobileRoster competitive tournaments.',
+    'Verified calendar, championship prize pools, standings, and results for Indian CODM competitive tournaments.',
 };
 
 export default async function TournamentsPage({

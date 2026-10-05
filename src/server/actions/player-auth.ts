@@ -393,11 +393,11 @@ export async function updatePlayerSelfProfile(
   }
 
   if (!MobileRosterUid) {
-    return { success: false, message: 'MobileRoster UID is required.' };
+    return { success: false, message: 'CODM UID is required.' };
   }
 
   if (!/^\d{19}$/.test(MobileRosterUid)) {
-    return { success: false, message: 'MobileRoster UID must be exactly 19 digits.' };
+    return { success: false, message: 'CODM UID must be exactly 19 digits.' };
   }
 
   const avatarRaw = field('avatarUrl', 5000000);

@@ -21,7 +21,7 @@ export const MapVetoRoom: React.FC<MapVetoRoomProps> = ({ scrim }) => {
 
   const copyCredentials = () => {
     if (!scrim.roomCredentials) return;
-    const text = `MobileRoster Scrim Lobby\nRoom ID: ${scrim.roomCredentials.roomId}\nPassword: ${scrim.roomCredentials.roomPassword}\nSpectator: ${scrim.roomCredentials.spectatorPassword || 'N/A'}`;
+    const text = `CODM Scrim Lobby\nRoom ID: ${scrim.roomCredentials.roomId}\nPassword: ${scrim.roomCredentials.roomPassword}\nSpectator: ${scrim.roomCredentials.spectatorPassword || 'N/A'}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -163,7 +163,7 @@ export const MapVetoRoom: React.FC<MapVetoRoomProps> = ({ scrim }) => {
               <Flame className="w-5 h-5 text-[#FFE93B]" /> Competitive Map Veto Pool
             </h2>
             <p className="text-xs text-[#ADABAB] mt-0.5">
-              Turn-based Pick & Ban rotation according to official MobileRoster Stage Rules.
+              Turn-based Pick & Ban rotation according to official CODM Stage Rules.
             </p>
           </div>
           <div className="flex items-center gap-2">

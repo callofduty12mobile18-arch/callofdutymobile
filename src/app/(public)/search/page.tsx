@@ -14,8 +14,8 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: 'Global Directory Search | MOBILEROSTER',
-  description: 'Search Indian MobileRoster competitive players, teams, and tournament championships.',
+  title: 'Global Directory Search | Call of Duty: Mobile',
+  description: 'Search Indian CODM competitive players, teams, and tournament championships.',
 };
 
 export default async function SearchPage({

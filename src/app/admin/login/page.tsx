@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: 'Administrator Login | MOBILEROSTER',
+  title: 'Administrator Login | Call of Duty: Mobile',
   description: 'Authorized administrative personnel access portal.',
 };
 

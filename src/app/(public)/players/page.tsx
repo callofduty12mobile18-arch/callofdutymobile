@@ -10,9 +10,9 @@ import { PlayerRole } from '@prisma/client';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'Indian MobileRoster Players Directory | MOBILEROSTER',
+  title: 'Indian CODM Players Directory | Call of Duty: Mobile',
   description:
-    'Browse verified Indian MobileRoster competitive players, in-game leaders, slayers, anchors, and snipers.',
+    'Browse verified Indian CODM competitive players, in-game leaders, slayers, anchors, and snipers.',
 };
 
 const ROLES: Array<{ label: string; value?: PlayerRole }> = [
@@ -62,7 +62,7 @@ export default async function PlayersPage({
               PLAYER <span className="text-[#FFE93B]">DIRECTORY</span>
             </h1>
             <p className="text-sm sm:text-base text-[#ADABAB] leading-relaxed">
-              Official records of verified Indian MobileRoster competitive competitors, rosters, roles, and statistics.
+              Official records of verified Indian CODM competitive competitors, rosters, roles, and statistics.
             </p>
           </div>
 

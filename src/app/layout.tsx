@@ -18,19 +18,20 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | CallOfDutyMobile — Indian MobileRoster',
-    default: 'CallOfDutyMobile — Indian MobileRoster Directory & Platform',
+    template: '%s | CallOfDutyMobile — Indian CODM',
+    default: 'CallOfDutyMobile — Indian CODM Directory & Platform',
   },
   description:
-    'The premier independent platform documenting the Indian MobileRoster competitive scene. Explore verified player profiles, team rosters, tournament standings, and career achievements.',
+    'The premier independent platform documenting the Indian CODM competitive scene. Explore verified player profiles, team rosters, tournament standings, and career achievements.',
   keywords: [
-    'MOBILEROSTER',
-    'MobileRoster Mobile India',
+    'CODM',
+    'Call of Duty: Mobile',
+    'CODM India',
     'Indian Gaming',
-    'MobileRoster Profiles',
+    'CODM Profiles',
     'Indian Competitive Gaming',
-    'MobileRoster Tournaments',
-    'MobileRoster Players Directory',
+    'CODM Tournaments',
+    'CODM Players Directory',
   ],
   authors: [{ name: 'CallOfDutyMobile Community' }],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -39,15 +40,15 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: '/',
     siteName: 'CallOfDutyMobile',
-    title: 'CallOfDutyMobile — Indian MobileRoster Platform',
+    title: 'CallOfDutyMobile — Indian CODM Platform',
     description:
-      'Official directory and records of competitive Indian MobileRoster players, teams, and tournament championships.',
+      'Official directory and records of competitive Indian CODM players, teams, and tournament championships.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CallOfDutyMobile — Indian MobileRoster Platform',
+    title: 'CallOfDutyMobile — Indian CODM Platform',
     description:
-      'Official directory and records of competitive Indian MobileRoster players, teams, and tournament championships.',
+      'Official directory and records of competitive Indian CODM players, teams, and tournament championships.',
   },
   icons: {
     icon: '/photos/logo1.png',

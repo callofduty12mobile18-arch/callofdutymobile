@@ -54,10 +54,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminUsername }) => 
       <div className="md:hidden flex items-center justify-between p-4 bg-[#0D0D0D] border-b border-[#2A2A2A] w-full">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-[2px] overflow-hidden flex items-center justify-center flex-shrink-0">
-            <img src="/photos/logo1.png" alt="MobileRoster Admin" className="w-full h-full object-contain" />
+            <img src="/photos/logo1.png" alt="CODM Admin" className="w-full h-full object-contain" />
           </div>
           <h2 className="font-display font-black text-sm text-white tracking-wider">
-            MobileRoster<span className="text-[#FFE93B]">ADMIN</span>
+            CODM<span className="text-[#FFE93B]">ADMIN</span>
           </h2>
         </div>
         <button
@@ -80,11 +80,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ adminUsername }) => 
           {/* Admin Brand Desktop */}
           <div className="hidden md:flex items-center gap-2.5 px-2 py-3 border-b border-[#2A2A2A]">
             <div className="w-9 h-9 rounded-[2px] overflow-hidden flex items-center justify-center flex-shrink-0">
-              <img src="/photos/logo1.png" alt="MobileRoster Admin" className="w-full h-full object-contain" />
+              <img src="/photos/logo1.png" alt="CODM Admin" className="w-full h-full object-contain" />
             </div>
             <div>
               <h2 className="font-display font-black text-sm text-white tracking-wider">
-                MobileRoster<span className="text-[#FFE93B]">ADMIN</span>
+                CODM<span className="text-[#FFE93B]">ADMIN</span>
               </h2>
               <span className="text-[10px] text-[#837D72] tracking-wider uppercase block font-mono">
                 EDITORIAL CMS

@@ -41,17 +41,17 @@ export default async function HomePage() {
           <div className="max-w-3xl space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#141414]/90 border border-[#837D72] rounded-[3px] text-xs font-display tracking-widest uppercase text-[#FFE93B] backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-[#FFE93B] animate-pulse" />
-              THE INDIAN MobileRoster ARCHIVE
+              THE INDIAN CODM ARCHIVE
             </div>
 
             <h1 className="font-display font-black text-4xl sm:text-6xl lg:text-7xl tracking-tight uppercase leading-[0.95] text-white">
               DOCUMENTING <br />
-              <span className="text-[#FFE93B]">INDIAN MobileRoster</span> <br />
+              <span className="text-[#FFE93B]">INDIAN CODM</span> <br />
               COMPETITIVE EXCELLENCE.
             </h1>
 
             <p className="text-base sm:text-lg text-[#ADABAB] leading-relaxed max-w-2xl font-normal">
-              Structured profiles, verified records, tournament championships, and team rosters for the Indian MobileRoster competitive ecosystem.
+              Structured profiles, verified records, tournament championships, and team rosters for the Indian Call of Duty: Mobile competitive ecosystem.
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-4">
@@ -183,7 +183,7 @@ export default async function HomePage() {
               COMMUNITY ACCESS
             </Badge>
             <h3 className="font-display font-black text-2xl sm:text-4xl text-white uppercase tracking-tight">
-              JOIN THE INDIAN MobileRoster COMMUNITY
+              JOIN THE INDIAN CODM COMMUNITY
             </h3>
             <div className="mt-6 flex flex-wrap items-center gap-4">
               <Link href="/join">

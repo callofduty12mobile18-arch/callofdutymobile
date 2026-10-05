@@ -23,7 +23,7 @@ export default function SupportPage() {
     },
     {
       q: 'How do I update my IGN, UID, or competitive team?',
-      a: 'Log into your Player Studio at /player/login. You can edit your IGN, MobileRoster UID, competitive role, team tag, bio, and social media channels anytime.',
+      a: 'Log into your Player Studio at /player/login. You can edit your IGN, CODM UID, competitive role, team tag, bio, and social media channels anytime.',
     },
     {
       q: 'How do I report an incorrect profile or tournament record?',
@@ -80,7 +80,7 @@ export default function SupportPage() {
           <div>
             <h3 className="font-display font-bold text-white text-base">Discord Community</h3>
             <p className="text-xs text-[#ADABAB] mt-1 leading-relaxed">
-              Connect with Indian MobileRoster scrim organizers, players, and platform mods.
+              Connect with Indian CODM scrim organizers, players, and platform mods.
             </p>
           </div>
           <Link

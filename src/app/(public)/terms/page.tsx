@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/Badge';
 
 export const metadata: Metadata = {
   title: 'Terms & Conditions',
-  description: 'Terms of service, community safety rules, and user agreement for MobileRoster India platform.',
+  description: 'Terms of service, community safety rules, and user agreement for Call of Duty: Mobile India platform.',
 };
 
 export default function TermsPage() {
@@ -29,7 +29,7 @@ export default function TermsPage() {
           TERMS & CONDITIONS
         </h1>
         <p className="text-sm sm:text-base text-[#ADABAB] leading-relaxed max-w-2xl">
-          Please read these terms and conditions carefully before using the MobileRoster India registry and platform services.
+          Please read these terms and conditions carefully before using the Call of Duty: Mobile India registry and platform services.
         </p>
       </div>
 
@@ -43,7 +43,7 @@ export default function TermsPage() {
           </CardHeader>
           <CardContent className="space-y-3 leading-relaxed text-sm text-[#ADABAB]">
             <p>
-              By accessing and using MobileRoster India (the &quot;Platform&quot;), including exploring directory listings, submitting player profiles, or logging into the Player Studio, you agree to comply with and be bound by these Terms and Conditions.
+              By accessing and using Call of Duty: Mobile India (the &quot;Platform&quot;), including exploring directory listings, submitting player profiles, or logging into the Player Studio, you agree to comply with and be bound by these Terms and Conditions.
             </p>
             <p>
               If you do not agree with any part of these terms, you must refrain from using the platform and submitting competitive data.
@@ -67,7 +67,7 @@ export default function TermsPage() {
             <div className="p-3.5 bg-black/60 border border-[#FF3D00]/30 rounded-[2px] flex items-start gap-3 text-xs text-[#FF8A80]">
               <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-[#FF3D00]" />
               <p>
-                <strong>Zero Tolerance on Personal Data:</strong> Do not share personal phone numbers, private real-life photos, or personal real-world incidents. This platform is strictly dedicated to MobileRoster esports and gaming content only.
+                <strong>Zero Tolerance on Personal Data:</strong> Do not share personal phone numbers, private real-life photos, or personal real-world incidents. This platform is strictly dedicated to CODM esports and gaming content only.
               </p>
             </div>
 
@@ -79,10 +79,10 @@ export default function TermsPage() {
                 <strong className="text-white">No Personal Incidents or Private Photos:</strong> Do not upload personal life incidents, real-world disputes, sensitive private photos, or non-gaming images.
               </li>
               <li>
-                <strong className="text-white">Strictly MobileRoster Content Only:</strong> All uploaded photos (max 5), gameplay video clips (max 2), tournament achievements, and profile bios must be <strong>100% related to MobileRoster</strong> gameplay, scrims, esports tournaments, and esports team rosters.
+                <strong className="text-white">Strictly CODM Content Only:</strong> All uploaded photos (max 5), gameplay video clips (max 2), tournament achievements, and profile bios must be <strong>100% related to CODM</strong> gameplay, scrims, esports tournaments, and esports team rosters.
               </li>
               <li>
-                <strong className="text-white">Immediate Enforcement:</strong> Any profile found containing personal contact numbers or non-MobileRoster private media will have the media deleted immediately and the account permanently suspended from the registry.
+                <strong className="text-white">Immediate Enforcement:</strong> Any profile found containing personal contact numbers or non-CODM private media will have the media deleted immediately and the account permanently suspended from the registry.
               </li>
             </ul>
           </CardContent>
@@ -96,7 +96,7 @@ export default function TermsPage() {
           </CardHeader>
           <CardContent className="space-y-3 leading-relaxed text-sm text-[#ADABAB]">
             <p>
-              MobileRoster India is an independent, non-commercial community documentation archive and esports registry for Indian players. <strong>This platform is purely informational and community-driven.</strong>
+              Call of Duty: Mobile India is an independent, non-commercial community documentation archive and esports registry for Indian players. <strong>This platform is purely informational and community-driven.</strong>
             </p>
             <p>
               <strong>Trademark Disclaimer:</strong> This platform is NOT affiliated with, endorsed by, sponsored by, or operated by Activision Publishing, Inc., TiMi Studio Group, Tencent Games, or any of their subsidiaries. 
@@ -116,7 +116,7 @@ export default function TermsPage() {
           <CardContent className="space-y-3 leading-relaxed text-sm text-[#ADABAB]">
             <ul className="list-disc list-inside space-y-2 text-xs sm:text-sm">
               <li>
-                <strong>Accuracy of Information:</strong> Players must submit truthful in-game tags (IGNs), numeric MobileRoster UIDs, tournament achievements, and contact details.
+                <strong>Accuracy of Information:</strong> Players must submit truthful in-game tags (IGNs), numeric CODM UIDs, tournament achievements, and contact details.
               </li>
               <li>
                 <strong>Profile Integrity:</strong> Misrepresenting tournament placements, impersonating other competitors, or submitting fabricated esports credentials will result in permanent removal from the directory.
@@ -136,7 +136,7 @@ export default function TermsPage() {
           </CardHeader>
           <CardContent className="space-y-3 leading-relaxed text-sm text-[#ADABAB]">
             <p>
-              By uploading avatars, banner covers, and gaming highlight media to the platform, you grant MobileRoster India a non-exclusive license to display this content on public directory pages, search results, and tournament leaderboards.
+              By uploading avatars, banner covers, and gaming highlight media to the platform, you grant Call of Duty: Mobile India a non-exclusive license to display this content on public directory pages, search results, and tournament leaderboards.
             </p>
             <p>
               You retain all ownership of your personal media and gamer brand assets.

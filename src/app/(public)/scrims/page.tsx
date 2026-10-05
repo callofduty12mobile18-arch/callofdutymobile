@@ -11,8 +11,8 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: 'Competitive Scrim Finder & Matchmaking | MOBILEROSTER',
-  description: 'Find, schedule, and challenge tier-verified MobileRoster scrims and matches across Indian esports rosters.',
+  title: 'Competitive Scrim Finder & Matchmaking | Call of Duty: Mobile',
+  description: 'Find, schedule, and challenge tier-verified CODM scrims and matches across Indian esports rosters.',
 };
 
 export default async function ScrimsDirectoryPage({

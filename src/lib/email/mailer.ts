@@ -61,7 +61,7 @@ export async function sendSetPasswordEmail({
     const setPasswordUrl = `${siteUrl}/set-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(to)}`;
     const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Esports" <${process.env.SMTP_USER || 'noreply@mobileroster.in'}>`;
 
-    const badgeText = isInvitation ? 'OFFICIAL PLAYER INVITATION' : 'INDIAN MobileRoster ARCHIVE';
+    const badgeText = isInvitation ? 'OFFICIAL PLAYER INVITATION' : 'INDIAN CODM ARCHIVE';
     const mainHeading = isInvitation ? 'YOU HAVE BEEN INVITED' : 'SET YOUR PASSWORD';
     const leadMessage = isInvitation
       ? `You have been officially invited by the platform administrators to join the <strong style="color: #FFE93B;">CallOfDutyMobile</strong> competitive community platform. Please set up your password to activate your player account.`
@@ -282,7 +282,7 @@ export async function sendPasswordResetEmail({
           </tr>
           <tr>
             <td style="padding: 20px 32px; background-color: #0F0F0F; border-top: 1px solid #2A2A2A; font-size: 11px; color: #837D72; text-align: center;">
-              CallOfDutyMobile Security Team &middot; Indian MobileRoster Competitive Platform
+              CallOfDutyMobile Security Team &middot; Indian CODM Competitive Platform
             </td>
           </tr>
         </table>
@@ -414,7 +414,7 @@ export async function sendBroadcastEmail({
           <tr>
             <td style="padding: 24px 32px; background-color: #0F0F0F; border-top: 1px solid #2A2A2A; font-size: 11px; color: #837D72; text-align: center;">
               You received this official dispatch as a registered player on <a href="${siteUrl}" style="color: #FFE93B; text-decoration: none;">CallOfDutyMobile India</a>.<br>
-              Indian MobileRoster Competitive Archive & Editorial Platform.
+              Indian CODM Competitive Archive & Editorial Platform.
             </td>
           </tr>
 

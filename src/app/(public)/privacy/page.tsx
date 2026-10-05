@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/Badge';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Privacy policy and data protection practices of MobileRoster India platform.',
+  description: 'Privacy policy and data protection practices of Call of Duty: Mobile India platform.',
 };
 
 export default function PrivacyPage() {
@@ -29,7 +29,7 @@ export default function PrivacyPage() {
           PRIVACY POLICY
         </h1>
         <p className="text-sm sm:text-base text-[#ADABAB] leading-relaxed max-w-2xl">
-          We respect your privacy and are committed to safeguarding your personal data across the MobileRoster India platform.
+          We respect your privacy and are committed to safeguarding your personal data across the Call of Duty: Mobile India platform.
         </p>
       </div>
 
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
             </p>
             <ul className="list-disc list-inside space-y-2 text-xs sm:text-sm">
               <li>
-                <strong>Public Gaming Data:</strong> In-game name (IGN), MobileRoster numeric UID, competitive role, team affiliation, state of residence, and social media handles.
+                <strong>Public Gaming Data:</strong> In-game name (IGN), CODM numeric UID, competitive role, team affiliation, state of residence, and social media handles.
               </li>
               <li>
                 <strong>Contact Information:</strong> Email address for dispatching access credentials, verification updates, and security alerts.

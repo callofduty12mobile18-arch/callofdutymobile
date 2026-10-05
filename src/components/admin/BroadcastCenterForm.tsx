@@ -366,7 +366,7 @@ export const BroadcastCenterForm: React.FC<BroadcastCenterFormProps> = ({
             {/* Email Footer */}
             <div className="p-4 bg-[#0F0F0F] border-t border-[#2A2A2A] text-center text-[10px] text-[#837D72]">
               You received this official dispatch as a registered player on CallOfDutyMobile India.<br />
-              Indian MobileRoster Competitive Archive & Editorial Platform.
+              Indian CODM Competitive Archive & Editorial Platform.
             </div>
           </div>
         </div>

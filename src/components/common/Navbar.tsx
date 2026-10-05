@@ -25,7 +25,7 @@ export const Navbar: React.FC = () => {
         {/* Brand Wordmark with Logo */}
         <Link href="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 rounded-[2px] overflow-hidden flex items-center justify-center transition-transform duration-300 group-hover:scale-105 flex-shrink-0">
-            <img src="/photos/logo1.png" alt="MOBILEROSTER" className="w-full h-full object-contain" />
+            <img src="/photos/logo1.png" alt="Call of Duty: Mobile India" className="w-full h-full object-contain" />
           </div>
           <div className="flex flex-col leading-none">
             <span className="font-display font-black text-lg tracking-wider text-white">

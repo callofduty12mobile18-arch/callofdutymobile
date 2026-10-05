@@ -26,9 +26,9 @@ export async function generateMetadata({
     return { title: 'Team Not Found' };
   }
 
-  const title = `${team.name} [${team.tag}] - Indian MobileRoster Team Profile`;
+  const title = `${team.name} [${team.tag}] - Indian CODM Team Profile`;
   const description =
-    team.bio || `Official roster, achievements, and statistics for Indian MobileRoster team ${team.name}.`;
+    team.bio || `Official roster, achievements, and statistics for Indian CODM team ${team.name}.`;
 
   return {
     title,
