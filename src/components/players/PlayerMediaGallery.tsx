@@ -47,32 +47,47 @@ export const PlayerMediaGallery: React.FC<PlayerMediaGalleryProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* 1. 60-Second Video Clips */}
+      {/* 1. Gameplay Video Highlights */}
       {videos.length > 0 && (
         <div className="space-y-3">
           <h4 className="font-display uppercase text-xs text-white font-bold tracking-wider flex items-center gap-1.5">
-            <Video className="w-3.5 h-3.5 text-cyan-400" /> Gameplay Video Highlights (60s Max)
+            <Video className="w-3.5 h-3.5 text-cyan-400" /> Gameplay Video Highlights
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {videos.map((video) => (
-              <div
-                key={video.id}
-                className="space-y-1.5 p-2 bg-[#1F1F1F] border border-[#2A2A2A] rounded-[2px]"
-              >
-                <div className="relative aspect-video rounded-[2px] bg-black overflow-hidden">
-                  <video
-                    src={video.publicUrl}
-                    controls
-                    playsInline
-                    preload="metadata"
-                    className="w-full h-full object-contain"
-                  />
+            {videos.map((video) => {
+              const ytMatch = video.publicUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
+              const ytEmbed = ytMatch ? `https://www.youtube-nocookie.com/embed/${ytMatch[1]}` : null;
+
+              return (
+                <div
+                  key={video.id}
+                  className="space-y-1.5 p-2 bg-[#1F1F1F] border border-[#2A2A2A] rounded-[2px]"
+                >
+                  <div className="relative aspect-video rounded-[2px] bg-black overflow-hidden">
+                    {ytEmbed ? (
+                      <iframe
+                        src={ytEmbed}
+                        title={video.caption || `${playerIgn} highlight`}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : (
+                      <video
+                        src={video.publicUrl}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        className="w-full h-full object-contain"
+                      />
+                    )}
+                  </div>
+                  <p className="text-[11px] text-[#ADABAB] font-display uppercase tracking-wider truncate px-1">
+                    {video.caption || (ytEmbed ? 'YouTube Highlight' : 'Gameplay Highlight Clip')}
+                  </p>
                 </div>
-                <p className="text-[11px] text-[#ADABAB] font-display uppercase tracking-wider truncate px-1">
-                  {video.caption || 'Gameplay Highlight Clip'}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

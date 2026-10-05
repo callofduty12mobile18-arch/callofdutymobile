@@ -192,18 +192,14 @@ export async function POST(req: NextRequest) {
       console.warn('[LOCAL FS WRITE FAILED, USING INLINE FALLBACK]:', fsErr);
 
       // 3. Resilient fallback for serverless environments (Vercel read-only filesystem)
-      if (!isVideo) {
-        const base64Data = buffer.toString('base64');
-        const dataUri = `data:${file.type};base64,${base64Data}`;
-        return NextResponse.json({
-          success: true,
-          url: dataUri,
-          fileName: uniqueFileName,
-          mediaType: 'IMAGE',
-        });
-      }
-
-      throw fsErr;
+      const base64Data = buffer.toString('base64');
+      const dataUri = `data:${file.type};base64,${base64Data}`;
+      return NextResponse.json({
+        success: true,
+        url: dataUri,
+        fileName: uniqueFileName,
+        mediaType: isVideo ? 'VIDEO' : 'IMAGE',
+      });
     }
   } catch (error) {
     console.error('[UPLOAD API ERROR]:', error);

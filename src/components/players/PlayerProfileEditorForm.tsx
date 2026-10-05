@@ -91,6 +91,9 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
   const photoFeedInputRef = useRef<HTMLInputElement>(null);
   const videoFeedInputRef = useRef<HTMLInputElement>(null);
 
+  const [showVideoUrlInput, setShowVideoUrlInput] = useState(false);
+  const [videoUrlInputText, setVideoUrlInputText] = useState('');
+
   const activeSlug = state?.slug || initialData.slug;
 
   useEffect(() => {
@@ -174,6 +177,27 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
     }
   };
 
+  const handleAddVideoUrl = () => {
+    const trimmed = videoUrlInputText.trim();
+    if (!trimmed) return;
+
+    if (videoFeed.length >= 2) {
+      setUploadError('Maximum 2 gameplay highlight videos allowed.');
+      return;
+    }
+
+    const isValid = /^https?:\/\//i.test(trimmed);
+    if (!isValid) {
+      setUploadError('Please enter a valid web URL (e.g. YouTube, Shorts, or MP4 link).');
+      return;
+    }
+
+    setUploadError(null);
+    setVideoFeed((prev) => [...prev, trimmed].slice(0, 2));
+    setVideoUrlInputText('');
+    setShowVideoUrlInput(false);
+  };
+
   const handleVideoFeedUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -183,8 +207,8 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
       return;
     }
 
-    if (file.size > 50 * 1024 * 1024) {
-      setUploadError('Video file size exceeds 50MB maximum limit.');
+    if (file.size > 20 * 1024 * 1024) {
+      setUploadError('Direct file upload limit is 20MB. For larger videos, please paste a YouTube Shorts or Video URL.');
       return;
     }
 
@@ -208,7 +232,7 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
         setUploadError(data.error || 'Failed to upload video');
       }
     } catch {
-      setUploadError('Network error while uploading video');
+      setUploadError('Network error while uploading video. You can paste a YouTube / Shorts link instead.');
     } finally {
       setIsUploadingVideoFeed(false);
       if (videoFeedInputRef.current) videoFeedInputRef.current.value = '';
@@ -630,12 +654,22 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
                   <Video className="w-3.5 h-3.5 text-[#FFE93B]" /> Gameplay Highlight Videos ({videoFeed.length}/2)
                 </h4>
                 <p className="text-[11px] text-[#837D72] leading-relaxed">
-                  Upload up to 2 landscape gameplay clips (up to 60s clips, MP4/WEBM, max 50MB per video).
+                  Add up to 2 landscape gameplay clips via YouTube, Shorts, or direct video file upload (Max 2 clips).
                 </p>
               </div>
 
               {videoFeed.length < 2 && (
-                <div className="flex-shrink-0 w-full sm:w-auto">
+                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="w-full sm:w-auto text-xs whitespace-nowrap"
+                    onClick={() => setShowVideoUrlInput(!showVideoUrlInput)}
+                  >
+                    <Plus className="w-3.5 h-3.5 mr-1 text-[#FFE93B]" /> Add Video / Shorts Link
+                  </Button>
+
                   <input
                     ref={videoFeedInputRef}
                     type="file"
@@ -646,8 +680,8 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
                   <Button
                     type="button"
                     size="sm"
-                    variant="outline"
-                    className="w-full sm:w-auto text-xs whitespace-nowrap"
+                    variant="ghost"
+                    className="w-full sm:w-auto text-xs whitespace-nowrap border border-[#2A2A2A] hover:border-[#FFE93B]"
                     disabled={isUploadingVideoFeed}
                     onClick={() => videoFeedInputRef.current?.click()}
                   >
@@ -657,7 +691,7 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
                       </>
                     ) : (
                       <>
-                        <Plus className="w-3.5 h-3.5 mr-1 text-[#FFE93B]" /> Add 60s Video Clip
+                        <Upload className="w-3.5 h-3.5 mr-1 text-[#FFE93B]" /> Upload File
                       </>
                     )}
                   </Button>
@@ -665,42 +699,94 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
               )}
             </div>
 
-            {/* Videos Grid (16:9 landscape video player) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {videoFeed.map((url, idx) => (
-                <div
-                  key={idx}
-                  className="space-y-2 p-3 bg-[#141414] border border-[#2A2A2A] rounded-[2px]"
-                >
-                  <div className="relative aspect-video rounded-[2px] bg-black overflow-hidden border border-[#1F1F1F]">
-                    <video
-                      src={url}
-                      controls
-                      playsInline
-                      preload="metadata"
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[10px] text-[#FFE93B] font-display uppercase tracking-wider font-semibold flex items-center gap-1.5">
-                      <Film className="w-3.5 h-3.5" /> Video Clip #{idx + 1} (60s Max)
-                    </span>
-                    <button
+            {/* Inline Video URL Input */}
+            {showVideoUrlInput && videoFeed.length < 2 && (
+              <div className="p-3 bg-[#181818] border border-[#FFE93B]/30 rounded-[2px] space-y-2">
+                <label className="text-xs text-[#FFE93B] font-display uppercase tracking-wider font-semibold">
+                  Paste YouTube, YouTube Shorts, or MP4 URL:
+                </label>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Input
+                    value={videoUrlInputText}
+                    onChange={(e) => setVideoUrlInputText(e.target.value)}
+                    placeholder="e.g. https://www.youtube.com/watch?v=... or https://youtube.com/shorts/..."
+                    className="flex-1 text-xs"
+                  />
+                  <div className="flex gap-2">
+                    <Button
                       type="button"
-                      onClick={() => removeVideoFeedItem(idx)}
-                      className="text-[11px] text-[#FF3D00] hover:underline flex items-center gap-1 font-medium"
+                      size="sm"
+                      variant="primary"
+                      className="text-xs font-bold w-full sm:w-auto"
+                      onClick={handleAddVideoUrl}
                     >
-                      <Trash2 className="w-3.5 h-3.5" /> Remove Clip
-                    </button>
+                      Add Video
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="text-xs w-full sm:w-auto"
+                      onClick={() => setShowVideoUrlInput(false)}
+                    >
+                      Cancel
+                    </Button>
                   </div>
                 </div>
-              ))}
+              </div>
+            )}
+
+            {/* Videos Grid (16:9 landscape video player) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {videoFeed.map((url, idx) => {
+                const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
+                const ytEmbed = ytMatch ? `https://www.youtube-nocookie.com/embed/${ytMatch[1]}` : null;
+
+                return (
+                  <div
+                    key={idx}
+                    className="space-y-2 p-3 bg-[#141414] border border-[#2A2A2A] rounded-[2px]"
+                  >
+                    <div className="relative aspect-video rounded-[2px] bg-black overflow-hidden border border-[#1F1F1F]">
+                      {ytEmbed ? (
+                        <iframe
+                          src={ytEmbed}
+                          title={`Gameplay Video #${idx + 1}`}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video
+                          src={url}
+                          controls
+                          playsInline
+                          preload="metadata"
+                          className="w-full h-full object-contain"
+                        />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[10px] text-[#FFE93B] font-display uppercase tracking-wider font-semibold flex items-center gap-1.5">
+                        <Film className="w-3.5 h-3.5" /> Video Clip #{idx + 1} {ytEmbed ? '(YouTube)' : '(60s Max)'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeVideoFeedItem(idx)}
+                        className="text-[11px] text-[#FF3D00] hover:underline flex items-center gap-1 font-medium"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Remove Clip
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
 
               {videoFeed.length === 0 && (
                 <div className="col-span-full p-8 rounded-[2px] border border-dashed border-[#2A2A2A] text-center space-y-2">
                   <Video className="w-8 h-8 text-[#555] mx-auto" />
                   <p className="text-xs text-[#837D72]">
-                    No gameplay video clips added yet. Click &quot;Add 60s Video Clip&quot; to showcase your top frags (up to 2 videos).
+                    No gameplay video clips added yet. Paste a YouTube / Shorts link or click &quot;Upload File&quot; to showcase your top frags.
                   </p>
                 </div>
               )}

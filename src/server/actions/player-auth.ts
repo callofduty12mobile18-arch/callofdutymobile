@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { randomBytes } from 'crypto';
 import { recordAuditLog } from '../data/audit-store';
 import { prisma } from '@/lib/db/prisma';
-import { Prisma, PlayerRole, VerificationStatus, PublishStatus, EntityType, MediaType, SocialPlatform } from '@prisma/client';
+import { Prisma, PlayerRole, VerificationStatus, PublishStatus, EntityType, MediaType, SocialPlatform, TeamMemberRole } from '@prisma/client';
 import { safeHttpUrl, safeMediaUrl } from '@/lib/security';
 import { verifyPassword, hashPassword } from '@/lib/auth/password';
 import { hashToken } from '@/lib/auth/tokens';
@@ -424,7 +424,9 @@ export async function updatePlayerSelfProfile(
 
   const parseUrlList = (key: string, limit: number): string[] => {
     try {
-      const parsed: unknown = JSON.parse(field(key, 20000) || '[]');
+      const rawVal = (formData.get(key) as string)?.trim();
+      if (!rawVal) return [];
+      const parsed: unknown = JSON.parse(rawVal);
       if (!Array.isArray(parsed)) return [];
       return parsed.map(safeMediaUrl).filter((u): u is string => !!u).slice(0, limit);
     } catch {
@@ -437,7 +439,13 @@ export async function updatePlayerSelfProfile(
 
   // Resolve the profile owned by this account
   const ownedPlayer = await prisma.player.findFirst({
-    where: { userId: session.playerId },
+    where: {
+      OR: [
+        { userId: session.playerId },
+        ...(session.slug ? [{ slug: session.slug }] : []),
+        ...(session.ign ? [{ ign: { equals: session.ign, mode: 'insensitive' as const } }] : []),
+      ],
+    },
     orderBy: { createdAt: 'asc' },
   });
 
@@ -512,6 +520,7 @@ export async function updatePlayerSelfProfile(
             where: { id: ownedPlayer.id },
             data: {
               slug: newSlug,
+              userId: ownedPlayer.userId || session.playerId,
               ign,
               displayName: displayName || null,
               realName: realName || null,
@@ -560,8 +569,8 @@ export async function updatePlayerSelfProfile(
         fileName: `feed-photo-${i + 1}.jpg`,
         mimeType: 'image/jpeg',
         fileSizeBytes: 1024 * 1024,
-        storagePath: url.slice(0, 490),
-        publicUrl: url.slice(0, 490),
+        storagePath: url,
+        publicUrl: url,
         caption: `Landscape Highlight Photo #${i + 1}`,
       })),
       ...videoUrls.map((url, i) => ({
@@ -571,8 +580,8 @@ export async function updatePlayerSelfProfile(
         fileName: `feed-clip-${i + 1}.mp4`,
         mimeType: 'video/mp4',
         fileSizeBytes: 10 * 1024 * 1024,
-        storagePath: url.slice(0, 490),
-        publicUrl: url.slice(0, 490),
+        storagePath: url,
+        publicUrl: url,
         durationSeconds: 60,
         caption: `Gameplay Highlight Clip #${i + 1}`,
       })),
@@ -634,6 +643,16 @@ export async function updatePlayerSelfProfile(
 
     if (team) {
       operations.push(
+        prisma.teamMember.updateMany({
+          where: {
+            playerId: player.id,
+            isCurrent: true,
+            NOT: { teamId: team.id },
+          },
+          data: { isCurrent: false, leftAt: new Date() },
+        })
+      );
+      operations.push(
         prisma.teamMember.upsert({
           where: {
             teamId_playerId_isCurrent: {
@@ -642,13 +661,23 @@ export async function updatePlayerSelfProfile(
               isCurrent: true,
             },
           },
-          update: { role: 'ACTIVE_ROSTER' },
+          update: { role: TeamMemberRole.ACTIVE_ROSTER, isCurrent: true, leftAt: null },
           create: {
             teamId: team.id,
             playerId: player.id,
-            role: 'ACTIVE_ROSTER',
+            role: TeamMemberRole.ACTIVE_ROSTER,
             isCurrent: true,
           },
+        })
+      );
+    } else {
+      operations.push(
+        prisma.teamMember.updateMany({
+          where: {
+            playerId: player.id,
+            isCurrent: true,
+          },
+          data: { isCurrent: false, leftAt: new Date() },
         })
       );
     }

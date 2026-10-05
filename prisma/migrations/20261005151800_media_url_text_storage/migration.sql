@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "media" ALTER COLUMN "storage_path" SET DATA TYPE TEXT;
+ALTER TABLE "media" ALTER COLUMN "public_url" SET DATA TYPE TEXT;
+ALTER TABLE "media" ALTER COLUMN "caption" SET DATA TYPE TEXT;
+ALTER TABLE "documents" ALTER COLUMN "storage_path" SET DATA TYPE TEXT;

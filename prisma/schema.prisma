@@ -411,13 +411,13 @@ model Media {
   fileName        String      @map("file_name") @db.VarChar(255)
   mimeType        String      @map("mime_type") @db.VarChar(100)
   fileSizeBytes   Int         @map("file_size_bytes")
-  storagePath     String      @map("storage_path") @db.VarChar(500)
-  publicUrl       String      @map("public_url") @db.VarChar(500)
+  storagePath     String      @map("storage_path") @db.Text
+  publicUrl       String      @map("public_url") @db.Text
   width           Int?
   height          Int?
   durationSeconds Int?        @map("duration_seconds")
   altText         String?     @map("alt_text") @db.VarChar(255)
-  caption         String?     @db.VarChar(500)
+  caption         String?     @db.Text
   isFeatured      Boolean     @default(false) @map("is_featured")
   createdAt       DateTime    @default(now()) @map("created_at")
 
@@ -441,7 +441,7 @@ model Document {
   fileName      String     @map("file_name") @db.VarChar(255)
   mimeType      String     @map("mime_type") @db.VarChar(100)
   fileSizeBytes Int        @map("file_size_bytes")
-  storagePath   String     @map("storage_path") @db.VarChar(500)
+  storagePath   String     @map("storage_path") @db.Text
   createdAt     DateTime   @default(now()) @map("created_at")
 
   player        Player?    @relation("PlayerDocuments", fields: [playerId], references: [id], onDelete: Cascade)

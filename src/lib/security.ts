@@ -11,7 +11,7 @@ export function escapeHtml(value: unknown): string {
 /** Returns a normalized http(s) URL, or null if the input is not a valid http(s) URL. */
 export function safeHttpUrl(input: string | null | undefined): string | null {
   const raw = (input ?? '').trim();
-  if (!raw || raw.length > 500) return null;
+  if (!raw || raw.length > 2048) return null;
   try {
     const url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
     return url.protocol === 'https:' || url.protocol === 'http:' ? url.toString() : null;
@@ -20,13 +20,13 @@ export function safeHttpUrl(input: string | null | undefined): string | null {
   }
 }
 
-/** Accepts /uploads/... files, https URLs, or safe image data URIs; rejects everything else. */
+/** Accepts /uploads/... files, https URLs, or safe image/video data URIs; rejects everything else. */
 export function safeMediaUrl(input: unknown): string | null {
   if (typeof input !== 'string') return null;
   const raw = input.trim();
   if (/^\/uploads\/[a-z_]+\/[A-Za-z0-9._-]+$/.test(raw) && !raw.includes('..')) return raw;
   if (/^https?:\/\//i.test(raw)) return safeHttpUrl(raw);
-  if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/i.test(raw)) return raw;
+  if (/^data:(image\/(png|jpeg|jpg|webp|gif)|video\/(mp4|webm|quicktime));base64,[A-Za-z0-9+/=]+$/i.test(raw)) return raw;
   return null;
 }
 
