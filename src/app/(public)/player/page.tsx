@@ -67,17 +67,17 @@ export default async function PlayerDashboardPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
           {session.slug && (
-            <Link href={`/players/${session.slug}`} target="_blank">
-              <Button size="sm" variant="outline">
+            <Link href={`/players/${session.slug}`} target="_blank" className="w-full sm:w-auto">
+              <Button size="sm" variant="outline" className="w-full sm:w-auto">
                 <ExternalLink className="w-4 h-4 mr-1.5" />
                 VIEW PUBLIC PROFILE
               </Button>
             </Link>
           )}
-          <form action={logoutPlayerAction}>
-            <Button size="sm" variant="ghost" type="submit">
+          <form action={logoutPlayerAction} className="w-full sm:w-auto">
+            <Button size="sm" variant="ghost" type="submit" className="w-full sm:w-auto">
               <LogOut className="w-4 h-4 mr-1.5" />
               SIGN OUT
             </Button>

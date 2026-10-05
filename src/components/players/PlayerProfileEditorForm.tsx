@@ -21,7 +21,6 @@ import {
   Video,
   Film,
   Plus,
-  Play,
   Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -294,7 +293,7 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
                 )}
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="w-20 h-20 rounded-[2px] bg-[#1F1F1F] border-2 border-[#FFE93B]/60 shadow-[0_0_15px_rgba(255,233,59,0.15)] flex items-center justify-center overflow-hidden flex-shrink-0 relative group">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="Player Avatar" className="w-full h-full object-cover" />
@@ -308,7 +307,7 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
                   )}
                 </div>
 
-                <div className="space-y-2 flex-1">
+                <div className="space-y-2 flex-1 w-full">
                   <input
                     ref={avatarInputRef}
                     type="file"
@@ -531,30 +530,30 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
       {/* 2. Landscape Highlights & Media Feed Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base flex items-center justify-between">
-            <span className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <CardTitle className="text-base flex items-center gap-2">
               <Film className="w-4 h-4 text-[#FFE93B]" /> Landscape Media Feed & Highlights
-            </span>
+            </CardTitle>
             <span className="text-[11px] font-mono text-[#837D72] font-normal">
               16:9 Landscape · Max 50MB
             </span>
-          </CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="space-y-8">
           {/* Section A: 5 Landscape Photos Feed */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-[#2A2A2A] pb-2">
-              <div>
-                <h4 className="font-display uppercase text-xs text-white font-bold tracking-wider flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2A2A2A] pb-3">
+              <div className="space-y-0.5 max-w-xl">
+                <h4 className="font-display uppercase text-xs sm:text-sm text-white font-bold tracking-wider flex items-center gap-2">
                   <ImageIcon className="w-3.5 h-3.5 text-[#FFE93B]" /> Landscape Photos Feed ({photoFeed.length}/5)
                 </h4>
-                <p className="text-[11px] text-[#837D72]">
+                <p className="text-[11px] text-[#837D72] leading-relaxed">
                   Upload up to 5 tournament photos, trophy celebrations, or scrim screenshots in landscape orientation (Max 50MB).
                 </p>
               </div>
 
               {photoFeed.length < 5 && (
-                <div>
+                <div className="flex-shrink-0 w-full sm:w-auto">
                   <input
                     ref={photoFeedInputRef}
                     type="file"
@@ -566,7 +565,7 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="text-xs"
+                    className="w-full sm:w-auto text-xs whitespace-nowrap"
                     disabled={isUploadingPhotoFeed}
                     onClick={() => photoFeedInputRef.current?.click()}
                   >
@@ -625,18 +624,18 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
 
           {/* Section B: 2 Gameplay Highlight Videos */}
           <div className="space-y-4 pt-4 border-t border-[#2A2A2A]">
-            <div className="flex items-center justify-between border-b border-[#2A2A2A] pb-2">
-              <div>
-                <h4 className="font-display uppercase text-xs text-white font-bold tracking-wider flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2A2A2A] pb-3">
+              <div className="space-y-0.5 max-w-xl">
+                <h4 className="font-display uppercase text-xs sm:text-sm text-white font-bold tracking-wider flex items-center gap-2">
                   <Video className="w-3.5 h-3.5 text-[#FFE93B]" /> Gameplay Highlight Videos ({videoFeed.length}/2)
                 </h4>
-                <p className="text-[11px] text-[#837D72]">
+                <p className="text-[11px] text-[#837D72] leading-relaxed">
                   Upload up to 2 landscape gameplay clips (up to 60s clips, MP4/WEBM, max 50MB per video).
                 </p>
               </div>
 
               {videoFeed.length < 2 && (
-                <div>
+                <div className="flex-shrink-0 w-full sm:w-auto">
                   <input
                     ref={videoFeedInputRef}
                     type="file"
@@ -648,7 +647,7 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="text-xs"
+                    className="w-full sm:w-auto text-xs whitespace-nowrap"
                     disabled={isUploadingVideoFeed}
                     onClick={() => videoFeedInputRef.current?.click()}
                   >
@@ -812,14 +811,14 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
       {/* 6. Google Search & SEO Keywords Discovery */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base flex items-center justify-between">
-            <span className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <CardTitle className="text-base flex items-center gap-2">
               <Search className="w-4 h-4 text-[#FFE93B]" /> Google Search & SEO Tags
-            </span>
-            <span className="text-[11px] font-mono text-[#FFE93B] bg-[#FFE93B]/10 px-2 py-0.5 rounded-[2px] border border-[#FFE93B]/30">
+            </CardTitle>
+            <span className="text-[11px] font-mono text-[#FFE93B] bg-[#FFE93B]/10 px-2 py-0.5 rounded-[2px] border border-[#FFE93B]/30 self-start sm:self-auto">
               SEARCH RANKING
             </span>
-          </CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="p-4 bg-[#141414] border border-[#2A2A2A] rounded-[2px] space-y-2">
@@ -827,7 +826,7 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
               <Sparkles className="w-3.5 h-3.5" /> Live Google Search Preview
             </div>
             <div className="bg-[#0A0A0A] p-3 rounded-[2px] border border-[#1F1F1F] space-y-1 font-sans">
-              <div className="text-[11px] text-[#837D72] flex items-center gap-1">
+              <div className="text-[11px] text-[#837D72] flex items-center gap-1 break-all">
                 <span>https://MobileRoster.in/players/{activeSlug}</span>
               </div>
               <div className="text-sm font-medium text-[#8ab4f8] hover:underline cursor-pointer">
@@ -904,12 +903,12 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <p className="text-xs text-[#837D72]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="text-xs text-[#837D72] break-all">
             All changes are published live to your official URL: <code className="text-[#FFE93B]">/players/{activeSlug}</code>
           </p>
 
-          <Button size="lg" variant="primary" type="submit" isLoading={isPending}>
+          <Button size="lg" variant="primary" type="submit" isLoading={isPending} className="w-full sm:w-auto flex-shrink-0">
             <Save className="w-4 h-4 mr-2" />
             SAVE & PUBLISH PROFILE
           </Button>

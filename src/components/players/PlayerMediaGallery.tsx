@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Camera, Video, Maximize2, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { Camera, Video, Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface MediaItem {
   id: string;
@@ -80,7 +80,7 @@ export const PlayerMediaGallery: React.FC<PlayerMediaGalleryProps> = ({
       {/* 2. Photos Gallery with Click-to-Preview Lightbox */}
       {photos.length > 0 && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <h4 className="font-display uppercase text-xs text-white font-bold tracking-wider flex items-center gap-1.5">
               <Camera className="w-3.5 h-3.5 text-[#FFE93B]" /> Photos Gallery ({photos.length})
             </h4>
@@ -129,10 +129,10 @@ export const PlayerMediaGallery: React.FC<PlayerMediaGalleryProps> = ({
           {/* Close Button */}
           <button
             onClick={() => setActivePhotoIndex(null)}
-            className="absolute top-5 right-5 z-50 text-white hover:text-[#FFE93B] p-2.5 bg-black/70 border border-[#2A2A2A] hover:border-[#FFE93B] rounded-full transition-colors"
+            className="absolute top-3 right-3 sm:top-5 sm:right-5 z-50 text-white hover:text-[#FFE93B] p-2 sm:p-2.5 bg-black/70 border border-[#2A2A2A] hover:border-[#FFE93B] rounded-full transition-colors"
             aria-label="Close Preview"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
 
           {/* Navigation: Previous Photo */}
@@ -144,10 +144,10 @@ export const PlayerMediaGallery: React.FC<PlayerMediaGalleryProps> = ({
                   prev !== null ? (prev - 1 + photos.length) % photos.length : 0
                 );
               }}
-              className="absolute left-4 z-50 p-3 bg-black/80 border border-[#2A2A2A] text-white hover:text-[#FFE93B] hover:border-[#FFE93B] rounded-full transition-all"
+              className="absolute left-2 sm:left-4 z-50 p-2 sm:p-3 bg-black/80 border border-[#2A2A2A] text-white hover:text-[#FFE93B] hover:border-[#FFE93B] rounded-full transition-all"
               aria-label="Previous Photo"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           )}
 
@@ -160,10 +160,10 @@ export const PlayerMediaGallery: React.FC<PlayerMediaGalleryProps> = ({
                   prev !== null ? (prev + 1) % photos.length : 0
                 );
               }}
-              className="absolute right-4 z-50 p-3 bg-black/80 border border-[#2A2A2A] text-white hover:text-[#FFE93B] hover:border-[#FFE93B] rounded-full transition-all"
+              className="absolute right-2 sm:right-4 z-50 p-2 sm:p-3 bg-black/80 border border-[#2A2A2A] text-white hover:text-[#FFE93B] hover:border-[#FFE93B] rounded-full transition-all"
               aria-label="Next Photo"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           )}
 

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Trophy, Swords, ShieldCheck, Clock, CheckCircle2, AlertCircle, Plus, Send, ChevronRight } from 'lucide-react';
+import { Trophy, Swords, CheckCircle2, AlertCircle, Plus, Send } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
