@@ -85,9 +85,6 @@ export async function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Backward compatibility for standard middleware runners
-export const middleware = proxy;
-
 export const config = {
   matcher: ['/admin/:path*'],
 };

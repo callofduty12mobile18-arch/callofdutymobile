@@ -46,7 +46,7 @@ async function fetchTournamentBySlug(slug: string) {
       },
     });
 
-    if (tournament && tournament.publishStatus === PublishStatus.PUBLISHED) {
+    if (tournament && tournament.publishStatus === PublishStatus.PUBLISHED && !tournament.deletedAt) {
       return tournament;
     }
   } catch (err) {

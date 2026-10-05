@@ -82,8 +82,13 @@ export const getPublishedPlayers = cache(async (params: PlayerFilterParams = {})
 
 async function fetchPlayerBySlug(slug: string) {
   try {
-    let player = await prisma.player.findUnique({
-      where: { slug },
+    const publicWhere = {
+      publishStatus: PublishStatus.PUBLISHED,
+      deletedAt: null,
+    } as const;
+
+    let player = await prisma.player.findFirst({
+      where: { slug, ...publicWhere },
       include: {
         teamMemberships: {
           include: { team: true },
@@ -107,6 +112,7 @@ async function fetchPlayerBySlug(slug: string) {
     if (!player) {
       player = await prisma.player.findFirst({
         where: {
+          ...publicWhere,
           OR: [
             { slug: slug.toLowerCase() },
             { ign: { equals: slug.replace(/-/g, ' '), mode: 'insensitive' } },

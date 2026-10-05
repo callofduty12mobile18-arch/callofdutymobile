@@ -41,6 +41,7 @@ async function fetchTeamBySlug(slug: string) {
       include: {
         organization: true,
         members: {
+          where: { isCurrent: true },
           include: { player: true },
         },
         achievements: {
@@ -52,7 +53,7 @@ async function fetchTeamBySlug(slug: string) {
       },
     });
 
-    if (team && team.publishStatus === PublishStatus.PUBLISHED) {
+    if (team && team.publishStatus === PublishStatus.PUBLISHED && !team.deletedAt) {
       return team;
     }
   } catch (err) {

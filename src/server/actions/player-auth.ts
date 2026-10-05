@@ -218,7 +218,7 @@ export async function setPasswordAction(
       return { success: false, message: 'Invalid or already used password setup link.' };
     }
 
-    if (user.passwordResetExpiresAt && user.passwordResetExpiresAt < new Date()) {
+    if (!user.passwordResetExpiresAt || user.passwordResetExpiresAt <= new Date()) {
       return { success: false, message: 'This password setup link has expired (24h limit). Please request a new link.' };
     }
 
