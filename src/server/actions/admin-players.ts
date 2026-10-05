@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db/prisma';
 import { recordAuditLog } from '../data/audit-store';
 import { requireAdminSession } from './admin-auth';
+import { getClientIp } from '@/lib/auth/rate-limit';
 
 export interface DeletePlayerResponse {
   success: boolean;
@@ -12,6 +13,7 @@ export interface DeletePlayerResponse {
 
 export async function deletePlayerAction(playerId: string): Promise<DeletePlayerResponse> {
   const admin = await requireAdminSession();
+  const ip = await getClientIp();
 
   if (!playerId) {
     return { success: false, message: 'Player ID is required.' };
@@ -81,7 +83,8 @@ export async function deletePlayerAction(playerId: string): Promise<DeletePlayer
       admin.username,
       `Deleted player profile for "${targetIgn}".`,
       targetIgn,
-      'WARNING'
+      'WARNING',
+      ip
     );
 
     // 4. Invalidate Next.js caches

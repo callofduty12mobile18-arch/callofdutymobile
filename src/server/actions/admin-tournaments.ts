@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db/prisma';
 import { PublishStatus, TournamentTier, TournamentStatus } from '@prisma/client';
 import { requireAdminSession } from './admin-auth';
 import { recordAuditLog } from '../data/audit-store';
+import { getClientIp } from '@/lib/auth/rate-limit';
 import { randomUUID } from 'crypto';
 
 export interface CreateTournamentAdminInput {
@@ -53,6 +54,7 @@ export async function updateTournamentPublishStatusAction(
   publishStatus: PublishStatus
 ): Promise<{ success: boolean; message: string }> {
   const admin = await requireAdminSession();
+  const ip = await getClientIp();
 
   try {
     const updated = await prisma.tournament.update({
@@ -65,7 +67,8 @@ export async function updateTournamentPublishStatusAction(
       admin.username,
       `Changed publish status of "${updated.name}" to ${publishStatus}.`,
       `Tournament: ${updated.slug}`,
-      'INFO'
+      'INFO',
+      ip
     );
 
     revalidatePath('/admin/tournaments');
@@ -89,6 +92,7 @@ export async function createTournamentAction(
   formData: FormData
 ): Promise<{ success: boolean; message: string; tournamentSlug?: string }> {
   const admin = await requireAdminSession();
+  const ip = await getClientIp();
 
   const name = (formData.get('name') as string)?.trim();
   const organizer = (formData.get('organizer') as string)?.trim() || 'MOBILEROSTER Editorial';
@@ -132,7 +136,8 @@ export async function createTournamentAction(
       admin.username,
       `Created tournament "${name}" (${tier}) with status ${publishStatus}.`,
       `Tournament: ${created.slug}`,
-      'SUCCESS'
+      'SUCCESS',
+      ip
     );
 
     revalidatePath('/admin/tournaments');
@@ -157,6 +162,7 @@ export async function updateTournamentAction(
   formData: FormData
 ): Promise<{ success: boolean; message: string }> {
   const admin = await requireAdminSession();
+  const ip = await getClientIp();
 
   const name = (formData.get('name') as string)?.trim();
   const organizer = (formData.get('organizer') as string)?.trim();
@@ -193,7 +199,8 @@ export async function updateTournamentAction(
       admin.username,
       `Updated tournament details for "${updated.name}".`,
       `Tournament: ${updated.slug}`,
-      'INFO'
+      'INFO',
+      ip
     );
 
     revalidatePath('/admin/tournaments');
@@ -214,6 +221,7 @@ export async function deleteTournamentAction(
   tournamentId: string
 ): Promise<{ success: boolean; message: string }> {
   const admin = await requireAdminSession();
+  const ip = await getClientIp();
 
   try {
     const deleted = await prisma.tournament.update({
@@ -226,7 +234,8 @@ export async function deleteTournamentAction(
       admin.username,
       `Archived / Deleted tournament "${deleted.name}".`,
       `Tournament: ${deleted.slug}`,
-      'WARNING'
+      'WARNING',
+      ip
     );
 
     revalidatePath('/admin/tournaments');

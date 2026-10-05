@@ -6,6 +6,7 @@ import { sendBroadcastEmail } from '@/lib/email/mailer';
 import { recordAuditLog } from '../data/audit-store';
 import { addBroadcastRecord, getDbBroadcastHistory, BroadcastHistoryItem } from '../data/broadcast-store';
 import { requireAdminSession } from './admin-auth';
+import { getClientIp } from '@/lib/auth/rate-limit';
 import { unstable_cache } from 'next/cache';
 
 async function fetchBroadcastRecipientEmails(): Promise<string[]> {
@@ -59,6 +60,7 @@ export async function getBroadcastHistoryList(): Promise<BroadcastHistoryItem[]>
 export async function sendBroadcastAnnouncementAction(formData: FormData) {
   try {
     const admin = await requireAdminSession();
+    const ip = await getClientIp();
     const subject = (formData.get('subject') as string)?.trim();
     const badgeTitle = (formData.get('badgeTitle') as string)?.trim() || 'OFFICIAL ANNOUNCEMENT';
     const headline = (formData.get('headline') as string)?.trim() || subject;
@@ -103,7 +105,8 @@ export async function sendBroadcastAnnouncementAction(formData: FormData) {
       admin.username,
       `Dispatched email broadcast "${subject}" to ${recipients.length} player mailbox(es).`,
       `Broadcast: ${badgeTitle}`,
-      result.success ? 'SUCCESS' : 'WARNING'
+      result.success ? 'SUCCESS' : 'WARNING',
+      ip
     );
 
     revalidatePath('/admin/broadcast');

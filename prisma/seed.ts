@@ -3,76 +3,77 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-async function main() {
+export async function main() {
   const adminEmail = process.env.SEED_ADMIN_EMAIL;
   const adminPassword = process.env.SEED_ADMIN_PASSWORD;
   if (!adminEmail || !adminPassword || adminPassword.length < 12) {
     throw new Error('Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD (min 12 chars) before seeding.');
   }
-  if (process.env.NODE_ENV === 'production' && process.env.SEED_CONFIRM_WIPE !== 'yes') {
-    throw new Error('Seeding deletes ALL data. Set SEED_CONFIRM_WIPE=yes to run it in production.');
-  }
 
-  console.log('--- Initializing Clean CallOfDutyMobile Database ---');
-
-  // Clean all existing data
-  await prisma.playerAchievement.deleteMany();
-  await prisma.teamAchievement.deleteMany();
-  await prisma.achievement.deleteMany();
-  await prisma.teamMember.deleteMany();
-  await prisma.playerTeamHistory.deleteMany();
-  await prisma.socialLink.deleteMany();
-  await prisma.media.deleteMany();
-  await prisma.document.deleteMany();
-  await prisma.submission.deleteMany();
-  await prisma.article.deleteMany();
-  await prisma.tournament.deleteMany();
-  await prisma.player.deleteMany();
-  await prisma.team.deleteMany();
-  await prisma.organization.deleteMany();
-  await prisma.user.deleteMany();
+  console.log('--- Running Non-Destructive CallOfDutyMobile Database Seed ---');
 
   // Hash admin password
   const adminPasswordHash = bcrypt.hashSync(adminPassword, 12);
 
-  // Create default platform Admin account
-  await prisma.user.create({
-    data: {
+  // Non-destructive: Upsert admin user by email
+  const adminUser = await prisma.user.upsert({
+    where: { email: adminEmail.trim().toLowerCase() },
+    update: {
+      role: RoleType.ADMIN,
+      passwordHash: adminPasswordHash,
+      emailVerified: true,
+    },
+    create: {
       email: adminEmail.trim().toLowerCase(),
       role: RoleType.ADMIN,
       passwordHash: adminPasswordHash,
+      emailVerified: true,
     },
   });
 
-  // Create standard achievement definitions
-  await prisma.achievement.createMany({
-    data: [
-      {
-        title: 'National Champion',
-        description: '1st Place in official Indian championship tournament.',
-        category: AchievementCategory.CHAMPIONSHIP,
-      },
-      {
-        title: 'Finals MVP',
-        description: 'Awarded to the Most Valuable Player in tournament finals.',
-        category: AchievementCategory.MVP,
-      },
-      {
-        title: 'Tournament Runner-up',
-        description: '2nd Place finish in national tournament.',
-        category: AchievementCategory.RUNNER_UP,
-      },
-    ],
-  });
+  console.log(`Admin user ensured: ${adminUser.email} (Role: ${adminUser.role})`);
 
-  console.log('--- Clean database initialized successfully with Admin user & Achievements. ---');
+  // Non-destructive: Create achievements only if missing
+  const defaultAchievements = [
+    {
+      title: 'National Champion',
+      description: '1st Place in official Indian championship tournament.',
+      category: AchievementCategory.CHAMPIONSHIP,
+    },
+    {
+      title: 'Finals MVP',
+      description: 'Awarded to the Most Valuable Player in tournament finals.',
+      category: AchievementCategory.MVP,
+    },
+    {
+      title: 'Tournament Runner-up',
+      description: '2nd Place finish in national tournament.',
+      category: AchievementCategory.RUNNER_UP,
+    },
+  ];
+
+  for (const ach of defaultAchievements) {
+    const existing = await prisma.achievement.findFirst({
+      where: { title: ach.title },
+    });
+    if (!existing) {
+      await prisma.achievement.create({ data: ach });
+      console.log(`Created missing achievement: ${ach.title}`);
+    } else {
+      console.log(`Achievement already exists: ${ach.title}`);
+    }
+  }
+
+  console.log('--- Non-destructive database seed completed successfully. ---');
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+if (require.main === module) {
+  main()
+    .catch((e) => {
+      console.error(e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}

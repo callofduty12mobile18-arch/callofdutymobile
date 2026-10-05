@@ -1,12 +1,13 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { SubmissionType, SubmissionStatus, TournamentTier, TournamentStatus, PublishStatus } from '@prisma/client';
 import { getPlayerSession } from './player-auth';
 import { requireAdminSession } from './admin-auth';
 import { recordAuditLog } from '../data/audit-store';
-import { scrimLobbiesStore, ScrimLobby } from '../data/scrims-data';
+import { getClientIp } from '@/lib/auth/rate-limit';
 import { randomUUID } from 'crypto';
 
 export interface OrganizerPermissionResponse {
@@ -38,6 +39,23 @@ export interface OrganizerRequestItem {
   createdAt: string;
   reviewedAt?: string | null;
 }
+
+const organizerRequestSchema = z.object({
+  type: z.enum(['TOURNAMENT', 'SCRIM']),
+  eventTitle: z.string().min(2, 'Event title is required (min 2 chars)').max(100, 'Event title must be at most 100 chars'),
+  organizationOrClan: z.string().max(100, 'Organization name must be at most 100 chars').optional(),
+  eventDate: z.string().max(50).optional(),
+  eventTime: z.string().max(50).optional(),
+  plannedDate: z.string().max(100).optional(),
+  prizePoolType: z.string().max(50).optional(),
+  customPrizeAmount: z.string().max(100).optional(),
+  prizePool: z.string().max(100).optional(),
+  entryType: z.string().max(50).optional(),
+  entryFee: z.string().max(100).optional(),
+  format: z.string().max(200).optional(),
+  discordOrContact: z.string().max(100).optional(),
+  description: z.string().max(2000, 'Description must be at most 2000 chars').optional(),
+});
 
 /**
  * Check if the currently logged-in player has approved permissions to organize.
@@ -106,36 +124,33 @@ export async function submitOrganizerRequestAction(
     return { success: false, message: 'You must be logged into Player Studio to submit a request.' };
   }
 
-  const eventTitle = (formData.get('eventTitle') as string)?.trim();
-  const organizationOrClan = (formData.get('organizationOrClan') as string)?.trim() || session.ign;
-  const eventDate = (formData.get('eventDate') as string)?.trim();
-  const eventTime = (formData.get('eventTime') as string)?.trim();
-  const plannedDate = eventDate
-    ? eventTime
-      ? `${eventDate} at ${eventTime}`
-      : eventDate
-    : (formData.get('plannedDate') as string)?.trim() || 'Upcoming';
+  const rawInput = {
+    type,
+    eventTitle: (formData.get('eventTitle') as string)?.trim() || '',
+    organizationOrClan: (formData.get('organizationOrClan') as string)?.trim() || session.ign,
+    eventDate: (formData.get('eventDate') as string)?.trim() || undefined,
+    eventTime: (formData.get('eventTime') as string)?.trim() || undefined,
+    plannedDate: (formData.get('plannedDate') as string)?.trim() || undefined,
+    prizePoolType: (formData.get('prizePoolType') as string)?.trim() || undefined,
+    customPrizeAmount: (formData.get('customPrizeAmount') as string)?.trim() || undefined,
+    prizePool: (formData.get('prizePool') as string)?.trim() || undefined,
+    entryType: (formData.get('entryType') as string)?.trim() || undefined,
+    entryFee: (formData.get('entryFee') as string)?.trim() || undefined,
+    format: (formData.get('format') as string)?.trim() || undefined,
+    discordOrContact: (formData.get('discordOrContact') as string)?.trim() || session.email,
+    description: (formData.get('description') as string)?.trim() || undefined,
+  };
 
-  const prizePoolType = (formData.get('prizePoolType') as string)?.trim();
-  const customPrizeAmount = (formData.get('customPrizeAmount') as string)?.trim();
-  const prizePool =
-    prizePoolType === 'CUSTOM' && customPrizeAmount
-      ? customPrizeAmount
-      : prizePoolType === 'FUN'
-      ? 'Just for Fun (No Cash Prize)'
-      : (formData.get('prizePool') as string)?.trim() || 'Just for Fun (No Cash Prize)';
-
-  const entryType = (formData.get('entryType') as string)?.trim() || 'FREE';
-  const entryFeeInput = (formData.get('entryFee') as string)?.trim();
-  const entryFee = entryType === 'PAID' ? (entryFeeInput || 'Payable') : 'Free Entry';
-
-  const format = (formData.get('format') as string)?.trim() || 'Standard Competitive Rules';
-  const discordOrContact = (formData.get('discordOrContact') as string)?.trim() || session.email;
-  const description = (formData.get('description') as string)?.trim() || '';
-
-  if (!eventTitle) {
-    return { success: false, message: 'Event or Tournament name is required.' };
+  const validated = organizerRequestSchema.safeParse(rawInput);
+  if (!validated.success) {
+    return {
+      success: false,
+      message: validated.error.issues[0]?.message || 'Invalid form input.',
+    };
   }
+
+  const data = validated.data;
+  const ip = await getClientIp();
 
   const submissionType =
     type === 'TOURNAMENT'
@@ -143,16 +158,72 @@ export async function submitOrganizerRequestAction(
       : SubmissionType.SCRIM_ORGANIZER_REQUEST;
 
   try {
-    const created = await prisma.submission.create({
+    // 1. Rate limit: max 3 requests per user per 24 hours
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const recentRequestsCount = await prisma.submission.count({
+      where: {
+        submitterEmail: { equals: session.email, mode: 'insensitive' },
+        type: { in: [SubmissionType.TOURNAMENT_ORGANIZER_REQUEST, SubmissionType.SCRIM_ORGANIZER_REQUEST] },
+        createdAt: { gte: oneDayAgo },
+      },
+    });
+
+    if (recentRequestsCount >= 3) {
+      return {
+        success: false,
+        message: 'You have reached the limit of 3 organizer requests per 24 hours. Please wait before submitting another.',
+      };
+    }
+
+    // 2. Reject if a request of the same type is already PENDING
+    const existingPending = await prisma.submission.findFirst({
+      where: {
+        submitterEmail: { equals: session.email, mode: 'insensitive' },
+        type: submissionType,
+        status: SubmissionStatus.PENDING,
+      },
+    });
+
+    if (existingPending) {
+      return {
+        success: false,
+        message: `You already have a pending ${type.toLowerCase()} organizer request under review. Please await admin review before submitting a new one.`,
+      };
+    }
+
+    // Compute formatted plannedDate and prizePool
+    const plannedDate = data.eventDate
+      ? data.eventTime
+        ? `${data.eventDate} at ${data.eventTime}`
+        : data.eventDate
+      : data.plannedDate || 'Upcoming';
+
+    const prizePool =
+      data.prizePoolType === 'CUSTOM' && data.customPrizeAmount
+        ? data.customPrizeAmount
+        : data.prizePoolType === 'FUN'
+        ? 'Just for Fun (No Cash Prize)'
+        : data.prizePool || 'Just for Fun (No Cash Prize)';
+
+    const entryType = data.entryType || 'FREE';
+    const entryFee = entryType === 'PAID' ? (data.entryFee || 'Payable') : 'Free Entry';
+    const format = data.format || 'Standard Competitive Rules';
+    const discordOrContact = data.discordOrContact || session.email;
+    const description = data.description || '';
+
+    // Create submission: keep discordOrContact in rawData only, submitterPhone is null
+    await prisma.submission.create({
       data: {
         type: submissionType,
         status: SubmissionStatus.PENDING,
         submitterName: session.ign,
         submitterEmail: session.email.toLowerCase().trim(),
-        submitterPhone: discordOrContact,
+        submitterPhone: null,
         rawData: {
-          eventTitle,
-          organizationOrClan,
+          eventTitle: data.eventTitle,
+          organizationOrClan: data.organizationOrClan || session.ign,
+          eventDate: data.eventDate || null,
+          eventTime: data.eventTime || null,
           plannedDate,
           prizePool,
           entryType,
@@ -167,9 +238,10 @@ export async function submitOrganizerRequestAction(
     await recordAuditLog(
       type === 'TOURNAMENT' ? 'TOURNAMENT_ORGANIZER_REQUESTED' : 'SCRIM_ORGANIZER_REQUESTED',
       session.email,
-      `Submitted ${type.toLowerCase()} organizer permission request for "${eventTitle}".`,
+      `Submitted ${type.toLowerCase()} organizer permission request for "${data.eventTitle}".`,
       `Organizer: ${session.ign}`,
-      'INFO'
+      'INFO',
+      ip
     );
 
     revalidatePath('/player');
@@ -240,6 +312,13 @@ export async function reviewOrganizerRequestAction(
   adminNotes?: string
 ): Promise<{ success: boolean; message: string }> {
   const admin = await requireAdminSession();
+  const ip = await getClientIp();
+
+  // Validate decision at runtime
+  const decisionValidation = z.enum(['APPROVE', 'REJECT']).safeParse(decision);
+  if (!decisionValidation.success) {
+    return { success: false, message: 'Invalid decision value. Must be APPROVE or REJECT.' };
+  }
 
   try {
     const sub = await prisma.submission.findUnique({
@@ -248,6 +327,20 @@ export async function reviewOrganizerRequestAction(
 
     if (!sub) {
       return { success: false, message: 'Organizer request not found.' };
+    }
+
+    // Require sub.type to be an organizer type
+    const organizerTypes: SubmissionType[] = [
+      SubmissionType.TOURNAMENT_ORGANIZER_REQUEST,
+      SubmissionType.SCRIM_ORGANIZER_REQUEST,
+    ];
+    if (!organizerTypes.includes(sub.type as SubmissionType)) {
+      return { success: false, message: 'Invalid submission type. Must be an organizer request.' };
+    }
+
+    // Require sub.status === PENDING
+    if (sub.status !== SubmissionStatus.PENDING) {
+      return { success: false, message: 'Only PENDING organizer requests can be reviewed.' };
     }
 
     const newStatus = decision === 'APPROVE' ? SubmissionStatus.APPROVED : SubmissionStatus.REJECTED;
@@ -265,10 +358,18 @@ export async function reviewOrganizerRequestAction(
     const raw = (sub.rawData as Record<string, unknown>) || {};
     const title = (raw.eventTitle as string) || 'Event';
 
-    // If approved and it's a tournament with details, auto-create a DRAFT/PUBLISHED tournament record for the organizer
+    // On approval, create the tournament as DRAFT (not PUBLISHED) and use the requested date if provided
     if (decision === 'APPROVE' && isTourney) {
       const slugBase = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `tourney-${Date.now()}`;
       const uniqueSlug = `${slugBase}-${randomUUID().slice(0, 4)}`;
+
+      // Parse requested date if provided
+      let startDate = new Date();
+      if (raw.eventDate && typeof raw.eventDate === 'string' && !isNaN(Date.parse(raw.eventDate))) {
+        startDate = new Date(raw.eventDate);
+      } else if (raw.plannedDate && typeof raw.plannedDate === 'string' && !isNaN(Date.parse(raw.plannedDate))) {
+        startDate = new Date(raw.plannedDate);
+      }
 
       await prisma.tournament.create({
         data: {
@@ -277,9 +378,9 @@ export async function reviewOrganizerRequestAction(
           organizer: (raw.organizationOrClan as string) || sub.submitterName,
           tier: TournamentTier.COMMUNITY,
           status: TournamentStatus.UPCOMING,
-          startDate: new Date(),
+          startDate,
           formatDescription: (raw.description as string) || (raw.format as string) || 'Approved Community Tournament',
-          publishStatus: PublishStatus.PUBLISHED,
+          publishStatus: PublishStatus.DRAFT,
         },
       });
     }
@@ -289,7 +390,8 @@ export async function reviewOrganizerRequestAction(
       admin.username,
       `${decision === 'APPROVE' ? 'Granted' : 'Declined'} organizer permission for ${sub.submitterEmail} (${title}).`,
       `Target: ${sub.submitterEmail}`,
-      decision === 'APPROVE' ? 'SUCCESS' : 'WARNING'
+      decision === 'APPROVE' ? 'SUCCESS' : 'WARNING',
+      ip
     );
 
     revalidatePath('/admin/requests');

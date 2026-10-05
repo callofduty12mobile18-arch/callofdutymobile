@@ -11,6 +11,17 @@ export function sanitizeSensitive<T>(value: T): unknown {
     return value;
   }
 
+  if (value instanceof Error) {
+    const isProd = process.env.NODE_ENV === 'production';
+    const errObj = value as Error & { code?: string | number };
+    return {
+      name: errObj.name,
+      message: errObj.message,
+      code: errObj.code,
+      ...(isProd ? {} : { stack: errObj.stack }),
+    };
+  }
+
   if (typeof value === 'string') {
     // Scrub URL parameters or raw strings containing secrets
     return value.replace(
@@ -21,7 +32,17 @@ export function sanitizeSensitive<T>(value: T): unknown {
 
   if (typeof value === 'object') {
     try {
+      const isProd = process.env.NODE_ENV === 'production';
       const serialized = JSON.stringify(value, (k, v) => {
+        if (v instanceof Error) {
+          const errObj = v as Error & { code?: string | number };
+          return {
+            name: errObj.name,
+            message: errObj.message,
+            code: errObj.code,
+            ...(isProd ? {} : { stack: errObj.stack }),
+          };
+        }
         if (k && SENSITIVE_PATTERN.test(k)) {
           return '***';
         }

@@ -3,11 +3,14 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { randomBytes } from 'crypto';
 import { recordAuditLog } from '../data/audit-store';
 import { prisma } from '@/lib/db/prisma';
 import { Prisma, PlayerRole, VerificationStatus, PublishStatus, EntityType, MediaType, SocialPlatform } from '@prisma/client';
 import { safeHttpUrl, safeMediaUrl } from '@/lib/security';
-import { verifyPassword } from '@/lib/auth/password';
+import { verifyPassword, hashPassword } from '@/lib/auth/password';
+import { hashToken } from '@/lib/auth/tokens';
+import { passwordComplexitySchema } from '@/lib/validation/auth';
 import { getClientIp, rateLimit } from '@/lib/auth/rate-limit';
 import { signSession, verifySession } from '@/lib/auth/session-token';
 import { sendAccountLockoutEmail } from '@/lib/email/mailer';
@@ -129,7 +132,7 @@ export async function loginPlayerAction(
   if (!authenticatedUser || !matchingDbUser) {
     return {
       success: false,
-      message: 'Invalid credentials. Please verify the email and access key sent to your inbox.',
+      message: 'Invalid credentials. Please verify your email and password.',
     };
   }
 
@@ -157,26 +160,106 @@ export async function loginPlayerAction(
     sessionData.ign || email,
     `Player logged into studio with validated database credentials.`,
     `Player: ${sessionData.ign}`,
-    'SUCCESS'
+    'SUCCESS',
+    ip
   );
 
   return {
     success: true,
-    message: 'Login successful! Redirecting to your Profile Studio...',
+    message: 'Welcome to Player Studio!',
     redirectUrl: '/player',
   };
 }
 
-export async function getPlayerSession(): Promise<PlayerSession | null> {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get(COOKIE_NAME)?.value;
-    if (!token) return null;
+/**
+ * Server action to set/reset a player password using a one-time setup token.
+ */
+export async function setPasswordAction(
+  prevState: { success: boolean; message: string } | null,
+  formData: FormData
+): Promise<{ success: boolean; message: string }> {
+  const token = (formData.get('token') as string)?.trim();
+  const email = (formData.get('email') as string)?.trim().toLowerCase();
+  const password = (formData.get('password') as string)?.trim();
+  const confirmPassword = (formData.get('confirmPassword') as string)?.trim();
 
-    return await verifySession<PlayerSession>(token);
-  } catch {
-    return null;
+  if (!token || !email) {
+    return { success: false, message: 'Invalid or missing security token.' };
   }
+
+  if (!password || !confirmPassword) {
+    return { success: false, message: 'Please provide and confirm your new password.' };
+  }
+
+  if (password !== confirmPassword) {
+    return { success: false, message: 'Passwords do not match.' };
+  }
+
+  const complexityCheck = passwordComplexitySchema.safeParse(password);
+  if (!complexityCheck.success) {
+    return {
+      success: false,
+      message: complexityCheck.error.issues[0]?.message || 'Password does not meet complexity requirements.',
+    };
+  }
+
+  const ip = await getClientIp();
+  const tokenHash = hashToken(token);
+
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        email,
+        passwordResetTokenHash: tokenHash,
+      },
+    });
+
+    if (!user) {
+      return { success: false, message: 'Invalid or already used password setup link.' };
+    }
+
+    if (user.passwordResetExpiresAt && user.passwordResetExpiresAt < new Date()) {
+      return { success: false, message: 'This password setup link has expired (24h limit). Please request a new link.' };
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: hashedPassword,
+        passwordResetTokenHash: null,
+        passwordResetExpiresAt: null,
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+      },
+    });
+
+    await recordAuditLog(
+      'PROFILE_UPDATED',
+      email,
+      'Player password set successfully via one-time token link.',
+      `User: ${email}`,
+      'SUCCESS',
+      ip
+    );
+
+    return {
+      success: true,
+      message: 'Your password has been set successfully! You can now log in.',
+    };
+  } catch (err) {
+    logger.error('Error setting user password:', err);
+    return { success: false, message: 'Failed to update password. Please try again.' };
+  }
+}
+
+export async function getPlayerSession(): Promise<PlayerSession | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
+  if (!token) return null;
+
+  return verifySession<PlayerSession>(token);
 }
 
 export async function logoutPlayerAction() {
@@ -186,20 +269,37 @@ export async function logoutPlayerAction() {
 }
 
 export async function updatePlayerSelfProfile(
-  prevState: { success: boolean; message: string; slug?: string } | null,
+  prevState: unknown,
   formData: FormData
-) {
+): Promise<{ success: boolean; message: string; slug?: string }> {
   const session = await getPlayerSession();
   if (!session) {
-    return { success: false, message: 'Session expired. Please log in again.' };
+    return { success: false, message: 'Unauthorized session. Please log in again.' };
   }
 
-  const field = (key: string, max: number) => (formData.get(key) as string | null)?.trim().slice(0, max) ?? '';
+  const ip = await getClientIp();
+
+  // Retrieve user to check email verification status
+  const user = await prisma.user.findUnique({
+    where: { id: session.playerId },
+    select: { id: true, emailVerified: true },
+  });
+
+  if (!user) {
+    return { success: false, message: 'User account not found.' };
+  }
+
+  const field = (name: string, maxLen: number) => {
+    const v = (formData.get(name) as string)?.trim();
+    if (!v) return null;
+    return v.slice(0, maxLen);
+  };
+
   const ign = field('ign', 50);
   const displayName = field('displayName', 100);
   const realName = field('realName', 100);
   const primaryRoleInput = field('primaryRole', 20);
-  const primaryRole = (Object.values(PlayerRole) as string[]).includes(primaryRoleInput)
+  const primaryRole = primaryRoleInput && (Object.values(PlayerRole) as string[]).includes(primaryRoleInput)
     ? (primaryRoleInput as PlayerRole)
     : PlayerRole.FLEX;
   const state = field('state', 100);
@@ -245,8 +345,6 @@ export async function updatePlayerSelfProfile(
   }
   const { youtubeUrl, instagramUrl, twitterUrl } = socials;
 
-  const newSlug = ign.toLowerCase().replace(/[^a-z0-9]/g, '-');
-
   const parseUrlList = (key: string, limit: number): string[] => {
     try {
       const parsed: unknown = JSON.parse(field(key, 20000) || '[]');
@@ -260,21 +358,62 @@ export async function updatePlayerSelfProfile(
   const photoUrls = parseUrlList('photoFeed', 5);
   const videoUrls = parseUrlList('videoFeed', 2);
 
-  // Resolve the profile owned by this account; a player may never edit someone else's profile.
+  // Resolve the profile owned by this account
   const ownedPlayer = await prisma.player.findFirst({
     where: { userId: session.playerId },
     orderBy: { createdAt: 'asc' },
-    select: { id: true },
   });
-  const slugOwner = await prisma.player.findUnique({ where: { slug: newSlug }, select: { id: true } });
-  if (slugOwner && slugOwner.id !== ownedPlayer?.id) {
-    return { success: false, message: 'That IGN is already taken by another player. Please choose a different one.' };
+
+  // Slug generation: sanitize lowercase alphanumeric characters; fallback to player-<random4> if empty; suffix -2, -3 on collision
+  let baseSlug = ign
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  if (!baseSlug) {
+    baseSlug = `player-${randomBytes(2).toString('hex')}`;
+  }
+
+  let newSlug = baseSlug;
+  let counter = 1;
+  while (true) {
+    const existing = await prisma.player.findUnique({
+      where: { slug: newSlug },
+      select: { id: true },
+    });
+    if (!existing || (ownedPlayer && existing.id === ownedPlayer.id)) {
+      break;
+    }
+    counter++;
+    newSlug = `${baseSlug}-${counter}`;
+  }
+
+  // Publication Rules:
+  // 1. Never republish a profile an admin archived
+  // 2. Enforce emailVerified before a player can publish (otherwise remains DRAFT)
+  let targetPublishStatus: PublishStatus = PublishStatus.DRAFT;
+  if (ownedPlayer && ownedPlayer.publishStatus === PublishStatus.ARCHIVED) {
+    targetPublishStatus = PublishStatus.ARCHIVED;
+  } else if (user.emailVerified) {
+    targetPublishStatus = PublishStatus.PUBLISHED;
+  } else {
+    targetPublishStatus = PublishStatus.DRAFT;
+  }
+
+  // Verification Rules:
+  // Changing IGN or UID resets verificationStatus to UNVERIFIED
+  const ignChanged = ownedPlayer ? ownedPlayer.ign.trim().toLowerCase() !== ign.trim().toLowerCase() : false;
+  const uidChanged = ownedPlayer ? (ownedPlayer.city || '').trim() !== (MobileRosterUid || '').trim() : false;
+
+  let targetVerificationStatus: VerificationStatus = VerificationStatus.UNVERIFIED;
+  let targetVerifiedAt: Date | null = null;
+  if (ownedPlayer && !ignChanged && !uidChanged) {
+    targetVerificationStatus = ownedPlayer.verificationStatus;
+    targetVerifiedAt = ownedPlayer.verifiedAt;
   }
 
   // Live PostgreSQL database update
   try {
-    const targetPublishStatus = PublishStatus.PUBLISHED;
-
     const teamSlug = teamName ? teamName.toLowerCase().replace(/[^a-z0-9]/g, '-') : null;
 
     // Concurrently execute Team and Player upserts
@@ -309,6 +448,8 @@ export async function updatePlayerSelfProfile(
               seoTitle: seoKeywords || null,
               seoDescription: seoDescription || null,
               publishStatus: targetPublishStatus,
+              verificationStatus: targetVerificationStatus,
+              verifiedAt: targetVerifiedAt,
             },
           })
         : prisma.player.create({
@@ -328,7 +469,8 @@ export async function updatePlayerSelfProfile(
               seoTitle: seoKeywords || null,
               seoDescription: seoDescription || null,
               publishStatus: targetPublishStatus,
-              verificationStatus: VerificationStatus.UNVERIFIED,
+              verificationStatus: targetVerificationStatus,
+              verifiedAt: targetVerifiedAt,
             },
           }),
     ]);
@@ -452,7 +594,7 @@ export async function updatePlayerSelfProfile(
 
     await prisma.$transaction(operations);
   } catch (err) {
-    console.error('Database profile update error:', err);
+    logger.error('Database profile update error:', err);
     return {
       success: false,
       message: 'Failed to update profile in database. Please try again.',
@@ -479,9 +621,10 @@ export async function updatePlayerSelfProfile(
     ign,
     `Updated profile info (Role: ${primaryRole}, Team: ${teamTag || 'Free Agent'})${
       mediaCount > 0 ? ` and uploaded ${photoUrls.length} photos, ${videoUrls.length} clips` : ''
-    }.`,
+    }. Status: ${targetPublishStatus}.`,
     `Player: ${ign} (/players/${newSlug})`,
-    'INFO'
+    'INFO',
+    ip
   );
 
   revalidatePath('/players');
@@ -490,9 +633,16 @@ export async function updatePlayerSelfProfile(
   revalidatePath('/admin/audit-logs');
   revalidatePath('/admin/media');
 
+  const statusMsg =
+    targetPublishStatus === PublishStatus.PUBLISHED
+      ? 'Profile saved and published to the Player Directory!'
+      : targetPublishStatus === PublishStatus.ARCHIVED
+      ? 'Profile updated (remains archived by Admin).'
+      : 'Profile saved in DRAFT mode. Please verify your email to publish.';
+
   return {
     success: true,
-    message: 'Profile saved and published to the Player Directory!',
+    message: statusMsg,
     slug: newSlug,
   };
 }

@@ -75,14 +75,13 @@ export default async function AdminRequestsPage() {
                     <th className="pb-3 font-semibold">Name / Gamer Tag</th>
                     <th className="pb-3 font-semibold">Date Requested</th>
                     <th className="pb-3 font-semibold">Status</th>
-                    <th className="pb-3 font-semibold">Credentials Issued</th>
                     <th className="pb-3 font-semibold text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#2A2A2A]">
                   {communityRequests.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-8 text-center text-[#837D72]">
+                      <td colSpan={5} className="py-8 text-center text-[#837D72]">
                         No community access requests yet. New requests submitted via /join will appear here.
                       </td>
                     </tr>

@@ -1,10 +1,10 @@
 import nodemailer from 'nodemailer';
 import { escapeHtml, safeHttpUrl } from '@/lib/security';
 
-interface SendCredentialsOptions {
+interface SendSetPasswordOptions {
   to: string;
   ign: string;
-  password: string;
+  token: string;
   fullName?: string;
   isInvitation?: boolean;
 }
@@ -43,13 +43,13 @@ export function getEmailTransporter() {
   });
 }
 
-export async function sendPlayerCredentialsEmail({
+export async function sendSetPasswordEmail({
   to,
   ign,
-  password,
+  token,
   fullName,
   isInvitation = false,
-}: SendCredentialsOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
+}: SendSetPasswordOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     const transporter = getEmailTransporter();
     if (!transporter) {
@@ -58,26 +58,25 @@ export async function sendPlayerCredentialsEmail({
     }
 
     const siteUrl = getSiteUrl();
-    const loginUrl = `${siteUrl}/player/login`;
+    const setPasswordUrl = `${siteUrl}/set-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(to)}`;
     const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Esports" <${process.env.SMTP_USER || 'noreply@mobileroster.in'}>`;
 
     const badgeText = isInvitation ? 'OFFICIAL PLAYER INVITATION' : 'INDIAN MobileRoster ARCHIVE';
-    const mainHeading = isInvitation ? 'YOU HAVE BEEN INVITED' : 'YOUR ACCESS CREDENTIALS';
+    const mainHeading = isInvitation ? 'YOU HAVE BEEN INVITED' : 'SET YOUR PASSWORD';
     const leadMessage = isInvitation
-      ? `You have been officially invited by the platform administrators to join the <strong style="color: #FFE93B;">CallOfDutyMobile</strong> competitive community platform.`
-      : `Your request to join the <strong style="color: #FFE93B;">CallOfDutyMobile</strong> competitive community platform has been approved by the platform administrators.`;
-    const boxTitle = isInvitation ? 'INVITATION ACCESS CREDENTIALS' : 'SECURE LOGIN CREDENTIALS';
-    const buttonText = isInvitation ? 'ACCEPT INVITATION & LOGIN &rarr;' : 'LOGIN TO PLAYER STUDIO &rarr;';
+      ? `You have been officially invited by the platform administrators to join the <strong style="color: #FFE93B;">CallOfDutyMobile</strong> competitive community platform. Please set up your password to activate your player account.`
+      : `Your request to join the <strong style="color: #FFE93B;">CallOfDutyMobile</strong> competitive community platform has been approved. Please set up your password to access Player Studio.`;
+    const buttonText = isInvitation ? 'ACCEPT INVITATION & SET PASSWORD &rarr;' : 'SET YOUR PASSWORD &rarr;';
     const emailSubject = isInvitation
-      ? `Official Invitation: Welcome to CallOfDutyMobile, ${ign}`
-      : `CallOfDutyMobile Access Key: Welcome ${ign}`;
+      ? `Official Invitation: Set Your Password for CallOfDutyMobile, ${ign}`
+      : `Set Your CallOfDutyMobile Password: Welcome ${ign}`;
 
     const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>${isInvitation ? 'Your CallOfDutyMobile Official Player Invitation' : 'Your CallOfDutyMobile Player Access Credentials'}</title>
+  <title>${isInvitation ? 'Your CallOfDutyMobile Official Player Invitation' : 'Set Your CallOfDutyMobile Password'}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #0A0A0A; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF;">
   <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0A0A0A; padding: 40px 20px;">
@@ -118,12 +117,12 @@ export async function sendPlayerCredentialsEmail({
                 ${leadMessage}
               </p>
 
-              <!-- Credentials Card -->
+              <!-- Account Info Card -->
               <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0A0A0A; border: 1px solid #FFE93B; border-radius: 4px; margin-bottom: 28px;">
                 <tr>
                   <td style="padding: 24px;">
                     <span style="display: block; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #837D72; font-weight: bold; margin-bottom: 16px;">
-                      ${boxTitle}
+                      ACCOUNT SETUP DETAILS
                     </span>
 
                     <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -136,19 +135,11 @@ export async function sendPlayerCredentialsEmail({
                         </td>
                       </tr>
                       <tr>
-                        <td style="padding-bottom: 12px; font-size: 12px; text-transform: uppercase; color: #837D72;">
+                        <td style="font-size: 12px; text-transform: uppercase; color: #837D72;">
                           PLAYER IGN:
                         </td>
-                        <td style="padding-bottom: 12px; font-size: 14px; font-family: monospace; color: #FFFFFF; font-weight: bold;">
+                        <td style="font-size: 14px; font-family: monospace; color: #FFFFFF; font-weight: bold;">
                           ${escapeHtml(ign)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="font-size: 12px; text-transform: uppercase; color: #837D72;">
-                          ACCESS KEY:
-                        </td>
-                        <td style="font-size: 16px; font-family: monospace; color: #FFE93B; font-weight: 900; letter-spacing: 1px;">
-                          ${escapeHtml(password)}
                         </td>
                       </tr>
                     </table>
@@ -160,7 +151,7 @@ export async function sendPlayerCredentialsEmail({
               <table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
                 <tr>
                   <td align="center" style="background-color: #FFE93B; border-radius: 2px;">
-                    <a href="${loginUrl}" target="_blank" style="display: inline-block; padding: 14px 28px; font-size: 13px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; color: #000000; text-decoration: none;">
+                    <a href="${setPasswordUrl}" target="_blank" style="display: inline-block; padding: 14px 28px; font-size: 13px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; color: #000000; text-decoration: none;">
                       ${buttonText}
                     </a>
                   </td>
@@ -173,10 +164,10 @@ export async function sendPlayerCredentialsEmail({
                   HOW TO GET STARTED:
                 </span>
                 <ol style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 20px; color: #ADABAB;">
-                  <li style="margin-bottom: 6px;">Click the button above or visit <a href="${loginUrl}" style="color: #FFE93B; text-decoration: none;">${loginUrl}</a></li>
-                  <li style="margin-bottom: 6px;">Log in using your email and the Access Key shown above.</li>
-                  <li style="margin-bottom: 6px;">Build your profile: set your competitive role, team tag, tournament history, and socials.</li>
-                  <li>Click <strong>Save & Publish Profile</strong> to go live in the national directory!</li>
+                  <li style="margin-bottom: 6px;">Click the button above or visit <a href="${setPasswordUrl}" style="color: #FFE93B; text-decoration: none; word-break: break-all;">${setPasswordUrl}</a></li>
+                  <li style="margin-bottom: 6px;">Create a secure password with at least 12 characters (including uppercase, number, and special character).</li>
+                  <li style="margin-bottom: 6px;">Log in and complete your player profile.</li>
+                  <li>Verify your email address to publish your profile live in the directory!</li>
                 </ol>
               </div>
 
@@ -186,7 +177,7 @@ export async function sendPlayerCredentialsEmail({
           <!-- Footer -->
           <tr>
             <td style="padding: 24px 32px; background-color: #0F0F0F; border-top: 1px solid #2A2A2A; font-size: 11px; color: #837D72; text-align: center;">
-              This is an official communication from the CallOfDutyMobile Indian Platform.<br>
+              This is a one-time password setup link valid for 24 hours.<br>
               ${isInvitation ? 'You received this email because an administrator invited you to the platform.' : 'If you did not request this access, you can disregard this email.'}
             </td>
           </tr>
@@ -195,8 +186,8 @@ export async function sendPlayerCredentialsEmail({
       </td>
     </tr>
   </table>
-</body>
-</html>
+ </body>
+ </html>
     `;
 
     const info = await transporter.sendMail({
@@ -204,12 +195,12 @@ export async function sendPlayerCredentialsEmail({
       to,
       subject: emailSubject,
       text: isInvitation
-        ? `Welcome to CallOfDutyMobile!\n\nYou have been officially invited by the platform administrators.\n\nLogin URL: ${loginUrl}\nEmail: ${to}\nAccess Key / Password: ${password}\n\nLog in to build and publish your official player profile.`
-        : `Welcome to CallOfDutyMobile!\n\nYour request has been approved.\n\nLogin URL: ${loginUrl}\nEmail: ${to}\nAccess Key / Password: ${password}\n\nLog in to build and publish your official player profile.`,
+        ? `Welcome to CallOfDutyMobile!\n\nYou have been officially invited by the platform administrators.\n\nSet your password link: ${setPasswordUrl}\nEmail: ${to}\n\nThis one-time link expires in 24 hours.`
+        : `Welcome to CallOfDutyMobile!\n\nYour request has been approved.\n\nSet your password link: ${setPasswordUrl}\nEmail: ${to}\n\nThis one-time link expires in 24 hours.`,
       html: htmlContent,
     });
 
-    console.log(`[MAILER] ${isInvitation ? 'Invitation' : 'Credentials'} email dispatched successfully to ${to} (MessageId: ${info.messageId})`);
+    console.log(`[MAILER] ${isInvitation ? 'Invitation' : 'Password setup'} email dispatched successfully to ${to} (MessageId: ${info.messageId})`);
     return { success: true, messageId: info.messageId };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : String(err);

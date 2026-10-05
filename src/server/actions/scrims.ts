@@ -8,6 +8,7 @@ import { getPlayerSession } from './player-auth';
 
 import { requireAdminSession } from './admin-auth';
 import { getPlayerOrganizerPermissions } from './organizer';
+import { getClientIp } from '@/lib/auth/rate-limit';
 
 const NOT_LOGGED_IN = { success: false, message: 'Please log in to the Player Studio to use scrims.' };
 const MAX_TEXT = 100;
@@ -108,6 +109,8 @@ export async function createScrimAction(
     isVisible: true,
   };
 
+  const ip = await getClientIp();
+
   scrimLobbiesStore.unshift(newScrim);
 
   await recordAuditLog(
@@ -115,7 +118,8 @@ export async function createScrimAction(
     hostTeamTag,
     `Created ${tier} scrim lobby scheduled for ${scheduledTime}`,
     newScrim.id,
-    'INFO'
+    'INFO',
+    ip
   );
 
   revalidatePath('/scrims');
@@ -127,6 +131,7 @@ export async function toggleScrimVisibilityAction(
   isVisible: boolean
 ): Promise<{ success: boolean; message: string }> {
   const admin = await requireAdminSession();
+  const ip = await getClientIp();
 
   const scrim = scrimLobbiesStore.find((s) => s.id === scrimId);
   if (!scrim) {
@@ -140,7 +145,8 @@ export async function toggleScrimVisibilityAction(
     admin.username,
     `Admin set scrim lobby visibility to ${isVisible ? 'VISIBLE' : 'HIDDEN'} for ${scrim.hostTeamName}.`,
     scrim.id,
-    'INFO'
+    'INFO',
+    ip
   );
 
   revalidatePath('/scrims');
@@ -153,6 +159,7 @@ export async function updateScrimStatusAction(
   newStatus: ScrimLobby['status']
 ): Promise<{ success: boolean; message: string }> {
   const admin = await requireAdminSession();
+  const ip = await getClientIp();
 
   const scrim = scrimLobbiesStore.find((s) => s.id === scrimId);
   if (!scrim) {
@@ -166,7 +173,8 @@ export async function updateScrimStatusAction(
     admin.username,
     `Admin modified scrim lobby status to ${newStatus} for ${scrim.hostTeamName}.`,
     scrim.id,
-    'INFO'
+    'INFO',
+    ip
   );
 
   revalidatePath('/scrims');
@@ -177,6 +185,7 @@ export async function updateScrimStatusAction(
 
 export async function deleteScrimAdminAction(scrimId: string): Promise<{ success: boolean; message: string }> {
   const admin = await requireAdminSession();
+  const ip = await getClientIp();
 
   const index = scrimLobbiesStore.findIndex((s) => s.id === scrimId);
   if (index === -1) {
@@ -190,7 +199,8 @@ export async function deleteScrimAdminAction(scrimId: string): Promise<{ success
     admin.username,
     `Admin removed scrim lobby ${removed.hostTeamName} (${removed.id}).`,
     scrimId,
-    'WARNING'
+    'WARNING',
+    ip
   );
 
   revalidatePath('/scrims');
@@ -218,6 +228,7 @@ export async function challengeScrimAction(scrimId: string, opponentName: string
     return { success: false, message: 'Team name and tag are required.' };
   }
 
+  const ip = await getClientIp();
   scrim.opponentTeamName = opponentName;
   scrim.opponentTeamTag = opponentTag.toUpperCase();
   scrim.opponentEmail = session.email;
@@ -228,7 +239,8 @@ export async function challengeScrimAction(scrimId: string, opponentName: string
     opponentTag,
     `Challenged host ${scrim.hostTeamTag} for ${scrim.matchFormat} match`,
     scrimId,
-    'INFO'
+    'INFO',
+    ip
   );
 
   revalidatePath(`/scrims/${scrimId}`);

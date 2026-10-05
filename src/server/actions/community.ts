@@ -2,15 +2,19 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { randomBytes } from 'crypto';
 import {
   addCommunityRequest,
   approveRequest,
   rejectRequest,
+  CommunityRequestItem,
 } from '../data/community-store';
 import { prisma } from '@/lib/db/prisma';
-import { sendPlayerCredentialsEmail, sendEmailVerificationEmail } from '@/lib/email/mailer';
+import { hashToken } from '@/lib/auth/tokens';
+import { sendSetPasswordEmail, sendEmailVerificationEmail } from '@/lib/email/mailer';
 import { recordAuditLog } from '../data/audit-store';
 import { requireAdminSession } from './admin-auth';
+import { getClientIp } from '@/lib/auth/rate-limit';
 
 const joinSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -50,39 +54,40 @@ export async function submitCommunityJoinRequest(
       };
     }
 
+    const ip = await getClientIp();
     const { email, fullName, gamerTag } = validated.data;
     const req = await addCommunityRequest(email, fullName, gamerTag);
 
-    // Auto-provision credentials immediately without requiring manual admin approval
+    // Auto-provision player record and one-time password setup link
     const result = await approveRequest(req.id);
-    if (!result) {
-      return { success: false, message: 'Could not generate player credentials. Please try again.' };
+    if (!result.success) {
+      return { success: false, message: result.error || 'Could not process player request. Please try again.' };
     }
 
-    const defaultIgn = gamerTag || result.credentials.email.split('@')[0];
+    const defaultIgn = gamerTag || result.email.split('@')[0];
 
-    // Dispatch credentials & email verification directly to applicant
-    const [credResult] = await Promise.all([
-      sendPlayerCredentialsEmail({
-        to: result.credentials.email,
+    // Dispatch one-time password setup & email verification directly to applicant
+    const [setupResult] = await Promise.all([
+      sendSetPasswordEmail({
+        to: result.email,
         ign: defaultIgn,
-        password: result.credentials.password,
+        token: result.passwordResetToken,
         fullName: fullName,
         isInvitation: false,
       }),
       sendEmailVerificationEmail({
-        to: result.credentials.email,
+        to: result.email,
         ign: defaultIgn,
         token: result.verificationToken,
       }),
     ]);
 
-    if (!credResult.success) {
-      console.error('[COMMUNITY JOIN] Email dispatch failed:', credResult.error);
+    if (!setupResult.success) {
+      console.error('[COMMUNITY JOIN] Email dispatch failed:', setupResult.error);
       return {
         success: false,
-        message: credResult.error
-          ? `Failed to send email: ${credResult.error}. Please check your SMTP settings.`
+        message: setupResult.error
+          ? `Failed to send email: ${setupResult.error}. Please check your SMTP settings.`
           : 'Failed to send email. Please check your SMTP configuration or try again.',
       };
     }
@@ -91,9 +96,10 @@ export async function submitCommunityJoinRequest(
     await recordAuditLog(
       'CREDENTIALS_ISSUED',
       email,
-      `Self-service registration completed. Access credentials dispatched directly to ${email}.`,
+      `Self-service registration completed. One-time password setup link dispatched directly to ${email}.`,
       `Player: ${defaultIgn}`,
-      'SUCCESS'
+      'SUCCESS',
+      ip
     );
 
     revalidatePath('/admin/requests');
@@ -103,7 +109,7 @@ export async function submitCommunityJoinRequest(
 
     return {
       success: true,
-      message: 'Your access credentials have been generated and sent to your email!',
+      message: 'Your registration was successful! A password setup link has been sent to your email.',
       email: req.email,
     };
   } catch (err: unknown) {
@@ -118,23 +124,24 @@ export async function submitCommunityJoinRequest(
 export async function approveCommunityRequestAction(requestId: string) {
   try {
     const admin = await requireAdminSession();
+    const ip = await getClientIp();
     const result = await approveRequest(requestId);
-    if (!result) {
-      return { success: false, error: 'Request not found in database.' };
+    if (!result.success) {
+      return { success: false, error: result.error || 'Request could not be approved.' };
     }
 
-    // Dispatch credentials and verification emails to applicant
-    const gamerTag = result.request.gamerTag || result.credentials.email.split('@')[0];
+    // Dispatch one-time setup and verification emails to applicant
+    const gamerTag = result.request.gamerTag || result.email.split('@')[0];
     const [emailResult] = await Promise.all([
-      sendPlayerCredentialsEmail({
-        to: result.credentials.email,
+      sendSetPasswordEmail({
+        to: result.email,
         ign: gamerTag,
-        password: result.credentials.password,
+        token: result.passwordResetToken,
         fullName: result.request.fullName,
         isInvitation: false,
       }),
       sendEmailVerificationEmail({
-        to: result.credentials.email,
+        to: result.email,
         ign: gamerTag,
         token: result.verificationToken,
       }),
@@ -144,9 +151,10 @@ export async function approveCommunityRequestAction(requestId: string) {
     await recordAuditLog(
       'CREDENTIALS_ISSUED',
       admin.username,
-      `Approved access and dispatched login key to ${result.credentials.email}.`,
-      `Player: ${result.request.gamerTag || result.credentials.email}`,
-      'SUCCESS'
+      `Approved access and dispatched password setup link to ${result.email}.`,
+      `Player: ${result.request.gamerTag || result.email}`,
+      'SUCCESS',
+      ip
     );
 
     revalidatePath('/admin/requests');
@@ -155,16 +163,15 @@ export async function approveCommunityRequestAction(requestId: string) {
     revalidatePath('/players');
 
     const emailStatusMsg = emailResult.success
-      ? `Email dispatched directly to ${result.credentials.email}!`
-      : `Credentials created in database (Email dispatch note: ${emailResult.error || 'Check SMTP config'}).`;
+      ? `Password setup link dispatched directly to ${result.email}!`
+      : `Account approved in database (Email dispatch note: ${emailResult.error || 'Check SMTP config'}).`;
 
     return {
       success: true,
       message: emailStatusMsg,
-      credentials: result.credentials,
       emailSent: emailResult.success,
     };
-  } catch (err: unknown) {
+  } catch {
     return { success: false, error: 'Failed to approve request' };
   }
 }
@@ -172,33 +179,70 @@ export async function approveCommunityRequestAction(requestId: string) {
 export async function resendCommunityRequestEmailAction(requestId: string) {
   try {
     const admin = await requireAdminSession();
-    const result = await approveRequest(requestId);
-    if (!result) {
+    const ip = await getClientIp();
+
+    const dbSub = await prisma.submission.findFirst({
+      where: {
+        OR: [{ id: requestId }, { submitterEmail: requestId.toLowerCase() }],
+        type: 'COMMUNITY_JOIN_REQUEST',
+      },
+    });
+
+    if (!dbSub) {
       return { success: false, error: 'Request not found in database.' };
     }
 
-    const gamerTag = result.request.gamerTag || result.credentials.email.split('@')[0];
+    const email = dbSub.submitterEmail.trim().toLowerCase();
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      return { success: false, error: 'User account not found for this email.' };
+    }
+
+    // Always issue new random tokens on resend - never reuse old credentials
+    const passwordResetToken = randomBytes(32).toString('hex');
+    const passwordResetTokenHash = hashToken(passwordResetToken);
+    const passwordResetExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    const verificationToken = randomBytes(32).toString('hex');
+    const emailVerificationTokenHash = hashToken(verificationToken);
+    const emailVerificationTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordResetTokenHash,
+        passwordResetExpiresAt,
+        emailVerificationTokenHash,
+        emailVerificationTokenExpiresAt,
+      },
+    });
+
+    const raw = (dbSub.rawData as Record<string, string>) || {};
+    const gamerTag = raw.gamerTag || email.split('@')[0];
+
     const [emailResult] = await Promise.all([
-      sendPlayerCredentialsEmail({
-        to: result.credentials.email,
+      sendSetPasswordEmail({
+        to: email,
         ign: gamerTag,
-        password: result.credentials.password,
-        fullName: result.request.fullName,
+        token: passwordResetToken,
+        fullName: raw.fullName || dbSub.submitterName,
         isInvitation: false,
       }),
       sendEmailVerificationEmail({
-        to: result.credentials.email,
+        to: email,
         ign: gamerTag,
-        token: result.verificationToken,
+        token: verificationToken,
       }),
     ]);
 
     await recordAuditLog(
       'CREDENTIALS_ISSUED',
       admin.username,
-      `Re-sent credentials email to ${result.credentials.email}.`,
+      `Re-issued new password setup & verification token to ${email}.`,
       `Player: ${gamerTag}`,
-      'SUCCESS'
+      'SUCCESS',
+      ip
     );
 
     revalidatePath('/admin/requests');
@@ -207,26 +251,27 @@ export async function resendCommunityRequestEmailAction(requestId: string) {
     return {
       success: emailResult.success,
       message: emailResult.success
-        ? `Credentials email successfully dispatched to ${result.credentials.email}!`
+        ? `Fresh password setup link dispatched to ${email}!`
         : `Email delivery issue: ${emailResult.error || 'Check SMTP configuration'}.`,
-      credentials: result.credentials,
     };
   } catch (err: unknown) {
     console.error('Error re-sending credentials email:', err);
-    return { success: false, error: 'Failed to re-send credentials email.' };
+    return { success: false, error: 'Failed to re-send setup email.' };
   }
 }
 
 export async function rejectCommunityRequestAction(requestId: string) {
   try {
     const admin = await requireAdminSession();
+    const ip = await getClientIp();
     const success = await rejectRequest(requestId);
     await recordAuditLog(
       'STATUS_MODIFIED',
       admin.username,
       `Rejected community request ${requestId}.`,
       `Request: ${requestId}`,
-      'WARNING'
+      'WARNING',
+      ip
     );
     revalidatePath('/admin/requests');
     revalidatePath('/admin/dashboard');
@@ -240,6 +285,7 @@ export async function rejectCommunityRequestAction(requestId: string) {
 export async function directInvitePlayerAction(formData: FormData) {
   try {
     const admin = await requireAdminSession();
+    const ip = await getClientIp();
     const email = (formData.get('email') as string)?.trim().toLowerCase();
     const fullName = (formData.get('fullName') as string)?.trim() || undefined;
     const gamerTag = (formData.get('gamerTag') as string)?.trim() || undefined;
@@ -251,26 +297,36 @@ export async function directInvitePlayerAction(formData: FormData) {
     const req = await addCommunityRequest(email, fullName, gamerTag);
     const result = await approveRequest(req.id);
 
-    if (!result) {
-      return { success: false, error: 'Could not generate credentials in database.' };
+    if (!result.success) {
+      return { success: false, error: result.error || 'Could not provision player invitation.' };
     }
 
-    // Dispatch credentials email directly to the applicant
-    const emailResult = await sendPlayerCredentialsEmail({
-      to: result.credentials.email,
-      ign: gamerTag || result.credentials.email.split('@')[0],
-      password: result.credentials.password,
-      fullName: fullName,
-      isInvitation: true,
-    });
+    const defaultIgn = gamerTag || result.email.split('@')[0];
+
+    // Dispatch one-time invitation & setup link directly to applicant
+    const [emailResult] = await Promise.all([
+      sendSetPasswordEmail({
+        to: result.email,
+        ign: defaultIgn,
+        token: result.passwordResetToken,
+        fullName: fullName,
+        isInvitation: true,
+      }),
+      sendEmailVerificationEmail({
+        to: result.email,
+        ign: defaultIgn,
+        token: result.verificationToken,
+      }),
+    ]);
 
     // Record Audit Log in DB
     await recordAuditLog(
       'DIRECT_INVITE_SENT',
       admin.username,
-      `Admin initiated direct invitation to ${result.credentials.email} (IGN: ${gamerTag || 'None'}).`,
-      `Invited: ${result.credentials.email}`,
-      'SUCCESS'
+      `Admin initiated direct invitation to ${result.email} (IGN: ${defaultIgn}).`,
+      `Invited: ${result.email}`,
+      'SUCCESS',
+      ip
     );
 
     revalidatePath('/admin/requests');
@@ -280,13 +336,12 @@ export async function directInvitePlayerAction(formData: FormData) {
     revalidatePath('/players');
 
     const emailStatusMsg = emailResult.success
-      ? `Invitation email dispatched directly to ${result.credentials.email}!`
-      : `Credentials created in database (Email dispatch note: ${emailResult.error || 'Check SMTP config'}).`;
+      ? `Invitation email dispatched directly to ${result.email}!`
+      : `Account created in database (Email dispatch note: ${emailResult.error || 'Check SMTP config'}).`;
 
     return {
       success: true,
       message: emailStatusMsg,
-      credentials: result.credentials,
       emailSent: emailResult.success,
     };
   } catch (err: unknown) {
@@ -295,7 +350,7 @@ export async function directInvitePlayerAction(formData: FormData) {
   }
 }
 
-async function fetchCommunityRequestsList() {
+async function fetchCommunityRequestsList(): Promise<CommunityRequestItem[]> {
   try {
     const dbSubs = await prisma.submission.findMany({
       where: { type: 'COMMUNITY_JOIN_REQUEST' },
@@ -304,10 +359,6 @@ async function fetchCommunityRequestsList() {
 
     return dbSubs.map((s) => {
       const raw = (s.rawData as Record<string, string>) || {};
-      let password = raw.password || undefined;
-      if (!password && s.status === 'APPROVED') {
-        password = `CODM#${s.id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 12).toUpperCase()}!`;
-      }
       return {
         id: s.id,
         email: s.submitterEmail,
@@ -316,7 +367,6 @@ async function fetchCommunityRequestsList() {
         status: s.status as 'PENDING' | 'APPROVED' | 'REJECTED',
         createdAt: s.createdAt.toISOString(),
         approvedAt: s.reviewedAt ? s.reviewedAt.toISOString() : undefined,
-        generatedPassword: password,
       };
     });
   } catch (err) {
@@ -325,7 +375,7 @@ async function fetchCommunityRequestsList() {
   }
 }
 
-export async function getCommunityRequestsList() {
+export async function getCommunityRequestsList(): Promise<CommunityRequestItem[]> {
   await requireAdminSession();
   return fetchCommunityRequestsList();
 }

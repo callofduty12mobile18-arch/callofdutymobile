@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
-import { PlayerRole, VerificationStatus, PublishStatus } from '@prisma/client';
+import { PlayerRole, VerificationStatus, PublishStatus, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
-import { hashPassword } from '@/lib/auth/password';
+import { hashToken } from '@/lib/auth/tokens';
 
 export interface CommunityRequestItem {
   id: string;
@@ -9,14 +9,65 @@ export interface CommunityRequestItem {
   fullName?: string;
   gamerTag?: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  generatedPassword?: string;
   createdAt: string;
   approvedAt?: string;
 }
 
+export type ApproveRequestResult =
+  | {
+      success: true;
+      request: CommunityRequestItem;
+      passwordResetToken: string;
+      verificationToken: string;
+      email: string;
+      ign: string;
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
 function isUuid(str?: string): boolean {
   if (!str) return false;
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+}
+
+/**
+ * Generate a unique player slug:
+ * - Sanitizes lowercase alphanumeric characters and hyphens.
+ * - Falls back to `player-<random4>` if the sanitized slug is empty.
+ * - Suffixes -2, -3 on collision.
+ */
+export async function generateUniquePlayerSlug(
+  ign: string,
+  tx?: Prisma.TransactionClient,
+  ignorePlayerId?: string
+): Promise<string> {
+  const client = tx || prisma;
+  let baseSlug = ign
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+
+  if (!baseSlug) {
+    baseSlug = `player-${randomBytes(2).toString('hex')}`;
+  }
+
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (true) {
+    const existing = await client.player.findUnique({
+      where: { slug },
+      select: { id: true },
+    });
+    if (!existing || (ignorePlayerId && existing.id === ignorePlayerId)) {
+      return slug;
+    }
+    counter++;
+    slug = `${baseSlug}-${counter}`;
+  }
 }
 
 /**
@@ -99,15 +150,15 @@ export async function addCommunityRequest(
 }
 
 /**
- * Approve a community access request, provision User + Player in PostgreSQL database.
+ * Approve a community access request, provision User + Player in PostgreSQL database safely.
+ * - Wrapped in prisma.$transaction.
+ * - If a User with that email already exists, do not change role or passwordHash, return error "Account already exists".
+ * - Never upsert Player by slug. Generates unique slug (suffix -2, -3 on collision; fallback to player-<random4>).
+ * - Creates Player only if the user has none.
+ * - Issues one-time password setup token & email verification token (stored as SHA-256 hashes).
+ * - Never stores password in Submission.rawData.
  */
-export async function approveRequest(
-  requestId: string
-): Promise<{
-  request: CommunityRequestItem;
-  credentials: { email: string; password: string };
-  verificationToken: string;
-} | null> {
+export async function approveRequest(requestId: string): Promise<ApproveRequestResult> {
   const whereConditions: Array<{ id?: string; submitterEmail?: string }> = [
     { submitterEmail: requestId.toLowerCase() },
   ];
@@ -124,106 +175,112 @@ export async function approveRequest(
   });
 
   if (!dbSub) {
-    console.error(`[COMMUNITY] Request ID ${requestId} not found in database.`);
-    return null;
+    return { success: false, error: 'Request not found in database.' };
   }
 
   const email = dbSub.submitterEmail.trim().toLowerCase();
   const raw = (dbSub.rawData as Record<string, string>) || {};
   const fullName = raw.fullName || dbSub.submitterName || undefined;
   const gamerTag = raw.gamerTag || undefined;
-
-  // Use existing generated password if available; otherwise create a secure randomized access key
-  let plainPassword = (raw as Record<string, string>).password;
-  if (!plainPassword) {
-    const randomSuffix = randomBytes(8).toString('hex').toUpperCase();
-    plainPassword = `CODM#${randomSuffix}!`;
-  }
-  const hashedPassword = await hashPassword(plainPassword);
-
-  const verificationToken = randomBytes(24).toString('hex');
-  const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
   const defaultIgn = gamerTag || email.split('@')[0];
-  const slug = defaultIgn.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
-  // Persist User, Player, and updated Submission in PostgreSQL
-  const user = await prisma.user.upsert({
-    where: { email },
-    update: {
-      passwordHash: hashedPassword,
-      role: 'PLAYER',
-      emailVerified: false,
-      emailVerificationToken: verificationToken,
-      emailVerificationTokenExpiresAt: tokenExpiresAt,
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-    },
-    create: {
-      email,
-      passwordHash: hashedPassword,
-      role: 'PLAYER',
-      emailVerified: false,
-      emailVerificationToken: verificationToken,
-      emailVerificationTokenExpiresAt: tokenExpiresAt,
-    },
-  });
+  // Generate one-time password setup token and verification token
+  const passwordResetToken = randomBytes(32).toString('hex');
+  const passwordResetTokenHash = hashToken(passwordResetToken);
+  const passwordResetExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
-  // Player profile stays in DRAFT until email is verified
-  await Promise.all([
-    prisma.player.upsert({
-      where: { slug },
-      update: {
-        ign: defaultIgn,
-        displayName: fullName || defaultIgn,
-        userId: user.id,
-        publishStatus: PublishStatus.DRAFT,
-        verificationStatus: VerificationStatus.UNVERIFIED,
-      },
-      create: {
-        slug,
-        ign: defaultIgn,
-        displayName: fullName || defaultIgn,
-        realName: fullName || null,
-        userId: user.id,
-        primaryRole: PlayerRole.FLEX,
-        publishStatus: PublishStatus.DRAFT,
-        verificationStatus: VerificationStatus.UNVERIFIED,
-      },
-    }),
-    prisma.submission.update({
-      where: { id: dbSub.id },
-      data: {
-        status: 'APPROVED',
-        reviewedAt: new Date(),
-        rawData: {
-          gamerTag: defaultIgn,
-          fullName: fullName || '',
-          password: plainPassword,
+  const verificationToken = randomBytes(32).toString('hex');
+  const emailVerificationTokenHash = hashToken(verificationToken);
+  const emailVerificationTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+
+  try {
+    const transactionResult = await prisma.$transaction(async (tx) => {
+      // 1. Check if user already exists
+      const existingUser = await tx.user.findUnique({
+        where: { email },
+      });
+
+      if (existingUser) {
+        throw new Error('Account already exists');
+      }
+
+      // 2. Create User record with hashed tokens
+      const user = await tx.user.create({
+        data: {
+          email,
+          role: 'PLAYER',
+          passwordHash: null,
+          emailVerified: false,
+          emailVerificationTokenHash,
+          emailVerificationTokenExpiresAt,
+          passwordResetTokenHash,
+          passwordResetExpiresAt,
+          failedLoginAttempts: 0,
+          lockedUntil: null,
         },
-      },
-    }),
-  ]);
+      });
 
-  const reqItem: CommunityRequestItem = {
-    id: dbSub.id,
-    email,
-    fullName,
-    gamerTag,
-    status: 'APPROVED',
-    generatedPassword: plainPassword,
-    createdAt: dbSub.createdAt.toISOString(),
-    approvedAt: new Date().toISOString(),
-  };
+      // 3. Create Player only if user has none
+      const existingPlayer = await tx.player.findFirst({
+        where: { userId: user.id },
+      });
 
-  return {
-    request: reqItem,
-    credentials: {
+      if (!existingPlayer) {
+        const uniqueSlug = await generateUniquePlayerSlug(defaultIgn, tx);
+        await tx.player.create({
+          data: {
+            slug: uniqueSlug,
+            ign: defaultIgn,
+            displayName: fullName || defaultIgn,
+            realName: fullName || null,
+            userId: user.id,
+            primaryRole: PlayerRole.FLEX,
+            publishStatus: PublishStatus.DRAFT,
+            verificationStatus: VerificationStatus.UNVERIFIED,
+          },
+        });
+      }
+
+      // 4. Update submission without password in rawData
+      const updatedSub = await tx.submission.update({
+        where: { id: dbSub.id },
+        data: {
+          status: 'APPROVED',
+          reviewedAt: new Date(),
+          rawData: {
+            gamerTag: defaultIgn,
+            fullName: fullName || '',
+          },
+        },
+      });
+
+      return {
+        id: updatedSub.id,
+        email: updatedSub.submitterEmail,
+        fullName: fullName || updatedSub.submitterName,
+        gamerTag: defaultIgn,
+        status: 'APPROVED' as const,
+        createdAt: updatedSub.createdAt.toISOString(),
+        approvedAt: new Date().toISOString(),
+      };
+    });
+
+    return {
+      success: true,
+      request: transactionResult,
+      passwordResetToken,
+      verificationToken,
       email,
-      password: plainPassword,
-    },
-    verificationToken,
-  };
+      ign: defaultIgn,
+    };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    if (errorMsg.includes('Account already exists')) {
+      return { success: false, error: 'Account already exists' };
+    }
+    console.error('[COMMUNITY] approveRequest transaction failed:', err);
+    return { success: false, error: errorMsg || 'Failed to approve request' };
+  }
 }
 
 /**

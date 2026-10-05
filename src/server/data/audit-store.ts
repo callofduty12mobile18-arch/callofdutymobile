@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db/prisma';
 import { unstable_cache } from 'next/cache';
+import { logger } from '@/lib/logger';
 
 export type AuditAction =
   | 'CREDENTIALS_ISSUED'
@@ -39,7 +40,7 @@ export async function recordAuditLog(
   details: string,
   target?: string,
   severity: AuditSeverity = 'INFO',
-  ipAddress: string = '127.0.0.1'
+  ipAddress?: string
 ): Promise<AuditLogItem> {
   const timestamp = new Date();
 
@@ -66,7 +67,14 @@ export async function recordAuditLog(
       timestamp: created.createdAt.toISOString(),
     };
   } catch (err) {
-    console.error('[AUDIT LOG] Database persistence error:', err);
+    logger.error('[AUDIT LOG] Database persistence error:', err, {
+      action,
+      actor,
+      details,
+      target,
+      severity,
+      ipAddress,
+    });
     return {
       id: `log-${Date.now()}`,
       action,

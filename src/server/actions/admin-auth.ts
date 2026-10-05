@@ -250,7 +250,8 @@ export async function loginAdminAction(
     adminUsername,
     `Administrator authenticated with verified DB credentials (${adminEmail})`,
     'ADMIN_PORTAL',
-    'SUCCESS'
+    'SUCCESS',
+    ip
   );
 
   return {

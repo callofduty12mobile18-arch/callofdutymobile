@@ -89,16 +89,6 @@ export const DirectInviteModal: React.FC<DirectInviteModalProps> = ({
                 <p className="text-xs text-[#ADABAB] leading-relaxed">
                   {result.message}
                 </p>
-                {result.credentials && (
-                  <div className="p-3 bg-black/70 border border-[#2A2A2A] rounded-[2px] space-y-1 font-mono text-xs">
-                    <div className="text-[#837D72]">
-                      Player Email: <span className="text-white">{result.credentials.email}</span>
-                    </div>
-                    <div className="text-[#837D72] flex items-center gap-1">
-                      Access Key: <span className="text-[#FFE93B] font-bold">{result.credentials.password}</span>
-                    </div>
-                  </div>
-                )}
                 <div className="pt-2 flex justify-end">
                   <Button size="sm" variant="primary" onClick={handleClose}>
                     DONE
