@@ -219,6 +219,10 @@ export async function updatePlayerSelfProfile(
     return { success: false, message: 'MobileRoster UID is required.' };
   }
 
+  if (!/^\d{19}$/.test(MobileRosterUid)) {
+    return { success: false, message: 'MobileRoster UID must be exactly 19 digits.' };
+  }
+
   const avatarRaw = field('avatarUrl', 5000000);
   const coverRaw = field('coverImageUrl', 5000000);
   const avatarUrl = avatarRaw ? safeMediaUrl(avatarRaw) : null;

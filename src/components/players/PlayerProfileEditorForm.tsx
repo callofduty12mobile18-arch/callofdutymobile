@@ -494,11 +494,15 @@ export const PlayerProfileEditorForm: React.FC<{ initialData: InitialData }> = (
             </div>
             <div>
               <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB] mb-1.5">
-                MobileRoster UID *
+                MobileRoster UID (19 Digits) *
               </label>
               <Input
                 name="MobileRosterUid"
                 required
+                minLength={19}
+                maxLength={19}
+                pattern="\d{19}"
+                title="UID must be exactly 19 digits"
                 defaultValue={initialData.MobileRosterUid}
                 placeholder="e.g. 6742819382109482910"
               />

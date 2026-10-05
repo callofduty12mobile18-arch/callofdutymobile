@@ -30,7 +30,7 @@ export const playerSchema = z.object({
   coverImageUrl: z.string().url('Must be a valid URL').optional().nullable(),
   country: z.string().default('IN'),
   state: z.string().min(1, 'State is required').max(100),
-  city: z.string().min(1, 'MobileRoster UID is required').max(100),
+  city: z.string().min(1, 'MobileRoster UID is required').regex(/^\d{19}$/, 'MobileRoster UID must be exactly 19 digits'),
   primaryRole: PlayerRoleEnum.default('FLEX'),
   secondaryRole: PlayerRoleEnum.optional().nullable(),
   bio: z.string().max(5000).optional().nullable(),
