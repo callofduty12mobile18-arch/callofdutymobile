@@ -13,7 +13,7 @@ import { hashToken } from '@/lib/auth/tokens';
 import { passwordComplexitySchema } from '@/lib/validation/auth';
 import { getClientIp, rateLimit } from '@/lib/auth/rate-limit';
 import { signSession, verifySession } from '@/lib/auth/session-token';
-import { sendAccountLockoutEmail } from '@/lib/email/mailer';
+import { sendAccountLockoutEmail, sendPasswordResetEmail } from '@/lib/email/mailer';
 import { logger } from '@/lib/logger';
 
 export interface PlayerSession {
@@ -251,6 +251,83 @@ export async function setPasswordAction(
   } catch (err) {
     logger.error('Error setting user password:', err);
     return { success: false, message: 'Failed to update password. Please try again.' };
+  }
+}
+
+/**
+ * Server action for players requesting a password reset link.
+ */
+export async function requestPasswordResetAction(
+  prevState: { success: boolean; message: string } | null,
+  formData: FormData
+): Promise<{ success: boolean; message: string }> {
+  const email = (formData.get('email') as string)?.trim().toLowerCase();
+
+  if (!email || !email.includes('@')) {
+    return { success: false, message: 'Please provide a valid email address.' };
+  }
+
+  const ip = await getClientIp();
+  const [ipAllowed, emailAllowed] = await Promise.all([
+    rateLimit(`pwd-reset:ip:${ip}`, 10, 15 * 60 * 1000),
+    rateLimit(`pwd-reset:email:${email}`, 3, 15 * 60 * 1000),
+  ]);
+
+  if (!ipAllowed || !emailAllowed) {
+    return {
+      success: false,
+      message: 'Too many password reset requests. Please wait 15 minutes before trying again.',
+    };
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { players: true },
+    });
+
+    if (user) {
+      const resetToken = randomBytes(32).toString('hex');
+      const resetTokenHash = hashToken(resetToken);
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          passwordResetTokenHash: resetTokenHash,
+          passwordResetExpiresAt: expiresAt,
+        },
+      });
+
+      const ign = user.players?.[0]?.ign || email.split('@')[0];
+
+      await sendPasswordResetEmail({
+        to: email,
+        ign,
+        token: resetToken,
+      });
+
+      await recordAuditLog(
+        'STATUS_MODIFIED',
+        email,
+        `Password reset requested for ${email}.`,
+        `User: ${email}`,
+        'INFO',
+        ip
+      );
+    }
+
+    // Always return a generic success message to prevent user enumeration
+    return {
+      success: true,
+      message: 'If an account exists with this email address, a password reset link has been dispatched to your inbox.',
+    };
+  } catch (err) {
+    logger.error('Error during password reset request:', err);
+    return {
+      success: false,
+      message: 'Failed to process password reset request. Please try again.',
+    };
   }
 }
 

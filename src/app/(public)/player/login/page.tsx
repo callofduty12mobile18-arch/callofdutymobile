@@ -36,7 +36,7 @@ export default function PlayerLoginPage() {
             PLAYER <span className="text-[#FFE93B]">LOGIN</span>
           </h1>
           <p className="text-[#ADABAB] text-xs leading-relaxed">
-            Sign in using the access key dispatched to your email address by the platform administrators.
+            Sign in with your email and password to access your player profile studio.
           </p>
         </div>
 
@@ -71,22 +71,30 @@ export default function PlayerLoginPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB]">
-              Access Key
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-display uppercase tracking-wider text-[#ADABAB]">
+                Password
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-[11px] text-[#FFE93B] hover:underline font-mono tracking-tight"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <Input
               name="password"
               type={showPassword ? 'text' : 'password'}
               required
-              placeholder="Enter your access key"
+              placeholder="Enter your password"
               leftIcon={<Lock className="w-4 h-4" />}
               rightIcon={
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="text-[#ADABAB] hover:text-[#FFE93B] transition-colors focus:outline-none p-1 cursor-pointer flex items-center justify-center"
-                  title={showPassword ? 'Hide access key' : 'Show access key'}
-                  aria-label={showPassword ? 'Hide access key' : 'Show access key'}
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4 text-[#837D72] hover:text-[#FFE93B]" />}
                 </button>

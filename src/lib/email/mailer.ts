@@ -209,6 +209,107 @@ export async function sendSetPasswordEmail({
   }
 }
 
+/**
+ * Dispatch dedicated password reset email with one-time 24h reset token link.
+ */
+export async function sendPasswordResetEmail({
+  to,
+  ign,
+  token,
+}: {
+  to: string;
+  ign: string;
+  token: string;
+}): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  try {
+    const transporter = getEmailTransporter();
+    if (!transporter) {
+      console.warn('[MAILER] SMTP credentials not configured. Skipping password reset email dispatch.');
+      return { success: false, error: 'SMTP not configured' };
+    }
+
+    const siteUrl = getSiteUrl();
+    const resetUrl = `${siteUrl}/set-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(to)}`;
+    const fromAddress = process.env.SMTP_FROM || `"CallOfDutyMobile Security" <${process.env.SMTP_USER || 'noreply@mobileroster.in'}>`;
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Reset Your CallOfDutyMobile Password</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0A0A0A; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF;">
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0A0A0A; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #141414; border: 1px solid #2A2A2A; border-radius: 4px; overflow: hidden;">
+          <tr><td height="4" style="background-color: #FFE93B;"></td></tr>
+          <tr>
+            <td style="padding: 32px 32px 20px 32px; border-bottom: 1px solid #2A2A2A;">
+              <span style="display: inline-block; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #FFE93B; font-weight: bold; margin-bottom: 8px;">
+                SECURITY & ACCESS
+              </span>
+              <h1 style="margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase; color: #FFFFFF;">
+                RESET YOUR PASSWORD
+              </h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 32px;">
+              <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 24px; color: #ADABAB;">
+                Hello <strong style="color: #FFFFFF;">${escapeHtml(ign)}</strong>,
+              </p>
+              <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 22px; color: #ADABAB;">
+                We received a request to reset the password for your <strong style="color: #FFE93B;">CallOfDutyMobile</strong> player account (<strong style="color: #FFFFFF;">${escapeHtml(to)}</strong>).
+              </p>
+              <table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 28px;">
+                <tr>
+                  <td align="center" style="background-color: #FFE93B; border-radius: 2px;">
+                    <a href="${resetUrl}" target="_blank" style="display: inline-block; padding: 14px 28px; font-size: 13px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; color: #000000; text-decoration: none;">
+                      RESET YOUR PASSWORD &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin: 0 0 12px 0; font-size: 12px; color: #837D72;">
+                This one-time link is valid for <strong>24 hours</strong>. If you did not request a password reset, you can safely ignore this email — your existing password remains unchanged.
+              </p>
+              <p style="margin: 0; font-size: 11px; color: #666666; word-break: break-all;">
+                Direct URL: <a href="${resetUrl}" style="color: #FFE93B; text-decoration: none;">${resetUrl}</a>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px 32px; background-color: #0F0F0F; border-top: 1px solid #2A2A2A; font-size: 11px; color: #837D72; text-align: center;">
+              CallOfDutyMobile Security Team &middot; Indian MobileRoster Competitive Platform
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+
+    const info = await transporter.sendMail({
+      from: fromAddress,
+      to,
+      subject: `Reset Your CallOfDutyMobile Password, ${ign}`,
+      text: `Hello ${ign},\n\nWe received a request to reset your password. Use the following link within 24 hours to set a new password:\n\n${resetUrl}\n\nIf you did not request this, you can safely ignore this email.`,
+      html: htmlContent,
+    });
+
+    console.log(`[MAILER] Password reset email dispatched to ${to} (MessageId: ${info.messageId})`);
+    return { success: true, messageId: info.messageId };
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error(`[MAILER ERROR] Failed to send password reset email to ${to}:`, errorMsg);
+    return { success: false, error: errorMsg };
+  }
+}
+
 export interface BroadcastEmailOptions {
   toList: string[];
   subject: string;
