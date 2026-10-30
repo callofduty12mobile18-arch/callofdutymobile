@@ -16,7 +16,7 @@ import { OrganizerPermissionsCard } from '@/components/players/OrganizerPermissi
 
 export const metadata: Metadata = {
   title: 'Player Profile Studio | Manage Your Profile',
-  description: 'Self-service competitive profile builder for verified Indian CODM competitors.',
+  description: 'Self-service competitive profile builder for verified Indian competitors.',
 };
 
 export const dynamic = 'force-dynamic';

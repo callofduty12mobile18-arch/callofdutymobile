@@ -9,9 +9,9 @@ import { getPublishedTeams } from '@/server/queries/teams';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'Indian CODM Competitive Teams & Rosters | Call of Duty: Mobile',
+  title: 'Indian Competitive Teams & Rosters | StrikeNova',
   description:
-    'Directory of active competitive CODM teams, starting rosters, organizations, and championships in India.',
+    'Directory of active competitive teams, starting rosters, organizations, and championships in India.',
 };
 
 export default async function TeamsPage() {

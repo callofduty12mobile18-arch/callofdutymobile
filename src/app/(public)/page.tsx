@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Link from 'next/link';
-import { Shield, Trophy, Users, Crosshair, ArrowRight, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Shield, Trophy, Users, ArrowRight, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { PlayerGrid } from '@/components/players/PlayerGrid';
@@ -27,31 +27,25 @@ export default async function HomePage() {
     <div className="w-full space-y-16 sm:space-y-24">
       {/* 1. HERO SECTION */}
       <section className="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-28 border-b border-[#2A2A2A]">
-        {/* Background Image Layer with Dark Gradients */}
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-65 pointer-events-none scale-100 transition-transform duration-1000"
-          style={{
-            backgroundImage: `url('/photos/hero-bg.jpg')`,
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_25%,rgba(182,243,107,0.16),transparent_28%),linear-gradient(125deg,#07090b_24%,#111a18_65%,#17251f)]" />
+        <div className="absolute right-[-10%] top-[-20%] h-[34rem] w-[34rem] rounded-full border border-[#b6f36b]/15 shadow-[0_0_160px_rgba(182,243,107,0.1)]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#07090b] via-transparent to-[#07090b]/30" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="max-w-3xl space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#141414]/90 border border-[#837D72] rounded-[3px] text-xs font-display tracking-widest uppercase text-[#FFE93B] backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-[#FFE93B] animate-pulse" />
-              THE INDIAN CODM ARCHIVE
+              THE INDIAN COMPETITIVE ARCHIVE
             </div>
 
             <h1 className="font-display font-black text-4xl sm:text-6xl lg:text-7xl tracking-tight uppercase leading-[0.95] text-white">
               DOCUMENTING <br />
-              <span className="text-[#FFE93B]">INDIAN CODM</span> <br />
+              <span className="text-[#b6f36b]">INDIAN ESPORTS</span> <br />
               COMPETITIVE EXCELLENCE.
             </h1>
 
             <p className="text-base sm:text-lg text-[#ADABAB] leading-relaxed max-w-2xl font-normal">
-              Structured profiles, verified records, tournament championships, and team rosters for the Indian Call of Duty: Mobile competitive ecosystem.
+              Structured profiles, verified records, tournament championships, and team rosters for India’s competitive gaming ecosystem.
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-4">
@@ -169,21 +163,14 @@ export default async function HomePage() {
           {/* Subtle accent border top */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-[#FFE93B]" />
 
-          {/* Background image layer */}
-          <div
-            className="absolute inset-0 bg-cover bg-right opacity-15 pointer-events-none mix-blend-screen"
-            style={{
-              backgroundImage: `url('/photos/MobileRoster-operator.jpg')`,
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-[#141414]/90 to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_50%,rgba(182,243,107,0.16),transparent_32%),linear-gradient(90deg,#141a18,#101412)]" />
 
           <div className="max-w-2xl relative z-10">
             <Badge variant="outline" className="mb-4">
               COMMUNITY ACCESS
             </Badge>
             <h3 className="font-display font-black text-2xl sm:text-4xl text-white uppercase tracking-tight">
-              JOIN THE INDIAN CODM COMMUNITY
+              JOIN THE INDIAN COMPETITIVE COMMUNITY
             </h3>
             <div className="mt-6 flex flex-wrap items-center gap-4">
               <Link href="/join">

@@ -2,13 +2,14 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Search, Menu, X, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -30,18 +31,16 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-black/95 backdrop-blur border-b border-[#2A2A2A]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[4.5rem] flex items-center justify-between">
         {/* Brand Wordmark with Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-[2px] overflow-hidden flex items-center justify-center transition-transform duration-300 group-hover:scale-105 flex-shrink-0">
-            <img src="/photos/logo1.png" alt="Call of Duty: Mobile India" className="w-full h-full object-contain" />
+          <div className="w-10 h-10 rounded-xl bg-[#b6f36b] text-[#071007] flex items-center justify-center transition-transform duration-300 group-hover:rotate-3 flex-shrink-0 shadow-[0_0_24px_rgba(182,243,107,0.18)]">
+            <span className="font-display font-black text-xl tracking-tighter">SN</span>
           </div>
           <div className="flex flex-col leading-none">
-            <span className="font-display font-black text-lg tracking-wider text-white">
-              CALL<span className="text-[#FFE93B]">OF</span>DUTY
-            </span>
-            <span className="font-display text-[9px] tracking-[0.25em] text-[#ADABAB] -mt-0.5 font-bold">
-              MOBILE <span className="text-[#FFE93B]">INDIA</span>
+            <span className="font-display font-black text-lg tracking-[0.12em] text-white">STRIKENOVA</span>
+            <span className="font-display text-[9px] tracking-[0.25em] text-[#8f9a9a] -mt-0.5 font-bold">
+              COMPETITIVE DIRECTORY
             </span>
           </div>
         </Link>
@@ -57,13 +56,13 @@ export const Navbar: React.FC = () => {
                 className={cn(
                   'font-display text-sm font-semibold tracking-wider transition-colors relative py-1',
                   isActive
-                    ? 'text-[#FFE93B]'
+                    ? 'text-[#b6f36b]'
                     : 'text-[#ADABAB] hover:text-white'
                 )}
               >
                 {link.label}
                 {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#FFE93B]" />
+                  <span className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#b6f36b]" />
                 )}
               </Link>
             );
@@ -102,19 +101,30 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div id="mobile-navigation" className="lg:hidden bg-[#141414] border-b border-[#2A2A2A] px-4 pt-2 pb-6 space-y-3">
+        <div id="mobile-navigation" className="lg:hidden bg-[#0d1112] border-b border-[#26302d] px-4 pt-3 pb-6 space-y-3">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={(event) => {
+                event.preventDefault();
+                setMobileMenuOpen(false);
+                router.push(link.href);
+              }}
               className="block font-display text-base font-semibold py-2 text-[#ADABAB] hover:text-[#FFE93B]"
             >
               {link.label}
             </Link>
           ))}
           <div className="pt-2">
-            <Link href="/join" onClick={() => setMobileMenuOpen(false)}>
+            <Link
+              href="/join"
+              onClick={(event) => {
+                event.preventDefault();
+                setMobileMenuOpen(false);
+                router.push('/join');
+              }}
+            >
               <Button size="md" variant="primary" className="w-full">
                 <ShieldCheck className="w-4 h-4 mr-1.5" />
                 JOIN WITH THE COMMUNITY

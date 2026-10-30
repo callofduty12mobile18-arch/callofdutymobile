@@ -46,7 +46,7 @@ export default function AdminSettingsPage() {
                 <strong className="text-white">Port:</strong> {process.env.SMTP_PORT || '465 (SSL)'}
               </p>
               <p>
-                <strong className="text-white">Sender:</strong> {process.env.SMTP_FROM || 'CallOfDutyMobile India'}
+                <strong className="text-white">Sender:</strong> {process.env.SMTP_FROM || 'StrikeNova India'}
               </p>
             </div>
           </CardContent>

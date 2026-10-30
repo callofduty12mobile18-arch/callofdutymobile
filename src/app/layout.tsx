@@ -18,37 +18,33 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | CallOfDutyMobile — Indian CODM',
-    default: 'CallOfDutyMobile — Indian CODM Directory & Platform',
+    template: '%s | StrikeNova',
+    default: 'StrikeNova — Competitive Player Directory',
   },
   description:
-    'The premier independent platform documenting the Indian CODM competitive scene. Explore verified player profiles, team rosters, tournament standings, and career achievements.',
+    'A focused competitive gaming directory for verified player profiles, team rosters, tournament standings, and career achievements.',
   keywords: [
-    'CODM',
-    'Call of Duty: Mobile',
-    'CODM India',
+    'StrikeNova',
     'Indian Gaming',
-    'CODM Profiles',
-    'Indian Competitive Gaming',
-    'CODM Tournaments',
-    'CODM Players Directory',
+    'competitive gaming',
+    'player directory',
+    'esports tournaments',
   ],
-  authors: [{ name: 'CallOfDutyMobile Community' }],
+  authors: [{ name: 'StrikeNova Community' }],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   openGraph: {
     type: 'website',
     locale: 'en_IN',
     url: '/',
-    siteName: 'CallOfDutyMobile',
-    title: 'CallOfDutyMobile — Indian CODM Platform',
+    siteName: 'StrikeNova',
+    title: 'StrikeNova — Competitive Gaming Platform',
     description:
-      'Official directory and records of competitive Indian CODM players, teams, and tournament championships.',
+      'Independent directory and records for competitive players, teams, and tournament championships.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CallOfDutyMobile — Indian CODM Platform',
-    description:
-      'Official directory and records of competitive Indian CODM players, teams, and tournament championships.',
+    title: 'StrikeNova — Competitive Gaming Platform',
+    description: 'Independent directory and records for competitive players, teams, and tournament championships.',
   },
   icons: {
     icon: '/photos/logo1.png',

@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { createScrimAction } from '@/server/actions/scrims';
 
 export const metadata: Metadata = {
-  title: 'Host Scrim Lobby | Call of Duty: Mobile',
-  description: 'Create and publish a competitive CODM scrimmage lobby for your team.',
+  title: 'Host Scrim Lobby | StrikeNova',
+  description: 'Create and publish a competitive scrimmage lobby for your team.',
 };
 
 export default function CreateScrimPage() {

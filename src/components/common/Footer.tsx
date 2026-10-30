@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
 type FooterLink = { label: string; href: string };
 
@@ -63,20 +62,14 @@ export function Footer() {
               href="/"
               className="inline-flex items-center gap-3 rounded-[2px] font-display text-xl font-bold tracking-tight text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFE93B]"
             >
-              <Image
-                src="/photos/logo1.png"
-                alt="CallOfDutyMobile India Logo"
-                width={36}
-                height={36}
-                className="h-9 w-9 object-contain flex-shrink-0"
-              />
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#b6f36b] text-sm font-black text-[#071007]">SN</span>
               <span className="flex items-baseline gap-1.5">
-                CallOfDutyMobile
+                StrikeNova
                 <span className="text-sm font-medium text-[#8A8A8A]">India</span>
               </span>
             </Link>
             <p className="mt-3 max-w-xs text-sm leading-6">
-              Player profiles, rosters, tournaments and scrims for Indian Call of Duty: Mobile.
+              Player profiles, rosters, tournaments and scrims for India’s competitive gaming community.
             </p>
             <Link
               href="/join"
@@ -94,7 +87,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 border-t border-[#1F1F1F] pt-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm">&copy; {year} CallOfDutyMobile India</p>
+            <p className="text-sm">&copy; {year} StrikeNova India</p>
             <nav aria-label="Legal">
               <ul className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
                 {legalLinks.map((link) => (
@@ -108,8 +101,7 @@ export function Footer() {
             </nav>
           </div>
           <p className="mt-4 max-w-2xl text-xs leading-5 text-[#8A8A8A]">
-            Community-operated and not affiliated with or endorsed by Activision or Tencent. Call of
-            Duty: Mobile and its marks belong to their respective owners.
+            Community-operated and independent. StrikeNova is not affiliated with any game publisher or tournament organizer.
           </p>
         </div>
       </div>

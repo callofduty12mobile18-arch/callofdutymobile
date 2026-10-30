@@ -65,11 +65,11 @@ export async function generateMetadata({
     ? player.seoTitle.split(',').map((k: string) => k.trim()).filter(Boolean)
     : [];
 
-  const title = `${player.ign}${player.displayName ? ` (${player.displayName})` : ''} — Indian CODM Player`;
+  const title = `${player.ign}${player.displayName ? ` (${player.displayName})` : ''} — Indian Competitive Player`;
   const description =
     player.seoDescription ||
     player.bio ||
-    `Official CODM competitive profile, championships, and team history for Indian competitor ${player.ign}.`;
+    `Official competitive profile, championships, and team history for Indian competitor ${player.ign}.`;
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://MobileRoster.in';
 
@@ -79,9 +79,8 @@ export async function generateMetadata({
     keywords: [
       player.ign,
       player.displayName || '',
-      'CODM',
-      'Call of Duty: Mobile',
-      'Indian CODM Player',
+      'competitive gaming',
+      'Indian competitive player',
       player.primaryRole,
       ...parsedKeywords,
     ].filter(Boolean),
@@ -138,9 +137,9 @@ export default async function PlayerProfilePage({
     '@type': 'Person',
     name: player.displayName || player.ign,
     alternateName: alternateNames,
-    jobTitle: `CODM Competitive Player (${player.primaryRole})`,
+    jobTitle: `Competitive Player (${player.primaryRole})`,
     nationality: 'Indian',
-    description: player.seoDescription || player.bio || `Official CODM player profile for ${player.ign}.`,
+    description: player.seoDescription || player.bio || `Official player profile for ${player.ign}.`,
     image: player.avatarUrl || undefined,
     url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://MobileRoster.in'}/players/${player.slug}`,
     sameAs: sameAsLinks.length > 0 ? sameAsLinks : undefined,
