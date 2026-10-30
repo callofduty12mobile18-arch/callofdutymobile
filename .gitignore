@@ -45,3 +45,9 @@ next-env.d.ts
 /photos/
 /public/uploads/
 *.eml
+
+# ai agent instruction files
+AGENTS.md
+CLAUDE.md
+/.agents/
+/.claude/
